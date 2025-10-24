@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock } from "lucide-react";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, MoreHorizontal } from "lucide-react";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +25,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [selectedType, setSelectedType] = useState<"fire" | "water" | "void">("void");
   const [deadline, setDeadline] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
 
@@ -38,15 +39,15 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim()) {
-      const itemType = deadline ? "fire" : "void";
       let finalDeadline = deadline;
       if (deadline && selectedTime) {
         const [hours, minutes] = selectedTime.split(':').map(Number);
         finalDeadline = set(deadline, { hours, minutes, seconds: 0, milliseconds: 0 });
       }
-      await onAddItem(title, itemType, selectedTags, finalDeadline, undefined, undefined);
+      await onAddItem(title, selectedType, selectedTags, finalDeadline, undefined, undefined);
       setTitle("");
       setSelectedTags([]);
+      setSelectedType("void");
       setDeadline(undefined);
       setSelectedTime("09:00");
     }
@@ -68,7 +69,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-5xl mx-auto">
+    <form onSubmit={handleSubmit} className="w-full max-w-5xl mx-auto space-y-3">
       <div className="flex items-center gap-2">
         <Input
           value={title}
@@ -85,39 +86,46 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
               size="icon"
               className={cn(
                 "rounded-full shrink-0",
-                deadline && "bg-fire-light text-fire-dark border-fire-secondary"
+                selectedType === "fire" && "bg-fire-light text-fire-dark border-fire-secondary",
+                selectedType === "water" && "bg-water-light text-water-dark border-water-secondary",
+                selectedType === "void" && "bg-void-light text-void-dark border-void-secondary"
               )}
             >
-              <CalendarIcon className="w-4 h-4" />
+              {selectedType === "fire" && <Flame className="w-4 h-4" />}
+              {selectedType === "water" && <Droplet className="w-4 h-4" />}
+              {selectedType === "void" && <Circle className="w-4 h-4" />}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={deadline}
-              onSelect={setDeadline}
-              initialFocus
-            />
-            {deadline && (
-              <div className="p-3 border-t">
-                <label className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Time
-                </label>
-                <Select value={selectedTime} onValueChange={setSelectedTime}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {timeOptions.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+          <PopoverContent className="w-48 p-2" align="start">
+            <div className="space-y-1">
+              <Button
+                type="button"
+                variant={selectedType === "fire" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setSelectedType("fire")}
+              >
+                <Flame className="w-4 h-4 mr-2" />
+                Fire
+              </Button>
+              <Button
+                type="button"
+                variant={selectedType === "water" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setSelectedType("water")}
+              >
+                <Droplet className="w-4 h-4 mr-2" />
+                Water
+              </Button>
+              <Button
+                type="button"
+                variant={selectedType === "void" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setSelectedType("void")}
+              >
+                <Circle className="w-4 h-4 mr-2" />
+                Void
+              </Button>
+            </div>
           </PopoverContent>
         </Popover>
 
@@ -156,7 +164,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
           className="rounded-full shrink-0"
           onClick={handleMoreDetails}
         >
-          <Plus className="w-4 h-4" />
+          <MoreHorizontal className="w-4 h-4" />
         </Button>
 
         <Button
@@ -166,6 +174,57 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
           Add Item
         </Button>
       </div>
+
+      {selectedType === "fire" && (
+        <div className="flex items-start gap-2 px-2">
+          <div className="flex-1 max-w-md">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !deadline && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {deadline ? format(deadline, "PPP 'at' HH:mm") : <span>Set deadline</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={deadline}
+                  onSelect={setDeadline}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+                {deadline && (
+                  <div className="p-3 border-t">
+                    <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Time
+                    </label>
+                    <Select value={selectedTime} onValueChange={setSelectedTime}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        {timeOptions.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
