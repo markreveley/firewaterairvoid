@@ -26,7 +26,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-12 space-y-12">
+      <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12 space-y-12">
         <header className="text-center space-y-2">
           
           

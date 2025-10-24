@@ -87,7 +87,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 px-2">
+      <div className="flex items-center justify-center gap-2">
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -179,7 +179,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
       </div>
 
       {selectedType === "fire" && (
-        <div className="flex items-start gap-2 px-2">
+        <div className="flex items-start justify-center gap-2">
           <div className="flex-1 max-w-md">
             <Popover>
               <PopoverTrigger asChild>
