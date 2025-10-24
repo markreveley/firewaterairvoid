@@ -105,7 +105,7 @@ export function ItemList({
                         <ExternalLink className="w-4 h-4" />
                       </a> : item.content}
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col items-end gap-2">
                     <button
                       onClick={() => onDeleteItem(item.id)}
                       className="text-muted-foreground hover:text-destructive transition-colors"
@@ -113,86 +113,86 @@ export function ItemList({
                     >
                       <X className="w-4 h-4" />
                     </button>
+                    
+                    {item.deadline && !isEditingThisDeadline && (
+                      <div className="flex items-center gap-2">
+                        <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
+                          <Flame className="w-3 h-3" />
+                          {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0"
+                          onClick={() => startEditingDeadline(item)}
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          onClick={() => deleteDeadline(item)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
+
+                    {isEditingThisDeadline && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-xs"
+                            >
+                              <CalendarIcon className="w-3 h-3 mr-1" />
+                              {editDeadline ? format(editDeadline, "MMM d, yyyy") : "Pick date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={editDeadline}
+                              onSelect={setEditDeadline}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <Select value={editTime} onValueChange={setEditTime}>
+                          <SelectTrigger className="w-24 h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {timeOptions.map((time) => (
+                              <SelectItem key={time} value={time}>
+                                {time}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="h-7"
+                          onClick={() => saveDeadline(item.id)}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7"
+                          onClick={() => setEditingDeadlineId(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
-                
-                {item.deadline && !isEditingThisDeadline && (
-                  <div className="flex items-center gap-2">
-                    <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
-                      <Flame className="w-3 h-3" />
-                      {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 w-6 p-0"
-                      onClick={() => startEditingDeadline(item)}
-                    >
-                      <Edit2 className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                      onClick={() => deleteDeadline(item)}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                )}
-
-                {isEditingThisDeadline && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 text-xs"
-                        >
-                          <CalendarIcon className="w-3 h-3 mr-1" />
-                          {editDeadline ? format(editDeadline, "MMM d, yyyy") : "Pick date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={editDeadline}
-                          onSelect={setEditDeadline}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <Select value={editTime} onValueChange={setEditTime}>
-                      <SelectTrigger className="w-24 h-7 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        {timeOptions.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      size="sm"
-                      variant="default"
-                      className="h-7"
-                      onClick={() => saveDeadline(item.id)}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7"
-                      onClick={() => setEditingDeadlineId(null)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                )}
                 <div className="flex flex-wrap gap-2">
                   {item.tags.map(tag => <Badge key={tag.id} variant="outline" className={cn("text-xs", tag.type === "fire" ? "border-fire-secondary text-fire-dark" : "border-water-secondary text-water-dark")}>
                       {tag.type === "fire" ? <Flame className="w-3 h-3 mr-1" /> : <Droplet className="w-3 h-3 mr-1" />}
