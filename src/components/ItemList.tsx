@@ -116,7 +116,7 @@ export function ItemList({
                   </div>
                 </div>
                 
-                {hasFireTag && item.deadline && !isEditingThisDeadline && (
+                {item.deadline && !isEditingThisDeadline && (
                   <div className="flex items-center gap-2">
                     <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
                       <Flame className="w-3 h-3" />
@@ -141,7 +141,7 @@ export function ItemList({
                   </div>
                 )}
 
-                {hasFireTag && isEditingThisDeadline && (
+                {isEditingThisDeadline && (
                   <div className="flex items-center gap-2 flex-wrap">
                     <Popover>
                       <PopoverTrigger asChild>

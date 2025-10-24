@@ -40,12 +40,26 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (content.trim()) {
+      let tagsToAdd = [...selectedTags];
+      
+      // If deadline is set, ensure there's a fire tag
+      if (deadline) {
+        const hasFireTag = tagsToAdd.some(tag => tag.type === "fire");
+        if (!hasFireTag) {
+          tagsToAdd.push({
+            id: "temp-fire-" + Date.now(),
+            name: "Urgent",
+            type: "fire" as const
+          });
+        }
+      }
+
       let finalDeadline = deadline;
       if (deadline && selectedTime) {
         const [hours, minutes] = selectedTime.split(':').map(Number);
         finalDeadline = set(deadline, { hours, minutes, seconds: 0, milliseconds: 0 });
       }
-      await onAddItem(content, selectedTags, finalDeadline);
+      await onAddItem(content, tagsToAdd, finalDeadline);
       setContent("");
       setSelectedTags([]);
       setDeadline(undefined);
