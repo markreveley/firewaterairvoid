@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2 } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal } from "lucide-react";
 import { format, isPast, set } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
@@ -38,13 +39,10 @@ export function ItemList({
   onDeleteItem,
   onUpdateItem
 }: ItemListProps) {
+  const navigate = useNavigate();
   const [editingDeadlineId, setEditingDeadlineId] = useState<string | null>(null);
   const [editDeadline, setEditDeadline] = useState<Date>();
   const [editTime, setEditTime] = useState<string>("09:00");
-  const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
-  const [editNotes, setEditNotes] = useState<string>("");
-  const [editingStatusId, setEditingStatusId] = useState<string | null>(null);
-  const [editStatus, setEditStatus] = useState<string>("");
 
   // Generate time options in 15-minute intervals
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
@@ -101,24 +99,11 @@ export function ItemList({
     onUpdateItem(item.id, { deadline: null });
   };
 
-  const startEditingNotes = (item: Item) => {
-    setEditingNotesId(item.id);
-    setEditNotes(item.notes || "");
-  };
-
-  const saveNotes = (itemId: string) => {
-    onUpdateItem(itemId, { notes: editNotes });
-    setEditingNotesId(null);
-  };
-
-  const startEditingStatus = (item: Item) => {
-    setEditingStatusId(item.id);
-    setEditStatus(item.status || "");
-  };
-
-  const saveStatus = (itemId: string) => {
-    onUpdateItem(itemId, { status: editStatus });
-    setEditingStatusId(null);
+  const truncateNotes = (notes: string | undefined) => {
+    if (!notes) return null;
+    const lines = notes.split('\n');
+    const firstTwoLines = lines.slice(0, 2).join('\n');
+    return firstTwoLines;
   };
   return <div className="space-y-3">
       {filteredItems.length === 0 ? <div className="text-center py-12 text-muted-foreground">
@@ -127,8 +112,6 @@ export function ItemList({
       const isOverdue = item.deadline && isPast(item.deadline);
       const hasFireTag = item.type === "fire";
       const isEditingThisDeadline = editingDeadlineId === item.id;
-      const isEditingThisNotes = editingNotesId === item.id;
-      const isEditingThisStatus = editingStatusId === item.id;
       
       return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", type === "void" && "border-l-4 border-l-void-primary", isOverdue && "bg-fire-light/50")}>
               <div className="space-y-3">
@@ -141,106 +124,30 @@ export function ItemList({
                         </a> : item.title}
                     </p>
                     
-                    {/* Notes section */}
-                    <div className="mb-2">
-                      {isEditingThisNotes ? (
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={editNotes}
-                            onChange={(e) => setEditNotes(e.target.value)}
-                            className="flex-1 px-2 py-1 text-sm border rounded"
-                            placeholder="Add notes..."
-                          />
-                          <Button size="sm" variant="default" className="h-7" onClick={() => saveNotes(item.id)}>
-                            Save
-                          </Button>
-                          <Button size="sm" variant="ghost" className="h-7" onClick={() => setEditingNotesId(null)}>
-                            Cancel
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 group">
-                          {item.notes ? (
-                            <>
-                              <p className="text-sm text-muted-foreground">{item.notes}</p>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => startEditingNotes(item)}
-                              >
-                                <Edit2 className="w-3 h-3" />
-                              </Button>
-                            </>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 text-xs text-muted-foreground"
-                              onClick={() => startEditingNotes(item)}
-                            >
-                              + Add notes
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Status section */}
-                    <div>
-                      {isEditingThisStatus ? (
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={editStatus}
-                            onChange={(e) => setEditStatus(e.target.value)}
-                            className="flex-1 px-2 py-1 text-sm border rounded"
-                            placeholder="Add status..."
-                          />
-                          <Button size="sm" variant="default" className="h-7" onClick={() => saveStatus(item.id)}>
-                            Save
-                          </Button>
-                          <Button size="sm" variant="ghost" className="h-7" onClick={() => setEditingStatusId(null)}>
-                            Cancel
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 group">
-                          {item.status ? (
-                            <>
-                              <p className="text-sm text-muted-foreground italic">{item.status}</p>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => startEditingStatus(item)}
-                              >
-                                <Edit2 className="w-3 h-3" />
-                              </Button>
-                            </>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 text-xs text-muted-foreground"
-                              onClick={() => startEditingStatus(item)}
-                            >
-                              + Add status
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    {/* Notes preview - first two lines */}
+                    {item.notes && (
+                      <p className="text-sm text-muted-foreground whitespace-pre-line line-clamp-2">
+                        {truncateNotes(item.notes)}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <button
-                      onClick={() => onDeleteItem(item.id)}
-                      className="text-muted-foreground hover:text-destructive transition-colors"
-                      aria-label="Delete item"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => navigate(`/item/${item.id}`)}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="View details"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => onDeleteItem(item.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors"
+                        aria-label="Delete item"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                     
                     {item.deadline && !isEditingThisDeadline && (
                       <div className="flex items-center gap-2">
