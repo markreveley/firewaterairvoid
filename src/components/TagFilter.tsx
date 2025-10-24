@@ -40,7 +40,7 @@ export function TagFilter({ tags, type, selectedTag, onSelectTag }: TagFilterPro
                 ? "bg-fire-primary text-white shadow-md scale-105"
                 : type === "water"
                 ? "bg-water-primary text-white shadow-md scale-105"
-                : "bg-void-primary text-white shadow-md scale-105"
+                : "bg-void-primary text-void-dark shadow-md scale-105"
               : type === "fire"
               ? "bg-fire-light text-fire-dark hover:bg-fire-secondary"
               : type === "water"
