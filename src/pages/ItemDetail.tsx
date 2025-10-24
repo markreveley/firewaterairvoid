@@ -294,6 +294,7 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
 
           <Button
             type="submit"
+            variant="white"
             className="w-full rounded-xl py-6 text-base"
           >
             Add Item
