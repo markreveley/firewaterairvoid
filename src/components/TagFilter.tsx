@@ -40,12 +40,12 @@ export function TagFilter({ tags, type, selectedTag, onSelectTag }: TagFilterPro
                 ? "bg-fire-primary text-white shadow-md scale-105"
                 : type === "water"
                 ? "bg-water-primary text-white shadow-md scale-105"
-                : "bg-void-primary text-void-dark shadow-md scale-105"
+                : "bg-white text-black shadow-md scale-105 border-2 border-black"
               : type === "fire"
               ? "bg-fire-light text-fire-dark hover:bg-fire-secondary"
               : type === "water"
               ? "bg-water-light text-water-dark hover:bg-water-secondary"
-              : "bg-void-light text-void-dark hover:bg-void-secondary"
+              : "bg-void-light text-void-dark hover:bg-white hover:text-black hover:border-black"
           )}
           onClick={() => onSelectTag(selectedTag === tag.id ? undefined : tag.id)}
         >
