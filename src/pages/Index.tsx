@@ -4,9 +4,6 @@ import { ItemList } from "@/components/ItemList";
 import { FireWaterToggle } from "@/components/FireWaterToggle";
 import { TagFilter } from "@/components/TagFilter";
 import { useItems } from "@/hooks/useItems";
-import { UserCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import logo from "@/assets/firewatervoid-logo.png";
 
 interface Tag {
   id: string;
@@ -30,14 +27,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-12 space-y-12">
-        <header className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="FireWaterVoid" className="h-12 w-12" />
-            <h1 className="text-2xl font-semibold">firewatervoid</h1>
-          </div>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <UserCircle className="w-6 h-6" />
-          </Button>
+        <header className="text-center space-y-2">
+          
+          
         </header>
 
         <div className="py-8">
