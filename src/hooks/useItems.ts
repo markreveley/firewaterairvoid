@@ -141,5 +141,48 @@ export function useItems() {
     }
   };
 
-  return { items, isLoading, addItem, deleteItem };
+  const updateItem = async (itemId: string, updates: { deadline?: Date | null; tags?: Tag[] }) => {
+    try {
+      // Update the item's deadline if provided
+      if ("deadline" in updates) {
+        const { error: itemError } = await supabase
+          .from("items")
+          .update({ deadline: updates.deadline?.toISOString() || null })
+          .eq("id", itemId);
+
+        if (itemError) throw itemError;
+      }
+
+      // Update tags if provided
+      if (updates.tags !== undefined) {
+        // Delete existing item_tags
+        const { error: deleteError } = await supabase
+          .from("item_tags")
+          .delete()
+          .eq("item_id", itemId);
+
+        if (deleteError) throw deleteError;
+
+        // Add new tags
+        for (const tag of updates.tags) {
+          const { error: linkError } = await supabase
+            .from("item_tags")
+            .insert({
+              item_id: itemId,
+              tag_id: tag.id,
+            });
+
+          if (linkError) throw linkError;
+        }
+      }
+
+      await loadItems();
+      toast.success("Item updated");
+    } catch (error) {
+      console.error("Error updating item:", error);
+      toast.error("Failed to update item");
+    }
+  };
+
+  return { items, isLoading, addItem, deleteItem, updateItem };
 }

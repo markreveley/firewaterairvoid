@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { CalendarIcon, Flame, Droplet, Plus, X } from "lucide-react";
-import { format } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CalendarIcon, Flame, Droplet, Plus, X, Clock } from "lucide-react";
+import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface Tag {
@@ -24,17 +25,31 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const [content, setContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [deadline, setDeadline] = useState<Date>();
+  const [selectedTime, setSelectedTime] = useState<string>("09:00");
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [newTagType, setNewTagType] = useState<"fire" | "water">("water");
 
+  // Generate time options in 15-minute intervals
+  const timeOptions = Array.from({ length: 96 }, (_, i) => {
+    const hours = Math.floor(i / 4);
+    const minutes = (i % 4) * 15;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (content.trim()) {
-      await onAddItem(content, selectedTags, deadline);
+      let finalDeadline = deadline;
+      if (deadline && selectedTime) {
+        const [hours, minutes] = selectedTime.split(':').map(Number);
+        finalDeadline = set(deadline, { hours, minutes, seconds: 0, milliseconds: 0 });
+      }
+      await onAddItem(content, selectedTags, finalDeadline);
       setContent("");
       setSelectedTags([]);
       setDeadline(undefined);
+      setSelectedTime("09:00");
     }
   };
 
@@ -118,6 +133,26 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
               onSelect={setDeadline}
               initialFocus
             />
+            {deadline && (
+              <div className="p-3 border-t">
+                <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Time
+                </label>
+                <Select value={selectedTime} onValueChange={setSelectedTime}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {timeOptions.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </PopoverContent>
         </Popover>
 

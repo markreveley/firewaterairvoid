@@ -12,7 +12,7 @@ interface Tag {
 }
 
 const Index = () => {
-  const { items, isLoading, addItem, deleteItem } = useItems();
+  const { items, isLoading, addItem, deleteItem, updateItem } = useItems();
   const [activeType, setActiveType] = useState<"fire" | "water">("fire");
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
 
@@ -59,6 +59,7 @@ const Index = () => {
               type={activeType} 
               selectedTagFilter={selectedTagFilter}
               onDeleteItem={deleteItem}
+              onUpdateItem={updateItem}
             />
           )}
         </div>
