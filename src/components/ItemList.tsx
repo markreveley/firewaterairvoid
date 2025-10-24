@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal, Wind } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal, Wind, Check } from "lucide-react";
 import { format, isPast, set } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
@@ -30,6 +30,7 @@ interface ItemListProps {
   items: Item[];
   type: "fire" | "water" | "air" | "void";
   selectedTagFilter?: string;
+  selectedStatusFilter?: "To Do" | "Completed";
   onDeleteItem: (itemId: string) => void;
   onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" }) => void;
 }
@@ -37,6 +38,7 @@ export function ItemList({
   items,
   type,
   selectedTagFilter,
+  selectedStatusFilter,
   onDeleteItem,
   onUpdateItem
 }: ItemListProps) {
@@ -56,6 +58,11 @@ export function ItemList({
     // Water view: only water items
     // Void view: only void items
     if (item.type !== type) return false;
+    
+    // Filter by status for fire items
+    if (type === "fire" && selectedStatusFilter) {
+      if (item.status !== selectedStatusFilter) return false;
+    }
     
     if (selectedTagFilter) {
       return item.tags.some(tag => tag.id === selectedTagFilter);
@@ -117,26 +124,49 @@ export function ItemList({
       return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", type === "air" && "border-l-4 border-l-air-primary", type === "void" && "border-l-4 border-l-void-primary", isOverdue && "bg-fire-light/50")}>
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="text-base font-medium mb-2">
-                      {item.type === "void" && item.url ? (
-                        <a 
-                          href={item.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-blue-600 underline hover:text-blue-700"
-                        >
-                          {item.title}
-                        </a>
-                      ) : isUrl(item.title) ? (
-                        <a href={item.title} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
-                          {item.title}
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      ) : (
-                        item.title
-                      )}
-                    </p>
+                  <div className="flex items-start gap-3 flex-1">
+                    {/* Checkbox for fire items */}
+                    {item.type === "fire" && (
+                      <button
+                        onClick={() => onUpdateItem(item.id, { 
+                          status: item.status === "Completed" ? "To Do" : "Completed" 
+                        })}
+                        className={cn(
+                          "mt-1 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors shrink-0",
+                          item.status === "Completed" 
+                            ? "bg-fire-primary border-fire-primary" 
+                            : "border-muted-foreground hover:border-fire-primary"
+                        )}
+                      >
+                        {item.status === "Completed" && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
+                      </button>
+                    )}
+                    
+                    <div className="flex-1">
+                      <p className={cn(
+                        "text-base font-medium mb-2",
+                        item.type === "fire" && item.status === "Completed" && "line-through text-muted-foreground"
+                      )}>
+                        {item.type === "void" && item.url ? (
+                          <a 
+                            href={item.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-blue-600 underline hover:text-blue-700"
+                          >
+                            {item.title}
+                          </a>
+                        ) : isUrl(item.title) ? (
+                          <a href={item.title} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+                            {item.title}
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        ) : (
+                          item.title
+                        )}
+                      </p>
                     
                     {/* Notes preview - first two lines */}
                     {item.notes && (
@@ -145,12 +175,7 @@ export function ItemList({
                       </p>
                     )}
 
-                    {/* Status for fire items */}
-                    {item.type === "fire" && item.status && (
-                      <p className="text-sm text-muted-foreground italic">
-                        {item.status}
-                      </p>
-                    )}
+                    </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-1">

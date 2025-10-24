@@ -3,6 +3,7 @@ import { ItemInput } from "@/components/ItemInput";
 import { ItemList } from "@/components/ItemList";
 import { FireWaterToggle } from "@/components/FireWaterToggle";
 import { TagFilter } from "@/components/TagFilter";
+import { StatusFilter } from "@/components/StatusFilter";
 import { useItems } from "@/hooks/useItems";
 import { useSearchParams } from "react-router-dom";
 
@@ -17,9 +18,12 @@ const Index = () => {
   const initialType = (searchParams.get("type") as "fire" | "water" | "air" | "void") || "fire";
   const [activeType, setActiveType] = useState<"fire" | "water" | "air" | "void">(initialType);
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
 
   const handleAddItem = async (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
-    await addItem(title, type, tags, deadline, notes, status, url);
+    // Default status to "To Do" for fire items if not provided
+    const finalStatus = type === "fire" && !status ? "To Do" : status;
+    await addItem(title, type, tags, deadline, notes, finalStatus, url);
     // Switch to the type of the newly created item
     if (type !== activeType) {
       setActiveType(type);
@@ -60,6 +64,15 @@ const Index = () => {
           <FireWaterToggle activeType={activeType} onToggle={setActiveType} />
         </div>
 
+        {activeType === "fire" && (
+          <div className="py-2">
+            <StatusFilter 
+              selectedStatus={selectedStatusFilter} 
+              onSelectStatus={setSelectedStatusFilter} 
+            />
+          </div>
+        )}
+
         <div className="py-2">
           <TagFilter 
             tags={allTags} 
@@ -77,6 +90,7 @@ const Index = () => {
               items={items} 
               type={activeType} 
               selectedTagFilter={selectedTagFilter}
+              selectedStatusFilter={activeType === "fire" ? selectedStatusFilter : undefined}
               onDeleteItem={deleteItem}
               onUpdateItem={updateItem}
             />

@@ -69,7 +69,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
         selectedTags,
         itemType === "fire" ? finalDeadline : undefined,
         notes.trim() || undefined,
-        itemType === "fire" ? (status.trim() || undefined) : undefined,
+        itemType === "fire" ? (status.trim() || "To Do") : undefined,
         itemType === "void" ? (url.trim() || undefined) : undefined
       );
       // navigation handled in parent
