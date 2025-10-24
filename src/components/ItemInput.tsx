@@ -169,6 +169,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
 
         <Button
           type="submit"
+          variant="white"
           className="rounded-xl px-8 py-6 text-base shrink-0"
         >
           Add Item
