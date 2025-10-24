@@ -154,7 +154,7 @@ export function ItemList({
                             href={item.url}
                             onClick={(e) => {
                               e.preventDefault();
-                              window.open(item.url, '_blank', 'noopener,noreferrer');
+                              window.open(`/redirect?to=${encodeURIComponent(item.url!)}`, '_blank', 'noopener,noreferrer');
                             }}
                             className="text-blue-600 underline hover:text-blue-700 cursor-pointer"
                           >
@@ -165,7 +165,7 @@ export function ItemList({
                             href={item.title}
                             onClick={(e) => {
                               e.preventDefault();
-                              window.open(item.title, '_blank', 'noopener,noreferrer');
+                              window.open(`/redirect?to=${encodeURIComponent(item.title)}`,'_blank','noopener,noreferrer');
                             }}
                             className="flex items-center gap-2 text-primary hover:underline cursor-pointer"
                           >

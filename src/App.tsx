@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ItemDetailPage from "./pages/ItemDetailPage";
 import NotFound from "./pages/NotFound";
+import Redirect from "./pages/Redirect";
 
 const App = () => (
   <TooltipProvider>
@@ -16,6 +17,7 @@ const App = () => (
         <Route path="/" element={<Index />} />
         <Route path="/item/new" element={<ItemDetailPage />} />
         <Route path="/item/edit" element={<ItemDetailPage />} />
+        <Route path="/redirect" element={<Redirect />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
