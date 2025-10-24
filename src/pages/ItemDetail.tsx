@@ -15,11 +15,10 @@ import { cn } from "@/lib/utils";
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water" | "void";
 }
 
 interface ItemDetailProps {
-  onAddItem: (title: string, tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
+  onAddItem: (title: string, type: "fire" | "water" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
   existingTags: Tag[];
 }
 
@@ -37,7 +36,6 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
-  const [newTagType, setNewTagType] = useState<"fire" | "water" | "void">("void");
 
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
     const hours = Math.floor(i / 4);
@@ -48,19 +46,6 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim()) {
-      let tagsToAdd = [...selectedTags];
-      
-      if (deadline && itemType === "fire") {
-        const hasFireTag = tagsToAdd.some(tag => tag.type === "fire");
-        if (!hasFireTag) {
-          tagsToAdd.push({
-            id: "temp-fire-" + Date.now(),
-            name: "Urgent",
-            type: "fire" as const
-          });
-        }
-      }
-
       let finalDeadline = deadline;
       if (deadline && selectedTime) {
         const [hours, minutes] = selectedTime.split(':').map(Number);
@@ -68,8 +53,9 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
       }
 
       await onAddItem(
-        title, 
-        tagsToAdd, 
+        title,
+        itemType,
+        selectedTags,
         itemType === "fire" ? finalDeadline : undefined,
         notes.trim() || undefined,
         status.trim() || undefined
@@ -81,9 +67,8 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
   const addNewTag = () => {
     if (newTagName.trim()) {
       const newTag: Tag = {
-        id: Date.now().toString(),
+        id: "temp-" + Date.now().toString(),
         name: newTagName,
-        type: newTagType,
       };
       setSelectedTags([...selectedTags, newTag]);
       setNewTagName("");
@@ -214,16 +199,8 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
                 {selectedTags.map((tag) => (
                   <Badge
                     key={tag.id}
-                    className={cn(
-                      "px-3 py-1 rounded-full flex items-center gap-1",
-                      tag.type === "fire"
-                        ? "bg-fire-light text-fire-dark border-fire-secondary"
-                        : tag.type === "water"
-                        ? "bg-water-light text-water-dark border-water-secondary"
-                        : "bg-void-light text-void-dark border-void-secondary"
-                    )}
+                    className="px-3 py-1 rounded-full flex items-center gap-1"
                   >
-                    {tag.type === "fire" ? <Flame className="w-3 h-3" /> : tag.type === "water" ? <Droplet className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
                     <span>{tag.name}</span>
                     <button
                       type="button"
@@ -263,35 +240,12 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
                               Create new tag
                             </Button>
                           </CommandEmpty>
-                          <CommandGroup heading="Fire Tags">
-                            {existingTags
-                              .filter((t) => t.type === "fire")
-                              .map((tag) => (
-                                <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
-                                  <Flame className="w-4 h-4 mr-2 text-fire-primary" />
-                                  <span>{tag.name}</span>
-                                </CommandItem>
-                              ))}
-                          </CommandGroup>
-                          <CommandGroup heading="Water Tags">
-                            {existingTags
-                              .filter((t) => t.type === "water")
-                              .map((tag) => (
-                                <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
-                                  <Droplet className="w-4 h-4 mr-2 text-water-primary" />
-                                  <span>{tag.name}</span>
-                                </CommandItem>
-                              ))}
-                          </CommandGroup>
-                          <CommandGroup heading="Void Tags">
-                            {existingTags
-                              .filter((t) => t.type === "void")
-                              .map((tag) => (
-                                <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
-                                  <Circle className="w-4 h-4 mr-2 text-void-primary" />
-                                  <span>{tag.name}</span>
-                                </CommandItem>
-                              ))}
+                          <CommandGroup heading="Tags">
+                            {existingTags.map((tag) => (
+                              <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                                <span>{tag.name}</span>
+                              </CommandItem>
+                            ))}
                           </CommandGroup>
                         </CommandList>
                       </Command>
@@ -305,44 +259,9 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
                       value={newTagName}
                       onChange={(e) => setNewTagName(e.target.value)}
                       placeholder="Tag name"
-                      className="w-32"
+                      className="flex-1"
                       autoFocus
                     />
-                    <div className="flex gap-1">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={newTagType === "fire" ? "default" : "outline"}
-                        onClick={() => setNewTagType("fire")}
-                        className={cn(
-                          newTagType === "fire" && "bg-fire-primary hover:bg-fire-dark"
-                        )}
-                      >
-                        <Flame className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={newTagType === "water" ? "default" : "outline"}
-                        onClick={() => setNewTagType("water")}
-                        className={cn(
-                          newTagType === "water" && "bg-water-primary hover:bg-water-dark"
-                        )}
-                      >
-                        <Droplet className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={newTagType === "void" ? "default" : "outline"}
-                        onClick={() => setNewTagType("void")}
-                        className={cn(
-                          newTagType === "void" && "bg-void-primary hover:bg-void-dark"
-                        )}
-                      >
-                        <Circle className="w-3 h-3" />
-                      </Button>
-                    </div>
                     <Button type="button" size="sm" onClick={addNewTag}>
                       <Plus className="w-3 h-3" />
                     </Button>

@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water" | "void";
 }
 
 interface TagFilterProps {
@@ -16,9 +15,7 @@ interface TagFilterProps {
 }
 
 export function TagFilter({ tags, type, selectedTag, onSelectTag }: TagFilterProps) {
-  const filteredTags = tags.filter((tag) => tag.type === type);
-
-  if (filteredTags.length === 0) return null;
+  if (tags.length === 0) return null;
 
   return (
     <div className="flex flex-wrap gap-2 items-center justify-center">
@@ -33,7 +30,7 @@ export function TagFilter({ tags, type, selectedTag, onSelectTag }: TagFilterPro
           <X className="w-3 h-3 ml-1" />
         </Badge>
       )}
-      {filteredTags.map((tag) => (
+      {tags.map((tag) => (
         <Badge
           key={tag.id}
           className={cn(
@@ -52,13 +49,6 @@ export function TagFilter({ tags, type, selectedTag, onSelectTag }: TagFilterPro
           )}
           onClick={() => onSelectTag(selectedTag === tag.id ? undefined : tag.id)}
         >
-          {type === "fire" ? (
-            <Flame className="w-3 h-3 mr-1" />
-          ) : type === "water" ? (
-            <Droplet className="w-3 h-3 mr-1" />
-          ) : (
-            <Circle className="w-3 h-3 mr-1" />
-          )}
           {tag.name}
         </Badge>
       ))}

@@ -11,12 +11,12 @@ import { cn } from "@/lib/utils";
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water" | "void";
 }
 
 interface Item {
   id: string;
   title: string;
+  type: "fire" | "water" | "void";
   notes?: string;
   status?: string;
   tags: Tag[];
@@ -53,15 +53,10 @@ export function ItemList({
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   });
   const filteredItems = items.filter(item => {
-    const hasFireTag = item.tags.some(tag => tag.type === "fire");
-    const hasVoidTag = item.tags.some(tag => tag.type === "void");
-    
-    // Fire view: only items WITH fire tags
-    // Water view: only items WITHOUT fire tags AND WITHOUT void tags
-    // Void view: only items WITH void tags
-    if (type === "fire" && !hasFireTag) return false;
-    if (type === "water" && (hasFireTag || hasVoidTag)) return false;
-    if (type === "void" && !hasVoidTag) return false;
+    // Fire view: only fire items
+    // Water view: only water items
+    // Void view: only void items
+    if (item.type !== type) return false;
     
     if (selectedTagFilter) {
       return item.tags.some(tag => tag.id === selectedTagFilter);
@@ -97,9 +92,8 @@ export function ItemList({
   };
 
   const deleteDeadline = (item: Item) => {
-    // Remove fire tags and deadline
-    const waterTags = item.tags.filter(tag => tag.type === "water");
-    onUpdateItem(item.id, { deadline: null, tags: waterTags });
+    // Remove deadline
+    onUpdateItem(item.id, { deadline: null });
   };
 
   const startEditingNotes = (item: Item) => {
@@ -126,7 +120,7 @@ export function ItemList({
           
         </div> : filteredItems.map(item => {
       const isOverdue = item.deadline && isPast(item.deadline);
-      const hasFireTag = item.tags.some(tag => tag.type === "fire");
+      const hasFireTag = item.type === "fire";
       const isEditingThisDeadline = editingDeadlineId === item.id;
       const isEditingThisNotes = editingNotesId === item.id;
       const isEditingThisStatus = editingStatusId === item.id;
@@ -323,8 +317,7 @@ export function ItemList({
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {item.tags.map(tag => <Badge key={tag.id} variant="outline" className={cn("text-xs", tag.type === "fire" ? "border-fire-secondary text-fire-dark" : tag.type === "water" ? "border-water-secondary text-water-dark" : "border-void-secondary text-void-dark")}>
-                      {tag.type === "fire" ? <Flame className="w-3 h-3 mr-1" /> : tag.type === "water" ? <Droplet className="w-3 h-3 mr-1" /> : <Circle className="w-3 h-3 mr-1" />}
+                  {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
                       {tag.name}
                     </Badge>)}
                 </div>

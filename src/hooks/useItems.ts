@@ -5,12 +5,12 @@ import { toast } from "sonner";
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water" | "void";
 }
 
 interface Item {
   id: string;
   title: string;
+  type: "fire" | "water" | "void";
   notes?: string;
   status?: string;
   tags: Tag[];
@@ -43,12 +43,12 @@ export function useItems() {
           .map((it: any) => ({
             id: it.tags.id,
             name: it.tags.name,
-            type: it.tags.type as "fire" | "water" | "void",
           }));
 
         return {
           id: item.id,
           title: item.title,
+          type: item.type as "fire" | "water" | "void",
           notes: item.notes || undefined,
           status: item.status || undefined,
           tags: itemTags,
@@ -70,12 +70,13 @@ export function useItems() {
     loadItems();
   }, []);
 
-  const addItem = async (title: string, tags: Tag[], deadline?: Date, notes?: string, status?: string) => {
+  const addItem = async (title: string, type: "fire" | "water" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
         .insert({ 
           title,
+          type,
           notes: notes || null,
           status: status || null,
           deadline: deadline?.toISOString()
@@ -102,7 +103,6 @@ export function useItems() {
               .from("tags")
               .insert({
                 name: tag.name,
-                type: tag.type,
               })
               .select()
               .single();

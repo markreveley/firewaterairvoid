@@ -14,12 +14,13 @@ export default function ItemDetailPage() {
 
   const handleAddItem = async (
     title: string,
-    tags: Array<{ id: string; name: string; type: "fire" | "water" | "void" }>,
+    type: "fire" | "water" | "void",
+    tags: Array<{ id: string; name: string }>,
     deadline?: Date,
     notes?: string,
     status?: string
   ) => {
-    await addItem(title, tags, deadline, notes, status);
+    await addItem(title, type, tags, deadline, notes, status);
     navigate("/");
   };
 

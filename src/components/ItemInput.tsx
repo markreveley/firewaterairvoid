@@ -14,11 +14,10 @@ import { cn } from "@/lib/utils";
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water" | "void";
 }
 
 interface ItemInputProps {
-  onAddItem: (title: string, tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
+  onAddItem: (title: string, type: "fire" | "water" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
   existingTags: Tag[];
 }
 
@@ -28,9 +27,6 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [deadline, setDeadline] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
-  const [isAddingTag, setIsAddingTag] = useState(false);
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagType, setNewTagType] = useState<"fire" | "water" | "void">("void");
 
   // Generate time options in 15-minute intervals
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
@@ -42,25 +38,13 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim()) {
-      let tagsToAdd = [...selectedTags];
-      
-      if (deadline) {
-        const hasFireTag = tagsToAdd.some(tag => tag.type === "fire");
-        if (!hasFireTag) {
-          tagsToAdd.push({
-            id: "temp-fire-" + Date.now(),
-            name: "Urgent",
-            type: "fire" as const
-          });
-        }
-      }
-
+      const itemType = deadline ? "fire" : "void";
       let finalDeadline = deadline;
       if (deadline && selectedTime) {
         const [hours, minutes] = selectedTime.split(':').map(Number);
         finalDeadline = set(deadline, { hours, minutes, seconds: 0, milliseconds: 0 });
       }
-      await onAddItem(title, tagsToAdd, finalDeadline, undefined, undefined);
+      await onAddItem(title, itemType, selectedTags, finalDeadline, undefined, undefined);
       setTitle("");
       setSelectedTags([]);
       setDeadline(undefined);
@@ -72,18 +56,6 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
     navigate(`/item/new?title=${encodeURIComponent(title)}`);
   };
 
-  const addNewTag = () => {
-    if (newTagName.trim()) {
-      const newTag: Tag = {
-        id: Date.now().toString(),
-        name: newTagName,
-        type: newTagType,
-      };
-      setSelectedTags([...selectedTags, newTag]);
-      setNewTagName("");
-      setIsAddingTag(false);
-    }
-  };
 
   const addExistingTag = (tag: Tag) => {
     if (!selectedTags.find((t) => t.id === tag.id)) {
@@ -165,35 +137,12 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
               <CommandInput placeholder="Search tags..." />
               <CommandList>
                 <CommandEmpty>No tags found.</CommandEmpty>
-                <CommandGroup heading="Fire Tags">
-                  {existingTags
-                    .filter((t) => t.type === "fire")
-                    .map((tag) => (
-                      <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
-                        <Flame className="w-4 h-4 mr-2 text-fire-primary" />
-                        <span>{tag.name}</span>
-                      </CommandItem>
-                    ))}
-                </CommandGroup>
-                <CommandGroup heading="Water Tags">
-                  {existingTags
-                    .filter((t) => t.type === "water")
-                    .map((tag) => (
-                      <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
-                        <Droplet className="w-4 h-4 mr-2 text-water-primary" />
-                        <span>{tag.name}</span>
-                      </CommandItem>
-                    ))}
-                </CommandGroup>
-                <CommandGroup heading="Void Tags">
-                  {existingTags
-                    .filter((t) => t.type === "void")
-                    .map((tag) => (
-                      <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
-                        <Circle className="w-4 h-4 mr-2 text-void-primary" />
-                        <span>{tag.name}</span>
-                      </CommandItem>
-                    ))}
+                <CommandGroup heading="Tags">
+                  {existingTags.map((tag) => (
+                    <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                      <span>{tag.name}</span>
+                    </CommandItem>
+                  ))}
                 </CommandGroup>
               </CommandList>
             </Command>

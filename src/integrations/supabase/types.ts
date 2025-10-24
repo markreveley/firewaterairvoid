@@ -52,6 +52,7 @@ export type Database = {
           notes: string | null
           status: string | null
           title: string
+          type: string
         }
         Insert: {
           created_at?: string | null
@@ -60,6 +61,7 @@ export type Database = {
           notes?: string | null
           status?: string | null
           title: string
+          type?: string
         }
         Update: {
           created_at?: string | null
@@ -68,6 +70,7 @@ export type Database = {
           notes?: string | null
           status?: string | null
           title?: string
+          type?: string
         }
         Relationships: []
       }
@@ -76,19 +79,16 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
-          type: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           name: string
-          type: string
         }
         Update: {
           created_at?: string | null
           id?: string
           name?: string
-          type?: string
         }
         Relationships: []
       }

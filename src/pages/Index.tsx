@@ -8,7 +8,6 @@ import { useItems } from "@/hooks/useItems";
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water" | "void";
 }
 
 const Index = () => {
