@@ -8,7 +8,7 @@ interface FireWaterToggleProps {
 
 export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) {
   return (
-    <div className={cn("flex gap-2 p-1 rounded-full w-fit mx-auto", activeType === "void" ? "bg-white border border-border" : "bg-muted")}>
+    <div className={cn("flex gap-2 p-1 rounded-full w-fit mx-auto", (activeType === "void" || activeType === "air") ? "bg-white border border-border" : "bg-muted")}>
       <button
         onClick={() => onToggle("fire")}
         className={cn(
