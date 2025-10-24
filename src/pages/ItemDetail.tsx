@@ -238,18 +238,14 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                       <Command>
                         <CommandInput placeholder="Search tags..." />
                         <CommandList>
-                          <CommandEmpty>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="w-full"
-                              onClick={() => setIsAddingTag(true)}
-                            >
+                          <CommandGroup>
+                            <CommandItem onSelect={() => setIsAddingTag(true)}>
                               <Plus className="w-4 h-4 mr-2" />
-                              Create new tag
-                            </Button>
-                          </CommandEmpty>
-                          <CommandGroup heading="Tags">
+                              <span>Create new tag</span>
+                            </CommandItem>
+                          </CommandGroup>
+                          <CommandEmpty>No tags found</CommandEmpty>
+                          <CommandGroup heading="Existing Tags">
                             {existingTags.map((tag) => (
                               <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
                                 <span>{tag.name}</span>
