@@ -5,10 +5,19 @@ import { useItems } from "@/hooks/useItems";
 export default function ItemDetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { addItem, updateItem, items } = useItems();
+  const { addItem, updateItem, items, isLoading } = useItems();
   
   const itemId = searchParams.get("id");
   const existingItem = itemId ? items.find(item => item.id === itemId) : null;
+
+  // Wait for items to load if we're editing an existing item
+  if (isLoading && itemId) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   const existingTags = Array.from(
     new Map(
