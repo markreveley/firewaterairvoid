@@ -70,18 +70,18 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-5xl mx-auto space-y-3">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4 mb-4">
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter an item..."
-          className="flex-1 text-lg py-6 px-6 rounded-2xl border-2"
+          className="flex-1 text-lg py-8 px-8 rounded-2xl border-2"
         />
 
         <Button
           type="submit"
           variant="white"
-          className="rounded-xl px-8 py-6 text-base shrink-0"
+          className="rounded-xl px-10 py-8 text-base shrink-0"
         >
           Add Item
         </Button>
