@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, MoreHorizontal, Wind } from "lucide-react";
+import { CalendarIcon, Plus, Clock, MoreHorizontal } from "lucide-react";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -26,14 +26,8 @@ export function ItemInput({ onAddItem, existingTags, currentType }: ItemInputPro
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [selectedType, setSelectedType] = useState<"fire" | "water" | "air" | "void">(currentType);
   const [deadline, setDeadline] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
-
-  // Sync selectedType with currentType when the filter changes
-  useEffect(() => {
-    setSelectedType(currentType);
-  }, [currentType]);
 
   // Generate time options in 15-minute intervals
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
@@ -50,10 +44,17 @@ export function ItemInput({ onAddItem, existingTags, currentType }: ItemInputPro
         const [hours, minutes] = selectedTime.split(':').map(Number);
         finalDeadline = set(deadline, { hours, minutes, seconds: 0, milliseconds: 0 });
       }
-      await onAddItem(title, selectedType, selectedTags, finalDeadline, undefined, undefined);
+      await onAddItem(
+        title,
+        currentType,
+        selectedTags,
+        finalDeadline,
+        undefined,
+        currentType === "fire" ? "To Do" : undefined,
+        currentType === "void" ? title : undefined
+      );
       setTitle("");
       setSelectedTags([]);
-      setSelectedType(currentType);
       setDeadline(undefined);
       setSelectedTime("09:00");
     }
@@ -100,68 +101,6 @@ export function ItemInput({ onAddItem, existingTags, currentType }: ItemInputPro
               type="button"
               variant="outline"
               size="icon"
-              className={cn(
-                "rounded-full shrink-0",
-                selectedType === "fire" && "bg-fire-light text-fire-dark border-fire-secondary",
-                selectedType === "water" && "bg-water-light text-water-dark border-water-secondary",
-                selectedType === "air" && "bg-air-light text-air-dark border-air-secondary",
-                selectedType === "void" && "bg-void-light text-void-dark border-void-secondary"
-              )}
-            >
-              {selectedType === "fire" && <Flame className="w-4 h-4" />}
-              {selectedType === "water" && <Droplet className="w-4 h-4" />}
-              {selectedType === "air" && <Wind className="w-4 h-4" />}
-              {selectedType === "void" && <Circle className="w-4 h-4" />}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-48 p-2" align="start">
-            <div className="space-y-1">
-              <Button
-                type="button"
-                variant={selectedType === "fire" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setSelectedType("fire")}
-              >
-                <Flame className="w-4 h-4 mr-2" />
-                Fire
-              </Button>
-              <Button
-                type="button"
-                variant={selectedType === "water" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setSelectedType("water")}
-              >
-                <Droplet className="w-4 h-4 mr-2" />
-                Water
-              </Button>
-              <Button
-                type="button"
-                variant={selectedType === "air" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setSelectedType("air")}
-              >
-                <Wind className="w-4 h-4 mr-2" />
-                Air
-              </Button>
-              <Button
-                type="button"
-                variant={selectedType === "void" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setSelectedType("void")}
-              >
-                <Circle className="w-4 h-4 mr-2" />
-                Void
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
               className="rounded-full shrink-0"
             >
               <Plus className="w-4 h-4" />
@@ -195,7 +134,7 @@ export function ItemInput({ onAddItem, existingTags, currentType }: ItemInputPro
         </Button>
       </div>
 
-      {selectedType === "fire" && (
+      {currentType === "fire" && (
         <div className="flex items-start justify-center gap-2">
           <div className="flex-1 max-w-md">
             <Popover>
