@@ -1,29 +1,33 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Flame, Droplet, ExternalLink } from "lucide-react";
+import { Flame, Droplet, ExternalLink, X } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
   id: string;
   name: string;
   type: "fire" | "water";
-  deadline?: Date;
 }
+
 interface Item {
   id: string;
   content: string;
   tags: Tag[];
   createdAt: Date;
+  deadline?: Date;
 }
+
 interface ItemListProps {
   items: Item[];
   type: "fire" | "water";
   selectedTagFilter?: string;
+  onDeleteItem: (itemId: string) => void;
 }
 export function ItemList({
   items,
   type,
-  selectedTagFilter
+  selectedTagFilter,
+  onDeleteItem
 }: ItemListProps) {
   const filteredItems = items.filter(item => {
     // Show items without tags OR items with matching type tags
@@ -46,8 +50,7 @@ export function ItemList({
       {filteredItems.length === 0 ? <div className="text-center py-12 text-muted-foreground">
           
         </div> : filteredItems.map(item => {
-      const fireTag = item.tags.find(t => t.type === "fire" && t.deadline);
-      const isOverdue = fireTag?.deadline && isPast(fireTag.deadline);
+      const isOverdue = item.deadline && isPast(item.deadline);
       return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", isOverdue && "bg-fire-light/50")}>
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-4">
@@ -57,10 +60,19 @@ export function ItemList({
                         <ExternalLink className="w-4 h-4" />
                       </a> : item.content}
                   </p>
-                  {fireTag?.deadline && <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
-                      <Flame className="w-3 h-3" />
-                      {format(fireTag.deadline, "MMM d, yyyy")}
-                    </div>}
+                  <div className="flex items-center gap-2">
+                    {item.deadline && <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
+                        <Flame className="w-3 h-3" />
+                        {format(item.deadline, "MMM d, yyyy")}
+                      </div>}
+                    <button
+                      onClick={() => onDeleteItem(item.id)}
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      aria-label="Delete item"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {item.tags.map(tag => <Badge key={tag.id} variant="outline" className={cn("text-xs", tag.type === "fire" ? "border-fire-secondary text-fire-dark" : "border-water-secondary text-water-dark")}>

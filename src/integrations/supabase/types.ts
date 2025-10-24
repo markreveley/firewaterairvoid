@@ -48,16 +48,19 @@ export type Database = {
         Row: {
           content: string
           created_at: string | null
+          deadline: string | null
           id: string
         }
         Insert: {
           content: string
           created_at?: string | null
+          deadline?: string | null
           id?: string
         }
         Update: {
           content?: string
           created_at?: string | null
+          deadline?: string | null
           id?: string
         }
         Relationships: []
@@ -65,21 +68,18 @@ export type Database = {
       tags: {
         Row: {
           created_at: string | null
-          deadline: string | null
           id: string
           name: string
           type: string
         }
         Insert: {
           created_at?: string | null
-          deadline?: string | null
           id?: string
           name: string
           type: string
         }
         Update: {
           created_at?: string | null
-          deadline?: string | null
           id?: string
           name?: string
           type?: string

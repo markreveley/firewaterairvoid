@@ -6,7 +6,6 @@ interface Tag {
   id: string;
   name: string;
   type: "fire" | "water";
-  deadline?: Date;
 }
 
 interface TagFilterProps {

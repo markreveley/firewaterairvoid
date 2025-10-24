@@ -6,7 +6,6 @@ interface Tag {
   id: string;
   name: string;
   type: "fire" | "water";
-  deadline?: Date;
 }
 
 interface Item {
@@ -14,6 +13,7 @@ interface Item {
   content: string;
   tags: Tag[];
   createdAt: Date;
+  deadline?: Date;
 }
 
 export function useItems() {
@@ -42,7 +42,6 @@ export function useItems() {
             id: it.tags.id,
             name: it.tags.name,
             type: it.tags.type as "fire" | "water",
-            deadline: it.tags.deadline ? new Date(it.tags.deadline) : undefined,
           }));
 
         return {
@@ -50,6 +49,7 @@ export function useItems() {
           content: item.content,
           tags: itemTags,
           createdAt: new Date(item.created_at),
+          deadline: item.deadline ? new Date(item.deadline) : undefined,
         };
       });
 
@@ -66,11 +66,14 @@ export function useItems() {
     loadItems();
   }, []);
 
-  const addItem = async (content: string, tags: Tag[]) => {
+  const addItem = async (content: string, tags: Tag[], deadline?: Date) => {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
-        .insert({ content })
+        .insert({ 
+          content,
+          deadline: deadline?.toISOString()
+        })
         .select()
         .single();
 
@@ -94,7 +97,6 @@ export function useItems() {
               .insert({
                 name: tag.name,
                 type: tag.type,
-                deadline: tag.deadline?.toISOString(),
               })
               .select()
               .single();
@@ -122,5 +124,22 @@ export function useItems() {
     }
   };
 
-  return { items, isLoading, addItem };
+  const deleteItem = async (itemId: string) => {
+    try {
+      const { error } = await supabase
+        .from("items")
+        .delete()
+        .eq("id", itemId);
+
+      if (error) throw error;
+
+      await loadItems();
+      toast.success("Item deleted");
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      toast.error("Failed to delete item");
+    }
+  };
+
+  return { items, isLoading, addItem, deleteItem };
 }

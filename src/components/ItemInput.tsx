@@ -13,28 +13,28 @@ interface Tag {
   id: string;
   name: string;
   type: "fire" | "water";
-  deadline?: Date;
 }
 
 interface ItemInputProps {
-  onAddItem: (content: string, tags: Tag[]) => void;
+  onAddItem: (content: string, tags: Tag[], deadline?: Date) => void;
   existingTags: Tag[];
 }
 
 export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const [content, setContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [deadline, setDeadline] = useState<Date>();
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [newTagType, setNewTagType] = useState<"fire" | "water">("water");
-  const [newTagDeadline, setNewTagDeadline] = useState<Date>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (content.trim()) {
-      await onAddItem(content, selectedTags);
+      await onAddItem(content, selectedTags, deadline);
       setContent("");
       setSelectedTags([]);
+      setDeadline(undefined);
     }
   };
 
@@ -44,11 +44,9 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
         id: Date.now().toString(),
         name: newTagName,
         type: newTagType,
-        deadline: newTagType === "fire" ? newTagDeadline : undefined,
       };
       setSelectedTags([...selectedTags, newTag]);
       setNewTagName("");
-      setNewTagDeadline(undefined);
       setIsAddingTag(false);
     }
   };
@@ -87,9 +85,6 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
           >
             {tag.type === "fire" ? <Flame className="w-3 h-3" /> : <Droplet className="w-3 h-3" />}
             <span>{tag.name}</span>
-            {tag.deadline && (
-              <span className="text-xs opacity-75">({format(tag.deadline, "MMM d")})</span>
-            )}
             <button
               type="button"
               onClick={() => removeTag(tag.id)}
@@ -99,6 +94,32 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
             </button>
           </Badge>
         ))}
+
+        {/* Deadline Input */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className={cn(
+                "rounded-full",
+                deadline && "bg-fire-light text-fire-dark border-fire-secondary"
+              )}
+            >
+              <CalendarIcon className="w-3 h-3 mr-1" />
+              {deadline ? format(deadline, "MMM d, yyyy") : "Set Deadline"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={deadline}
+              onSelect={setDeadline}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
 
         {!isAddingTag && (
           <Popover>
@@ -137,11 +158,6 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
                         <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
                           <Flame className="w-4 h-4 mr-2 text-fire-primary" />
                           <span>{tag.name}</span>
-                          {tag.deadline && (
-                            <span className="ml-auto text-xs text-muted-foreground">
-                              {format(tag.deadline, "MMM d")}
-                            </span>
-                          )}
                         </CommandItem>
                       ))}
                   </CommandGroup>
@@ -194,24 +210,6 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
                 <Droplet className="w-3 h-3" />
               </Button>
             </div>
-            {newTagType === "fire" && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <CalendarIcon className="w-3 h-3 mr-1" />
-                    {newTagDeadline ? format(newTagDeadline, "MMM d") : "Deadline"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={newTagDeadline}
-                    onSelect={setNewTagDeadline}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            )}
             <Button type="button" size="sm" onClick={addNewTag}>
               <Plus className="w-3 h-3" />
             </Button>
@@ -222,7 +220,6 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
               onClick={() => {
                 setIsAddingTag(false);
                 setNewTagName("");
-                setNewTagDeadline(undefined);
               }}
             >
               <X className="w-3 h-3" />

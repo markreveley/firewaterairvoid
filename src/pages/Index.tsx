@@ -9,11 +9,10 @@ interface Tag {
   id: string;
   name: string;
   type: "fire" | "water";
-  deadline?: Date;
 }
 
 const Index = () => {
-  const { items, isLoading, addItem } = useItems();
+  const { items, isLoading, addItem, deleteItem } = useItems();
   const [activeType, setActiveType] = useState<"fire" | "water">("fire");
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
 
@@ -55,7 +54,12 @@ const Index = () => {
           {isLoading ? (
             <div className="text-center py-12 text-muted-foreground">Loading...</div>
           ) : (
-            <ItemList items={items} type={activeType} selectedTagFilter={selectedTagFilter} />
+            <ItemList 
+              items={items} 
+              type={activeType} 
+              selectedTagFilter={selectedTagFilter}
+              onDeleteItem={deleteItem}
+            />
           )}
         </div>
       </div>
