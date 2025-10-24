@@ -16,7 +16,9 @@ interface Tag {
 
 interface Item {
   id: string;
-  content: string;
+  title: string;
+  notes?: string;
+  status?: string;
   tags: Tag[];
   createdAt: Date;
   deadline?: Date;
@@ -27,7 +29,7 @@ interface ItemListProps {
   type: "fire" | "water";
   selectedTagFilter?: string;
   onDeleteItem: (itemId: string) => void;
-  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[] }) => void;
+  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string }) => void;
 }
 export function ItemList({
   items,
@@ -39,6 +41,10 @@ export function ItemList({
   const [editingDeadlineId, setEditingDeadlineId] = useState<string | null>(null);
   const [editDeadline, setEditDeadline] = useState<Date>();
   const [editTime, setEditTime] = useState<string>("09:00");
+  const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
+  const [editNotes, setEditNotes] = useState<string>("");
+  const [editingStatusId, setEditingStatusId] = useState<string | null>(null);
+  const [editStatus, setEditStatus] = useState<string>("");
 
   // Generate time options in 15-minute intervals
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
@@ -88,6 +94,26 @@ export function ItemList({
     const waterTags = item.tags.filter(tag => tag.type === "water");
     onUpdateItem(item.id, { deadline: null, tags: waterTags });
   };
+
+  const startEditingNotes = (item: Item) => {
+    setEditingNotesId(item.id);
+    setEditNotes(item.notes || "");
+  };
+
+  const saveNotes = (itemId: string) => {
+    onUpdateItem(itemId, { notes: editNotes });
+    setEditingNotesId(null);
+  };
+
+  const startEditingStatus = (item: Item) => {
+    setEditingStatusId(item.id);
+    setEditStatus(item.status || "");
+  };
+
+  const saveStatus = (itemId: string) => {
+    onUpdateItem(itemId, { status: editStatus });
+    setEditingStatusId(null);
+  };
   return <div className="space-y-3">
       {filteredItems.length === 0 ? <div className="text-center py-12 text-muted-foreground">
           
@@ -95,16 +121,112 @@ export function ItemList({
       const isOverdue = item.deadline && isPast(item.deadline);
       const hasFireTag = item.tags.some(tag => tag.type === "fire");
       const isEditingThisDeadline = editingDeadlineId === item.id;
+      const isEditingThisNotes = editingNotesId === item.id;
+      const isEditingThisStatus = editingStatusId === item.id;
       
       return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", isOverdue && "bg-fire-light/50")}>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
-                  <p className="text-base flex-1">
-                    {isUrl(item.content) ? <a href={item.content} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
-                        {item.content}
-                        <ExternalLink className="w-4 h-4" />
-                      </a> : item.content}
-                  </p>
+                  <div className="flex-1">
+                    <p className="text-base font-medium mb-2">
+                      {isUrl(item.title) ? <a href={item.title} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+                          {item.title}
+                          <ExternalLink className="w-4 h-4" />
+                        </a> : item.title}
+                    </p>
+                    
+                    {/* Notes section */}
+                    <div className="mb-2">
+                      {isEditingThisNotes ? (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={editNotes}
+                            onChange={(e) => setEditNotes(e.target.value)}
+                            className="flex-1 px-2 py-1 text-sm border rounded"
+                            placeholder="Add notes..."
+                          />
+                          <Button size="sm" variant="default" className="h-7" onClick={() => saveNotes(item.id)}>
+                            Save
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7" onClick={() => setEditingNotesId(null)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 group">
+                          {item.notes ? (
+                            <>
+                              <p className="text-sm text-muted-foreground">{item.notes}</p>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => startEditingNotes(item)}
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 text-xs text-muted-foreground"
+                              onClick={() => startEditingNotes(item)}
+                            >
+                              + Add notes
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Status section */}
+                    <div>
+                      {isEditingThisStatus ? (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={editStatus}
+                            onChange={(e) => setEditStatus(e.target.value)}
+                            className="flex-1 px-2 py-1 text-sm border rounded"
+                            placeholder="Add status..."
+                          />
+                          <Button size="sm" variant="default" className="h-7" onClick={() => saveStatus(item.id)}>
+                            Save
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7" onClick={() => setEditingStatusId(null)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 group">
+                          {item.status ? (
+                            <>
+                              <p className="text-sm text-muted-foreground italic">{item.status}</p>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => startEditingStatus(item)}
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 text-xs text-muted-foreground"
+                              onClick={() => startEditingStatus(item)}
+                            >
+                              + Add status
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex flex-col items-end gap-2">
                     <button
                       onClick={() => onDeleteItem(item.id)}

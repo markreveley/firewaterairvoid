@@ -46,22 +46,28 @@ export type Database = {
       }
       items: {
         Row: {
-          content: string
           created_at: string | null
           deadline: string | null
           id: string
+          notes: string | null
+          status: string | null
+          title: string
         }
         Insert: {
-          content: string
           created_at?: string | null
           deadline?: string | null
           id?: string
+          notes?: string | null
+          status?: string | null
+          title: string
         }
         Update: {
-          content?: string
           created_at?: string | null
           deadline?: string | null
           id?: string
+          notes?: string | null
+          status?: string | null
+          title?: string
         }
         Relationships: []
       }

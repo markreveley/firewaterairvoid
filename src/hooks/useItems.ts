@@ -10,7 +10,9 @@ interface Tag {
 
 interface Item {
   id: string;
-  content: string;
+  title: string;
+  notes?: string;
+  status?: string;
   tags: Tag[];
   createdAt: Date;
   deadline?: Date;
@@ -46,7 +48,9 @@ export function useItems() {
 
         return {
           id: item.id,
-          content: item.content,
+          title: item.title,
+          notes: item.notes || undefined,
+          status: item.status || undefined,
           tags: itemTags,
           createdAt: new Date(item.created_at),
           deadline: item.deadline ? new Date(item.deadline) : undefined,
@@ -66,12 +70,14 @@ export function useItems() {
     loadItems();
   }, []);
 
-  const addItem = async (content: string, tags: Tag[], deadline?: Date) => {
+  const addItem = async (title: string, tags: Tag[], deadline?: Date, notes?: string, status?: string) => {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
         .insert({ 
-          content,
+          title,
+          notes: notes || null,
+          status: status || null,
           deadline: deadline?.toISOString()
         })
         .select()
@@ -141,13 +147,24 @@ export function useItems() {
     }
   };
 
-  const updateItem = async (itemId: string, updates: { deadline?: Date | null; tags?: Tag[] }) => {
+  const updateItem = async (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string }) => {
     try {
-      // Update the item's deadline if provided
+      // Update the item fields if provided
+      const itemUpdates: any = {};
       if ("deadline" in updates) {
+        itemUpdates.deadline = updates.deadline?.toISOString() || null;
+      }
+      if ("notes" in updates) {
+        itemUpdates.notes = updates.notes || null;
+      }
+      if ("status" in updates) {
+        itemUpdates.status = updates.status || null;
+      }
+
+      if (Object.keys(itemUpdates).length > 0) {
         const { error: itemError } = await supabase
           .from("items")
-          .update({ deadline: updates.deadline?.toISOString() || null })
+          .update(itemUpdates)
           .eq("id", itemId);
 
         if (itemError) throw itemError;

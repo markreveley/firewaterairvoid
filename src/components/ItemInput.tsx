@@ -17,12 +17,14 @@ interface Tag {
 }
 
 interface ItemInputProps {
-  onAddItem: (content: string, tags: Tag[], deadline?: Date) => void;
+  onAddItem: (title: string, tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
   existingTags: Tag[];
 }
 
 export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState("");
+  const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [deadline, setDeadline] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
@@ -39,7 +41,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (content.trim()) {
+    if (title.trim()) {
       let tagsToAdd = [...selectedTags];
       
       // If deadline is set, ensure there's a fire tag
@@ -59,8 +61,16 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
         const [hours, minutes] = selectedTime.split(':').map(Number);
         finalDeadline = set(deadline, { hours, minutes, seconds: 0, milliseconds: 0 });
       }
-      await onAddItem(content, tagsToAdd, finalDeadline);
-      setContent("");
+      await onAddItem(
+        title, 
+        tagsToAdd, 
+        finalDeadline,
+        notes.trim() || undefined,
+        status.trim() || undefined
+      );
+      setTitle("");
+      setNotes("");
+      setStatus("");
       setSelectedTags([]);
       setDeadline(undefined);
       setSelectedTime("09:00");
@@ -92,12 +102,24 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto space-y-4">
-      <div className="relative">
+      <div className="space-y-3">
         <Input
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Enter anything - a todo, idea, url, or resource..."
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter a title..."
           className="text-lg py-6 px-6 rounded-2xl border-2 transition-all duration-300 focus:scale-[1.02]"
+        />
+        <Input
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Add notes (optional)..."
+          className="text-base py-4 px-6 rounded-xl"
+        />
+        <Input
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          placeholder="Add status (optional)..."
+          className="text-base py-4 px-6 rounded-xl"
         />
       </div>
 
