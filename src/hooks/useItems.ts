@@ -147,7 +147,7 @@ export function useItems() {
     }
   };
 
-  const updateItem = async (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string }) => {
+  const updateItem = async (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; type?: "fire" | "water" | "void" }) => {
     try {
       // Update the item fields if provided
       const itemUpdates: any = {};
@@ -159,6 +159,9 @@ export function useItems() {
       }
       if ("status" in updates) {
         itemUpdates.status = updates.status || null;
+      }
+      if ("type" in updates) {
+        itemUpdates.type = updates.type;
       }
 
       if (Object.keys(itemUpdates).length > 0) {

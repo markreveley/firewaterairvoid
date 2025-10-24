@@ -29,7 +29,7 @@ interface ItemListProps {
   type: "fire" | "water" | "void";
   selectedTagFilter?: string;
   onDeleteItem: (itemId: string) => void;
-  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string }) => void;
+  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; type?: "fire" | "water" | "void" }) => void;
 }
 export function ItemList({
   items,
@@ -82,11 +82,16 @@ export function ItemList({
     }
   };
 
-  const saveDeadline = (itemId: string) => {
+  const saveDeadline = (itemId: string, currentType: "fire" | "water" | "void") => {
     if (editDeadline && editTime) {
       const [hours, minutes] = editTime.split(':').map(Number);
       const finalDeadline = set(editDeadline, { hours, minutes, seconds: 0, milliseconds: 0 });
-      onUpdateItem(itemId, { deadline: finalDeadline });
+      // Automatically set type to "fire" when adding a deadline
+      const updates: any = { deadline: finalDeadline };
+      if (currentType !== "fire") {
+        updates.type = "fire";
+      }
+      onUpdateItem(itemId, updates);
     }
     setEditingDeadlineId(null);
   };
@@ -300,7 +305,7 @@ export function ItemList({
                           size="sm"
                           variant="default"
                           className="h-7"
-                          onClick={() => saveDeadline(item.id)}
+                          onClick={() => saveDeadline(item.id, item.type)}
                         >
                           Save
                         </Button>
