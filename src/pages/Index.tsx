@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ItemInput } from "@/components/ItemInput";
 import { ItemList } from "@/components/ItemList";
 import { FireWaterToggle } from "@/components/FireWaterToggle";
 import { TagFilter } from "@/components/TagFilter";
 import { useItems } from "@/hooks/useItems";
+import { useSearchParams } from "react-router-dom";
 
 interface Tag {
   id: string;
@@ -12,8 +13,20 @@ interface Tag {
 
 const Index = () => {
   const { items, isLoading, addItem, deleteItem, updateItem } = useItems();
-  const [activeType, setActiveType] = useState<"fire" | "water" | "void">("fire");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialType = (searchParams.get("type") as "fire" | "water" | "void") || "fire";
+  const [activeType, setActiveType] = useState<"fire" | "water" | "void">(initialType);
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
+
+  useEffect(() => {
+    setSearchParams((prev) => {
+      const p = new URLSearchParams(prev);
+      p.set("type", activeType);
+      if (selectedTagFilter) p.set("tag", selectedTagFilter);
+      else p.delete("tag");
+      return p;
+    });
+  }, [activeType, selectedTagFilter, setSearchParams]);
 
   const allTags = items.reduce((acc, item) => {
     item.tags.forEach(tag => {
@@ -23,7 +36,6 @@ const Index = () => {
     });
     return acc;
   }, [] as Tag[]);
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12 space-y-12">
