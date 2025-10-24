@@ -91,7 +91,7 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
       <div className="max-w-3xl mx-auto">
         <Button
           variant="ghost"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(-1)}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
