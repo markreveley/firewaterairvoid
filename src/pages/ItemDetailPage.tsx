@@ -36,6 +36,7 @@ export default function ItemDetailPage() {
     if (existingItem) {
       // Edit mode - update existing item
       await updateItem(existingItem.id, { 
+        title,
         type, 
         tags, 
         deadline: deadline || null, 

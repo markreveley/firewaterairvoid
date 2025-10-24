@@ -147,10 +147,23 @@ export function useItems() {
     }
   };
 
-  const updateItem = async (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; type?: "fire" | "water" | "void" }) => {
+  const updateItem = async (
+    itemId: string,
+    updates: {
+      title?: string;
+      deadline?: Date | null;
+      tags?: Tag[];
+      notes?: string;
+      status?: string;
+      type?: "fire" | "water" | "void";
+    }
+  ) => {
     try {
       // Update the item fields if provided
       const itemUpdates: any = {};
+      if ("title" in updates) {
+        itemUpdates.title = updates.title;
+      }
       if ("deadline" in updates) {
         itemUpdates.deadline = updates.deadline?.toISOString() || null;
       }
@@ -183,13 +196,37 @@ export function useItems() {
 
         if (deleteError) throw deleteError;
 
-        // Add new tags
+        // Add new tags (create missing tags if needed)
         for (const tag of updates.tags) {
+          let tagId = tag.id;
+
+          // If tag id is not a UUID, look up by name or create it
+          if (!tag.id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            const { data: existingTag } = await supabase
+              .from("tags")
+              .select("*")
+              .eq("name", tag.name)
+              .maybeSingle();
+
+            if (existingTag) {
+              tagId = existingTag.id;
+            } else {
+              const { data: newTag, error: tagError } = await supabase
+                .from("tags")
+                .insert({ name: tag.name })
+                .select()
+                .single();
+
+              if (tagError) throw tagError;
+              tagId = newTag.id;
+            }
+          }
+
           const { error: linkError } = await supabase
             .from("item_tags")
             .insert({
               item_id: itemId,
-              tag_id: tag.id,
+              tag_id: tagId,
             });
 
           if (linkError) throw linkError;

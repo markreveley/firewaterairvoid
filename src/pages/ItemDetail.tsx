@@ -69,7 +69,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
         notes.trim() || undefined,
         status.trim() || undefined
       );
-      navigate("/");
+      // navigation handled in parent
     }
   };
 
