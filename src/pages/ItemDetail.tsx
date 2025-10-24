@@ -20,19 +20,28 @@ interface Tag {
 interface ItemDetailProps {
   onAddItem: (title: string, type: "fire" | "water" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
   existingTags: Tag[];
+  existingItem?: {
+    id: string;
+    title: string;
+    type: "fire" | "water" | "void";
+    tags: Tag[];
+    deadline?: Date;
+    notes?: string;
+    status?: string;
+  } | null;
 }
 
-export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps) {
+export default function ItemDetail({ onAddItem, existingTags, existingItem }: ItemDetailProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const initialTitle = searchParams.get("title") || "";
+  const initialTitle = existingItem?.title || searchParams.get("title") || "";
 
   const [title, setTitle] = useState(initialTitle);
-  const [notes, setNotes] = useState("");
-  const [status, setStatus] = useState("");
-  const [itemType, setItemType] = useState<"fire" | "water" | "void">("fire");
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [deadline, setDeadline] = useState<Date>();
+  const [notes, setNotes] = useState(existingItem?.notes || "");
+  const [status, setStatus] = useState(existingItem?.status || "");
+  const [itemType, setItemType] = useState<"fire" | "water" | "void">(existingItem?.type || "fire");
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(existingItem?.tags || []);
+  const [deadline, setDeadline] = useState<Date | undefined>(existingItem?.deadline);
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
@@ -297,7 +306,7 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
             variant="white"
             className="w-full rounded-xl py-6 text-base"
           >
-            Add Item
+            {existingItem ? "Save Changes" : "Add Item"}
           </Button>
         </form>
       </div>

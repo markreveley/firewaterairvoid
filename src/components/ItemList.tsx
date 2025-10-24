@@ -134,7 +134,7 @@ export function ItemList({
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => navigate(`/item/new?title=${encodeURIComponent(item.title)}&type=${type}`)}
+                        onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`)}
                         className="text-muted-foreground hover:text-foreground transition-colors"
                         aria-label="View details"
                       >
