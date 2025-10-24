@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal, Wind } from "lucide-react";
 import { format, isPast, set } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
@@ -168,6 +168,11 @@ export function ItemList({
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
+                    </div>
+                    
+                    {/* Created date */}
+                    <div className="text-xs text-muted-foreground">
+                      {format(item.createdAt, "MMM d, yyyy")}
                     </div>
                     
                     {item.deadline && !isEditingThisDeadline && (

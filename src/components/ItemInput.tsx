@@ -19,13 +19,14 @@ interface Tag {
 interface ItemInputProps {
   onAddItem: (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => void;
   existingTags: Tag[];
+  currentType: "fire" | "water" | "air" | "void";
 }
 
-export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
+export function ItemInput({ onAddItem, existingTags, currentType }: ItemInputProps) {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [selectedType, setSelectedType] = useState<"fire" | "water" | "air" | "void">("void");
+  const [selectedType, setSelectedType] = useState<"fire" | "water" | "air" | "void">(currentType);
   const [deadline, setDeadline] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
 
@@ -47,7 +48,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
       await onAddItem(title, selectedType, selectedTags, finalDeadline, undefined, undefined);
       setTitle("");
       setSelectedTags([]);
-      setSelectedType("void");
+      setSelectedType(currentType);
       setDeadline(undefined);
       setSelectedTime("09:00");
     }

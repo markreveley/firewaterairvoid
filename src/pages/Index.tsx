@@ -18,6 +18,14 @@ const Index = () => {
   const [activeType, setActiveType] = useState<"fire" | "water" | "air" | "void">(initialType);
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
 
+  const handleAddItem = async (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
+    await addItem(title, type, tags, deadline, notes, status, url);
+    // Switch to the type of the newly created item
+    if (type !== activeType) {
+      setActiveType(type);
+    }
+  };
+
   useEffect(() => {
     setSearchParams((prev) => {
       const p = new URLSearchParams(prev);
@@ -45,7 +53,7 @@ const Index = () => {
         </header>
 
         <div className="py-8">
-          <ItemInput onAddItem={addItem} existingTags={allTags} />
+          <ItemInput onAddItem={handleAddItem} existingTags={allTags} currentType={activeType} />
         </div>
 
         <div className="py-4">
