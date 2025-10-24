@@ -111,7 +111,7 @@ export function ItemList({
                       className="text-muted-foreground hover:text-destructive transition-colors"
                       aria-label="Delete item"
                     >
-                      <X className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                     
                     {item.deadline && !isEditingThisDeadline && (
@@ -134,7 +134,7 @@ export function ItemList({
                           className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                           onClick={() => deleteDeadline(item)}
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <X className="w-3 h-3" />
                         </Button>
                       </div>
                     )}
