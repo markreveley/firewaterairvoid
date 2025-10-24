@@ -3,20 +3,17 @@ import { ItemInput } from "@/components/ItemInput";
 import { ItemList } from "@/components/ItemList";
 import { FireWaterToggle } from "@/components/FireWaterToggle";
 import { TagFilter } from "@/components/TagFilter";
+import { useItems } from "@/hooks/useItems";
+
 interface Tag {
   id: string;
   name: string;
   type: "fire" | "water";
   deadline?: Date;
 }
-interface Item {
-  id: string;
-  content: string;
-  tags: Tag[];
-  createdAt: Date;
-}
+
 const Index = () => {
-  const [items, setItems] = useState<Item[]>([]);
+  const { items, loading, addItem } = useItems();
   const [activeType, setActiveType] = useState<"fire" | "water">("fire");
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
 
@@ -29,15 +26,6 @@ const Index = () => {
     });
     return acc;
   }, [] as Tag[]);
-  const handleAddItem = (content: string, tags: Tag[]) => {
-    const newItem: Item = {
-      id: Date.now().toString(),
-      content,
-      tags,
-      createdAt: new Date()
-    };
-    setItems([newItem, ...items]);
-  };
   return <div className="min-h-screen bg-gradient-to-br from-background via-zen-sand to-background">
       <div className="container mx-auto px-4 py-12 space-y-12">
         {/* Header */}
@@ -48,7 +36,7 @@ const Index = () => {
 
         {/* Input Section */}
         <div className="py-8">
-          <ItemInput onAddItem={handleAddItem} existingTags={allTags} />
+          <ItemInput onAddItem={addItem} existingTags={allTags} />
         </div>
 
         {/* Toggle Section */}
@@ -63,7 +51,11 @@ const Index = () => {
 
         {/* Items Display */}
         <div className="max-w-4xl mx-auto">
-          <ItemList items={items} type={activeType} selectedTagFilter={selectedTagFilter} />
+          {loading ? (
+            <div className="text-center py-12 text-muted-foreground">Loading...</div>
+          ) : (
+            <ItemList items={items} type={activeType} selectedTagFilter={selectedTagFilter} />
+          )}
         </div>
       </div>
     </div>;
