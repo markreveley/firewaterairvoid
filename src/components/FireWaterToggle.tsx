@@ -1,9 +1,9 @@
-import { Flame, Droplet } from "lucide-react";
+import { Flame, Droplet, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FireWaterToggleProps {
-  activeType: "fire" | "water";
-  onToggle: (type: "fire" | "water") => void;
+  activeType: "fire" | "water" | "void";
+  onToggle: (type: "fire" | "water" | "void") => void;
 }
 
 export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) {
@@ -32,6 +32,18 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
       >
         <Droplet className={cn("w-5 h-5", activeType === "water" && "animate-pulse")} />
         <span className="font-medium">Water</span>
+      </button>
+      <button
+        onClick={() => onToggle("void")}
+        className={cn(
+          "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
+          activeType === "void"
+            ? "bg-void-primary text-white shadow-lg scale-105"
+            : "text-muted-foreground hover:text-void-primary"
+        )}
+      >
+        <Circle className={cn("w-5 h-5", activeType === "void" && "animate-pulse")} />
+        <span className="font-medium">Void</span>
       </button>
     </div>
   );

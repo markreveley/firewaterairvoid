@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Flame, Droplet, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2 } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2 } from "lucide-react";
 import { format, isPast, set } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water";
+  type: "fire" | "water" | "void";
 }
 
 interface Item {
@@ -26,7 +26,7 @@ interface Item {
 
 interface ItemListProps {
   items: Item[];
-  type: "fire" | "water";
+  type: "fire" | "water" | "void";
   selectedTagFilter?: string;
   onDeleteItem: (itemId: string) => void;
   onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string }) => void;
@@ -54,11 +54,14 @@ export function ItemList({
   });
   const filteredItems = items.filter(item => {
     const hasFireTag = item.tags.some(tag => tag.type === "fire");
+    const hasVoidTag = item.tags.some(tag => tag.type === "void");
     
     // Fire view: only items WITH fire tags
-    // Water view: only items WITHOUT fire tags
+    // Water view: only items WITHOUT fire tags AND WITHOUT void tags
+    // Void view: only items WITH void tags
     if (type === "fire" && !hasFireTag) return false;
-    if (type === "water" && hasFireTag) return false;
+    if (type === "water" && (hasFireTag || hasVoidTag)) return false;
+    if (type === "void" && !hasVoidTag) return false;
     
     if (selectedTagFilter) {
       return item.tags.some(tag => tag.id === selectedTagFilter);
@@ -128,7 +131,7 @@ export function ItemList({
       const isEditingThisNotes = editingNotesId === item.id;
       const isEditingThisStatus = editingStatusId === item.id;
       
-      return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", isOverdue && "bg-fire-light/50")}>
+      return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", type === "void" && "border-l-4 border-l-void-primary", isOverdue && "bg-fire-light/50")}>
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
@@ -320,8 +323,8 @@ export function ItemList({
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {item.tags.map(tag => <Badge key={tag.id} variant="outline" className={cn("text-xs", tag.type === "fire" ? "border-fire-secondary text-fire-dark" : "border-water-secondary text-water-dark")}>
-                      {tag.type === "fire" ? <Flame className="w-3 h-3 mr-1" /> : <Droplet className="w-3 h-3 mr-1" />}
+                  {item.tags.map(tag => <Badge key={tag.id} variant="outline" className={cn("text-xs", tag.type === "fire" ? "border-fire-secondary text-fire-dark" : tag.type === "water" ? "border-water-secondary text-water-dark" : "border-void-secondary text-void-dark")}>
+                      {tag.type === "fire" ? <Flame className="w-3 h-3 mr-1" /> : tag.type === "water" ? <Droplet className="w-3 h-3 mr-1" /> : <Circle className="w-3 h-3 mr-1" />}
                       {tag.name}
                     </Badge>)}
                 </div>

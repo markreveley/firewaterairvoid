@@ -5,7 +5,7 @@ import { toast } from "sonner";
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water";
+  type: "fire" | "water" | "void";
 }
 
 interface Item {
@@ -43,7 +43,7 @@ export function useItems() {
           .map((it: any) => ({
             id: it.tags.id,
             name: it.tags.name,
-            type: it.tags.type as "fire" | "water",
+            type: it.tags.type as "fire" | "water" | "void",
           }));
 
         return {

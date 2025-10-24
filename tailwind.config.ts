@@ -61,6 +61,13 @@ export default {
           light: "hsl(var(--water-light))",
           dark: "hsl(var(--water-dark))",
         },
+        void: {
+          primary: "hsl(var(--void-primary))",
+          secondary: "hsl(var(--void-secondary))",
+          accent: "hsl(var(--void-accent))",
+          light: "hsl(var(--void-light))",
+          dark: "hsl(var(--void-dark))",
+        },
         zen: {
           stone: "hsl(var(--zen-stone))",
           sand: "hsl(var(--zen-sand))",

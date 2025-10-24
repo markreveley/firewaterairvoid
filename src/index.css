@@ -52,6 +52,13 @@ All colors MUST be HSL.
     --water-light: 190 100% 95%;
     --water-dark: 200 70% 35%;
 
+    /* Void theme colors */
+    --void-primary: 270 60% 55%;
+    --void-secondary: 285 55% 60%;
+    --void-accent: 260 65% 50%;
+    --void-light: 275 70% 95%;
+    --void-dark: 265 50% 35%;
+
     /* Zen neutral */
     --zen-stone: 40 8% 75%;
     --zen-sand: 40 20% 88%;
@@ -99,6 +106,13 @@ All colors MUST be HSL.
     --water-accent: 170 90% 50%;
     --water-light: 190 60% 25%;
     --water-dark: 200 75% 40%;
+
+    /* Void theme colors - adjusted for dark */
+    --void-primary: 270 65% 60%;
+    --void-secondary: 285 60% 65%;
+    --void-accent: 260 70% 55%;
+    --void-light: 275 50% 25%;
+    --void-dark: 265 60% 45%;
 
     /* Zen neutral */
     --zen-stone: 40 5% 40%;

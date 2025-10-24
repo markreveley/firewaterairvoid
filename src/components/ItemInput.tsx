@@ -6,14 +6,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Plus, X, Clock } from "lucide-react";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock } from "lucide-react";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water";
+  type: "fire" | "water" | "void";
 }
 
 interface ItemInputProps {
@@ -30,7 +30,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
-  const [newTagType, setNewTagType] = useState<"fire" | "water">("water");
+  const [newTagType, setNewTagType] = useState<"fire" | "water" | "void">("void");
 
   // Generate time options in 15-minute intervals
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
@@ -131,10 +131,12 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
               "px-3 py-1 rounded-full flex items-center gap-1",
               tag.type === "fire"
                 ? "bg-fire-light text-fire-dark border-fire-secondary"
-                : "bg-water-light text-water-dark border-water-secondary"
+                : tag.type === "water"
+                ? "bg-water-light text-water-dark border-water-secondary"
+                : "bg-void-light text-void-dark border-void-secondary"
             )}
           >
-            {tag.type === "fire" ? <Flame className="w-3 h-3" /> : <Droplet className="w-3 h-3" />}
+            {tag.type === "fire" ? <Flame className="w-3 h-3" /> : tag.type === "water" ? <Droplet className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
             <span>{tag.name}</span>
             <button
               type="button"
@@ -242,6 +244,16 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
                         </CommandItem>
                       ))}
                   </CommandGroup>
+                  <CommandGroup heading="Void Tags">
+                    {existingTags
+                      .filter((t) => t.type === "void")
+                      .map((tag) => (
+                        <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                          <Circle className="w-4 h-4 mr-2 text-void-primary" />
+                          <span>{tag.name}</span>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
                 </CommandList>
               </Command>
             </PopoverContent>
@@ -279,6 +291,17 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
                 )}
               >
                 <Droplet className="w-3 h-3" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={newTagType === "void" ? "default" : "outline"}
+                onClick={() => setNewTagType("void")}
+                className={cn(
+                  newTagType === "void" && "bg-void-primary hover:bg-void-dark"
+                )}
+              >
+                <Circle className="w-3 h-3" />
               </Button>
             </div>
             <Button type="button" size="sm" onClick={addNewTag}>

@@ -8,12 +8,12 @@ import { useItems } from "@/hooks/useItems";
 interface Tag {
   id: string;
   name: string;
-  type: "fire" | "water";
+  type: "fire" | "water" | "void";
 }
 
 const Index = () => {
   const { items, isLoading, addItem, deleteItem, updateItem } = useItems();
-  const [activeType, setActiveType] = useState<"fire" | "water">("fire");
+  const [activeType, setActiveType] = useState<"fire" | "water" | "void">("fire");
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
 
   const allTags = items.reduce((acc, item) => {
