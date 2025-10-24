@@ -53,9 +53,13 @@ export function ItemList({
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   });
   const filteredItems = items.filter(item => {
-    // Show items without tags OR items with matching type tags
-    const hasTypeTag = item.tags.length === 0 || item.tags.some(tag => tag.type === type);
-    if (!hasTypeTag) return false;
+    const hasFireTag = item.tags.some(tag => tag.type === "fire");
+    
+    // Fire view: only items WITH fire tags
+    // Water view: only items WITHOUT fire tags
+    if (type === "fire" && !hasFireTag) return false;
+    if (type === "water" && hasFireTag) return false;
+    
     if (selectedTagFilter) {
       return item.tags.some(tag => tag.id === selectedTagFilter);
     }
