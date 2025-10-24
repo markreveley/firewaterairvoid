@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface Tag {
   id: string;
@@ -18,14 +18,9 @@ interface Item {
 
 export function useItems() {
   const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
-
-  const fetchItems = async () => {
+  const loadItems = async () => {
     try {
       const { data: itemsData, error: itemsError } = await supabase
         .from("items")
@@ -34,30 +29,20 @@ export function useItems() {
 
       if (itemsError) throw itemsError;
 
-      const { data: tagsData, error: tagsError } = await supabase
-        .from("tags")
-        .select("*");
-
-      if (tagsError) throw tagsError;
-
       const { data: itemTagsData, error: itemTagsError } = await supabase
         .from("item_tags")
-        .select("*");
+        .select("item_id, tag_id, tags(*)");
 
       if (itemTagsError) throw itemTagsError;
 
-      const formattedItems: Item[] = (itemsData || []).map((item) => {
-        const itemTagIds = (itemTagsData || [])
-          .filter((it) => it.item_id === item.id)
-          .map((it) => it.tag_id);
-
-        const itemTags = (tagsData || [])
-          .filter((tag) => itemTagIds.includes(tag.id))
-          .map((tag) => ({
-            id: tag.id,
-            name: tag.name,
-            type: tag.type as "fire" | "water",
-            deadline: tag.deadline ? new Date(tag.deadline) : undefined,
+      const itemsWithTags: Item[] = itemsData.map((item) => {
+        const itemTags = itemTagsData
+          .filter((it: any) => it.item_id === item.id)
+          .map((it: any) => ({
+            id: it.tags.id,
+            name: it.tags.name,
+            type: it.tags.type as "fire" | "water",
+            deadline: it.tags.deadline ? new Date(it.tags.deadline) : undefined,
           }));
 
         return {
@@ -68,21 +53,22 @@ export function useItems() {
         };
       });
 
-      setItems(formattedItems);
-    } catch (error: any) {
-      toast({
-        title: "Error loading items",
-        description: error.message,
-        variant: "destructive",
-      });
+      setItems(itemsWithTags);
+    } catch (error) {
+      console.error("Error loading items:", error);
+      toast.error("Failed to load items");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    loadItems();
+  }, []);
+
   const addItem = async (content: string, tags: Tag[]) => {
     try {
-      const { data: itemData, error: itemError } = await supabase
+      const { data: newItem, error: itemError } = await supabase
         .from("items")
         .insert({ content })
         .select()
@@ -91,54 +77,50 @@ export function useItems() {
       if (itemError) throw itemError;
 
       for (const tag of tags) {
-        const { data: existingTag } = await supabase
-          .from("tags")
-          .select("id")
-          .eq("name", tag.name)
-          .eq("type", tag.type)
-          .maybeSingle();
-
-        let tagId = existingTag?.id;
-
-        if (!tagId) {
-          const { data: newTag, error: tagError } = await supabase
+        let tagId = tag.id;
+        
+        if (!tag.id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+          const { data: existingTag } = await supabase
             .from("tags")
-            .insert({
-              name: tag.name,
-              type: tag.type,
-              deadline: tag.deadline?.toISOString(),
-            })
-            .select()
+            .select("*")
+            .eq("name", tag.name)
             .single();
 
-          if (tagError) throw tagError;
-          tagId = newTag.id;
+          if (existingTag) {
+            tagId = existingTag.id;
+          } else {
+            const { data: newTag, error: tagError } = await supabase
+              .from("tags")
+              .insert({
+                name: tag.name,
+                type: tag.type,
+                deadline: tag.deadline?.toISOString(),
+              })
+              .select()
+              .single();
+
+            if (tagError) throw tagError;
+            tagId = newTag.id;
+          }
         }
 
-        const { error: itemTagError } = await supabase
+        const { error: linkError } = await supabase
           .from("item_tags")
           .insert({
-            item_id: itemData.id,
+            item_id: newItem.id,
             tag_id: tagId,
           });
 
-        if (itemTagError) throw itemTagError;
+        if (linkError) throw linkError;
       }
 
-      await fetchItems();
-      
-      toast({
-        title: "Item added",
-        description: "Your item has been saved successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error adding item",
-        description: error.message,
-        variant: "destructive",
-      });
+      await loadItems();
+      toast.success("Item added");
+    } catch (error) {
+      console.error("Error adding item:", error);
+      toast.error("Failed to add item");
     }
   };
 
-  return { items, loading, addItem };
+  return { items, isLoading, addItem };
 }
