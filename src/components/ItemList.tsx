@@ -119,10 +119,23 @@ export function ItemList({
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-base font-medium mb-2">
-                      {isUrl(item.title) ? <a href={item.title} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+                      {item.type === "void" && item.url ? (
+                        <a 
+                          href={item.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-blue-600 underline hover:text-blue-700"
+                        >
+                          {item.title}
+                        </a>
+                      ) : isUrl(item.title) ? (
+                        <a href={item.title} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
                           {item.title}
                           <ExternalLink className="w-4 h-4" />
-                        </a> : item.title}
+                        </a>
+                      ) : (
+                        item.title
+                      )}
                     </p>
                     
                     {/* Notes preview - first two lines */}
@@ -137,19 +150,6 @@ export function ItemList({
                       <p className="text-sm text-muted-foreground italic">
                         {item.status}
                       </p>
-                    )}
-
-                    {/* URL for void items */}
-                    {item.type === "void" && item.url && (
-                      <a 
-                        href={item.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="flex items-center gap-2 text-sm text-primary hover:underline"
-                      >
-                        {item.url}
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-2">
