@@ -151,15 +151,24 @@ export function ItemList({
                       )}>
                         {item.type === "void" && item.url ? (
                           <a 
-                            href={item.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="text-blue-600 underline hover:text-blue-700"
+                            href={item.url}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              window.open(item.url, '_blank', 'noopener,noreferrer');
+                            }}
+                            className="text-blue-600 underline hover:text-blue-700 cursor-pointer"
                           >
                             {item.title}
                           </a>
                         ) : isUrl(item.title) ? (
-                          <a href={item.title} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+                          <a 
+                            href={item.title}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              window.open(item.title, '_blank', 'noopener,noreferrer');
+                            }}
+                            className="flex items-center gap-2 text-primary hover:underline cursor-pointer"
+                          >
                             {item.title}
                             <ExternalLink className="w-4 h-4" />
                           </a>
