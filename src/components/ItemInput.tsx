@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,11 @@ export function ItemInput({ onAddItem, existingTags, currentType }: ItemInputPro
   const [selectedType, setSelectedType] = useState<"fire" | "water" | "air" | "void">(currentType);
   const [deadline, setDeadline] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
+
+  // Sync selectedType with currentType when the filter changes
+  useEffect(() => {
+    setSelectedType(currentType);
+  }, [currentType]);
 
   // Generate time options in 15-minute intervals
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
