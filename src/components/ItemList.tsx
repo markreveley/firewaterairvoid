@@ -126,7 +126,7 @@ export function ItemList({
                     
                     {/* Notes preview - first two lines */}
                     {item.notes && (
-                      <p className="text-sm text-muted-foreground whitespace-pre-line line-clamp-2">
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">
                         {truncateNotes(item.notes)}
                       </p>
                     )}
@@ -134,7 +134,7 @@ export function ItemList({
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => navigate(`/item/${item.id}`)}
+                        onClick={() => navigate(`/item/new?title=${encodeURIComponent(item.title)}`)}
                         className="text-muted-foreground hover:text-foreground transition-colors"
                         aria-label="View details"
                       >
