@@ -17,7 +17,7 @@ interface Tag {
 interface Item {
   id: string;
   title: string;
-  type: "fire" | "water" | "void";
+  type: "fire" | "water" | "air" | "void";
   notes?: string;
   status?: string;
   tags: Tag[];
@@ -27,10 +27,10 @@ interface Item {
 
 interface ItemListProps {
   items: Item[];
-  type: "fire" | "water" | "void";
+  type: "fire" | "water" | "air" | "void";
   selectedTagFilter?: string;
   onDeleteItem: (itemId: string) => void;
-  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; type?: "fire" | "water" | "void" }) => void;
+  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; type?: "fire" | "water" | "air" | "void" }) => void;
 }
 export function ItemList({
   items,
@@ -80,7 +80,7 @@ export function ItemList({
     }
   };
 
-  const saveDeadline = (itemId: string, currentType: "fire" | "water" | "void") => {
+  const saveDeadline = (itemId: string, currentType: "fire" | "water" | "air" | "void") => {
     if (editDeadline && editTime) {
       const [hours, minutes] = editTime.split(':').map(Number);
       const finalDeadline = set(editDeadline, { hours, minutes, seconds: 0, milliseconds: 0 });

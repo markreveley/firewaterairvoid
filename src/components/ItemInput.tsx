@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, MoreHorizontal } from "lucide-react";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, MoreHorizontal, Wind } from "lucide-react";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ interface Tag {
 }
 
 interface ItemInputProps {
-  onAddItem: (title: string, type: "fire" | "water" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
+  onAddItem: (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
   existingTags: Tag[];
 }
 
@@ -25,7 +25,7 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [selectedType, setSelectedType] = useState<"fire" | "water" | "void">("void");
+  const [selectedType, setSelectedType] = useState<"fire" | "water" | "air" | "void">("void");
   const [deadline, setDeadline] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
 
@@ -98,11 +98,13 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
                 "rounded-full shrink-0",
                 selectedType === "fire" && "bg-fire-light text-fire-dark border-fire-secondary",
                 selectedType === "water" && "bg-water-light text-water-dark border-water-secondary",
+                selectedType === "air" && "bg-air-light text-air-dark border-air-secondary",
                 selectedType === "void" && "bg-void-light text-void-dark border-void-secondary"
               )}
             >
               {selectedType === "fire" && <Flame className="w-4 h-4" />}
               {selectedType === "water" && <Droplet className="w-4 h-4" />}
+              {selectedType === "air" && <Wind className="w-4 h-4" />}
               {selectedType === "void" && <Circle className="w-4 h-4" />}
             </Button>
           </PopoverTrigger>
@@ -125,6 +127,15 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
               >
                 <Droplet className="w-4 h-4 mr-2" />
                 Water
+              </Button>
+              <Button
+                type="button"
+                variant={selectedType === "air" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setSelectedType("air")}
+              >
+                <Wind className="w-4 h-4 mr-2" />
+                Air
               </Button>
               <Button
                 type="button"

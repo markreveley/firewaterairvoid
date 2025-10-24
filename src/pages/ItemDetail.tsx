@@ -8,7 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft } from "lucide-react";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind } from "lucide-react";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -18,12 +18,12 @@ interface Tag {
 }
 
 interface ItemDetailProps {
-  onAddItem: (title: string, type: "fire" | "water" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
+  onAddItem: (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
   existingTags: Tag[];
   existingItem?: {
     id: string;
     title: string;
-    type: "fire" | "water" | "void";
+    type: "fire" | "water" | "air" | "void";
     tags: Tag[];
     deadline?: Date;
     notes?: string;
@@ -39,7 +39,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
   const [title, setTitle] = useState(initialTitle);
   const [notes, setNotes] = useState(existingItem?.notes || "");
   const [status, setStatus] = useState(existingItem?.status || "");
-  const [itemType, setItemType] = useState<"fire" | "water" | "void">(existingItem?.type || "fire");
+  const [itemType, setItemType] = useState<"fire" | "water" | "air" | "void">(existingItem?.type || "fire");
   const [selectedTags, setSelectedTags] = useState<Tag[]>(existingItem?.tags || []);
   const [deadline, setDeadline] = useState<Date | undefined>(existingItem?.deadline);
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
@@ -119,7 +119,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
 
             <div>
               <label className="text-sm font-medium mb-2 block">Type</label>
-              <Select value={itemType} onValueChange={(value: "fire" | "water" | "void") => setItemType(value)}>
+              <Select value={itemType} onValueChange={(value: "fire" | "water" | "air" | "void") => setItemType(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -127,19 +127,25 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                   <SelectItem value="fire">
                     <div className="flex items-center gap-2">
                       <Flame className="w-4 h-4 text-fire-primary" />
-                      Fire (Action Items)
+                      Fire (Actions)
                     </div>
                   </SelectItem>
                   <SelectItem value="water">
                     <div className="flex items-center gap-2">
                       <Droplet className="w-4 h-4 text-water-primary" />
-                      Water (Intentions/Dreams)
+                      Water (Intentions)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="air">
+                    <div className="flex items-center gap-2">
+                      <Wind className="w-4 h-4 text-air-primary" />
+                      Air (Analysis)
                     </div>
                   </SelectItem>
                   <SelectItem value="void">
                     <div className="flex items-center gap-2">
                       <Circle className="w-4 h-4 text-black dark:text-white" />
-                      Void (Intentions/Goals)
+                      Void (Web URLs)
                     </div>
                   </SelectItem>
                 </SelectContent>

@@ -27,7 +27,7 @@ export default function ItemDetailPage() {
 
   const handleAddItem = async (
     title: string,
-    type: "fire" | "water" | "void",
+    type: "fire" | "water" | "air" | "void",
     tags: Array<{ id: string; name: string }>,
     deadline?: Date,
     notes?: string,

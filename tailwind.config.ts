@@ -61,6 +61,13 @@ export default {
           light: "hsl(var(--water-light))",
           dark: "hsl(var(--water-dark))",
         },
+        air: {
+          primary: "hsl(var(--air-primary))",
+          secondary: "hsl(var(--air-secondary))",
+          accent: "hsl(var(--air-accent))",
+          light: "hsl(var(--air-light))",
+          dark: "hsl(var(--air-dark))",
+        },
         void: {
           primary: "hsl(var(--void-primary))",
           secondary: "hsl(var(--void-secondary))",

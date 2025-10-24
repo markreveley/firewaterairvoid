@@ -9,7 +9,7 @@ interface Tag {
 
 interface TagFilterProps {
   tags: Tag[];
-  type: "fire" | "water" | "void";
+  type: "fire" | "water" | "air" | "void";
   selectedTag?: string;
   onSelectTag: (tagId: string | undefined) => void;
 }

@@ -14,8 +14,8 @@ interface Tag {
 const Index = () => {
   const { items, isLoading, addItem, deleteItem, updateItem } = useItems();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialType = (searchParams.get("type") as "fire" | "water" | "void") || "fire";
-  const [activeType, setActiveType] = useState<"fire" | "water" | "void">(initialType);
+  const initialType = (searchParams.get("type") as "fire" | "water" | "air" | "void") || "fire";
+  const [activeType, setActiveType] = useState<"fire" | "water" | "air" | "void">(initialType);
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
 
   useEffect(() => {

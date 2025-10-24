@@ -52,6 +52,13 @@ All colors MUST be HSL.
     --water-light: 190 100% 95%;
     --water-dark: 200 70% 35%;
 
+    /* Air theme colors */
+    --air-primary: 270 70% 60%;
+    --air-secondary: 260 65% 55%;
+    --air-accent: 280 75% 65%;
+    --air-light: 270 60% 95%;
+    --air-dark: 275 60% 40%;
+
     /* Void theme colors */
     --void-primary: 0 0% 95%;
     --void-secondary: 0 0% 90%;
@@ -106,6 +113,13 @@ All colors MUST be HSL.
     --water-accent: 170 90% 50%;
     --water-light: 190 60% 25%;
     --water-dark: 200 75% 40%;
+
+    /* Air theme colors - adjusted for dark */
+    --air-primary: 270 75% 65%;
+    --air-secondary: 260 70% 60%;
+    --air-accent: 280 80% 70%;
+    --air-light: 270 50% 30%;
+    --air-dark: 275 65% 50%;
 
     /* Void theme colors - adjusted for dark */
     --void-primary: 0 0% 85%;
