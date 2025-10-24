@@ -25,7 +25,7 @@ const Index = () => {
   }, [] as Tag[]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-zen-sand to-background">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-12 space-y-12">
         <header className="text-center space-y-2">
           
