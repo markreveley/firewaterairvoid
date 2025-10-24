@@ -129,7 +129,7 @@ export default function ItemDetail({ onAddItem, existingTags }: ItemDetailProps)
                   </SelectItem>
                   <SelectItem value="void">
                     <div className="flex items-center gap-2">
-                      <Circle className="w-4 h-4 text-void-primary" />
+                      <Circle className="w-4 h-4 text-black dark:text-white" />
                       Void (Intentions/Goals)
                     </div>
                   </SelectItem>

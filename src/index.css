@@ -56,8 +56,8 @@ All colors MUST be HSL.
     --void-primary: 0 0% 95%;
     --void-secondary: 0 0% 90%;
     --void-accent: 0 0% 85%;
-    --void-light: 0 0% 98%;
-    --void-dark: 0 0% 20%;
+    --void-light: 0 0% 100%;
+    --void-dark: 240 5% 50%;
 
     /* Zen neutral */
     --zen-stone: 40 8% 75%;
