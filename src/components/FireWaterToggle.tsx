@@ -38,8 +38,8 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
         className={cn(
           "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
           activeType === "void"
-            ? "bg-void-primary text-white shadow-lg scale-105"
-            : "text-muted-foreground hover:text-void-primary"
+            ? "bg-white text-black shadow-lg scale-105"
+            : "text-muted-foreground hover:text-black"
         )}
       >
         <Circle className={cn("w-5 h-5", activeType === "void" && "animate-pulse")} />
