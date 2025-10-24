@@ -29,10 +29,10 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
   const [newTagType, setNewTagType] = useState<"fire" | "water">("water");
   const [newTagDeadline, setNewTagDeadline] = useState<Date>();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (content.trim()) {
-      onAddItem(content, selectedTags);
+      await onAddItem(content, selectedTags);
       setContent("");
       setSelectedTags([]);
     }
