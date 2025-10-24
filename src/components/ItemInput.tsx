@@ -78,6 +78,16 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
           className="flex-1 text-lg py-6 px-6 rounded-2xl border-2"
         />
 
+        <Button
+          type="submit"
+          variant="white"
+          className="rounded-xl px-8 py-6 text-base shrink-0"
+        >
+          Add Item
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-2 px-2">
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -165,14 +175,6 @@ export function ItemInput({ onAddItem, existingTags }: ItemInputProps) {
           onClick={handleMoreDetails}
         >
           <MoreHorizontal className="w-4 h-4" />
-        </Button>
-
-        <Button
-          type="submit"
-          variant="white"
-          className="rounded-xl px-8 py-6 text-base shrink-0"
-        >
-          Add Item
         </Button>
       </div>
 
