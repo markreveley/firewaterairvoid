@@ -26,7 +26,8 @@ export function ItemList({
   selectedTagFilter
 }: ItemListProps) {
   const filteredItems = items.filter(item => {
-    const hasTypeTag = item.tags.some(tag => tag.type === type);
+    // Show items without tags OR items with matching type tags
+    const hasTypeTag = item.tags.length === 0 || item.tags.some(tag => tag.type === type);
     if (!hasTypeTag) return false;
     if (selectedTagFilter) {
       return item.tags.some(tag => tag.id === selectedTagFilter);
