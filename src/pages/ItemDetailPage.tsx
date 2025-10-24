@@ -31,7 +31,8 @@ export default function ItemDetailPage() {
     tags: Array<{ id: string; name: string }>,
     deadline?: Date,
     notes?: string,
-    status?: string
+    status?: string,
+    url?: string
   ) => {
     if (existingItem) {
       // Edit mode - update existing item
@@ -41,11 +42,12 @@ export default function ItemDetailPage() {
         tags, 
         deadline: deadline || null, 
         notes, 
-        status 
+        status,
+        url
       });
     } else {
       // Create mode - add new item
-      await addItem(title, type, tags, deadline, notes, status);
+      await addItem(title, type, tags, deadline, notes, status, url);
     }
     navigate(-1);
   };

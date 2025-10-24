@@ -18,7 +18,7 @@ interface Tag {
 }
 
 interface ItemDetailProps {
-  onAddItem: (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => void;
+  onAddItem: (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => void;
   existingTags: Tag[];
   existingItem?: {
     id: string;
@@ -28,6 +28,7 @@ interface ItemDetailProps {
     deadline?: Date;
     notes?: string;
     status?: string;
+    url?: string;
   } | null;
 }
 
@@ -39,6 +40,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
   const [title, setTitle] = useState(initialTitle);
   const [notes, setNotes] = useState(existingItem?.notes || "");
   const [status, setStatus] = useState(existingItem?.status || "");
+  const [url, setUrl] = useState(existingItem?.url || "");
   const [itemType, setItemType] = useState<"fire" | "water" | "air" | "void">(existingItem?.type || "fire");
   const [selectedTags, setSelectedTags] = useState<Tag[]>(existingItem?.tags || []);
   const [deadline, setDeadline] = useState<Date | undefined>(existingItem?.deadline);
@@ -67,7 +69,8 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
         selectedTags,
         itemType === "fire" ? finalDeadline : undefined,
         notes.trim() || undefined,
-        status.trim() || undefined
+        itemType === "fire" ? (status.trim() || undefined) : undefined,
+        itemType === "void" ? (url.trim() || undefined) : undefined
       );
       // navigation handled in parent
     }
@@ -152,12 +155,24 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
               </Select>
             </div>
 
-            <Input
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              placeholder="Add status (optional)..."
-              className="text-base py-4 px-6 rounded-xl"
-            />
+            {itemType === "fire" && (
+              <Input
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                placeholder="Add status (optional)..."
+                className="text-base py-4 px-6 rounded-xl"
+              />
+            )}
+
+            {itemType === "void" && (
+              <Input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Add URL..."
+                className="text-base py-4 px-6 rounded-xl"
+                type="url"
+              />
+            )}
 
             {itemType === "fire" && (
               <div>

@@ -20,6 +20,7 @@ interface Item {
   type: "fire" | "water" | "air" | "void";
   notes?: string;
   status?: string;
+  url?: string;
   tags: Tag[];
   createdAt: Date;
   deadline?: Date;
@@ -30,7 +31,7 @@ interface ItemListProps {
   type: "fire" | "water" | "air" | "void";
   selectedTagFilter?: string;
   onDeleteItem: (itemId: string) => void;
-  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; type?: "fire" | "water" | "air" | "void" }) => void;
+  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" }) => void;
 }
 export function ItemList({
   items,
@@ -113,7 +114,7 @@ export function ItemList({
       const hasFireTag = item.type === "fire";
       const isEditingThisDeadline = editingDeadlineId === item.id;
       
-      return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", type === "void" && "border-l-4 border-l-void-primary", isOverdue && "bg-fire-light/50")}>
+      return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", type === "air" && "border-l-4 border-l-air-primary", type === "void" && "border-l-4 border-l-void-primary", isOverdue && "bg-fire-light/50")}>
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
@@ -129,6 +130,26 @@ export function ItemList({
                       <p className="text-sm text-muted-foreground whitespace-pre-line">
                         {truncateNotes(item.notes)}
                       </p>
+                    )}
+
+                    {/* Status for fire items */}
+                    {item.type === "fire" && item.status && (
+                      <p className="text-sm text-muted-foreground italic">
+                        {item.status}
+                      </p>
+                    )}
+
+                    {/* URL for void items */}
+                    {item.type === "void" && item.url && (
+                      <a 
+                        href={item.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center gap-2 text-sm text-primary hover:underline"
+                      >
+                        {item.url}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-2">

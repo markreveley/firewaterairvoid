@@ -13,6 +13,7 @@ interface Item {
   type: "fire" | "water" | "air" | "void";
   notes?: string;
   status?: string;
+  url?: string;
   tags: Tag[];
   createdAt: Date;
   deadline?: Date;
@@ -51,6 +52,7 @@ export function useItems() {
           type: item.type as "fire" | "water" | "air" | "void",
           notes: item.notes || undefined,
           status: item.status || undefined,
+          url: item.url || undefined,
           tags: itemTags,
           createdAt: new Date(item.created_at),
           deadline: item.deadline ? new Date(item.deadline) : undefined,
@@ -70,7 +72,7 @@ export function useItems() {
     loadItems();
   }, []);
 
-  const addItem = async (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string) => {
+  const addItem = async (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
@@ -79,6 +81,7 @@ export function useItems() {
           type,
           notes: notes || null,
           status: status || null,
+          url: url || null,
           deadline: deadline?.toISOString()
         })
         .select()
@@ -155,6 +158,7 @@ export function useItems() {
       tags?: Tag[];
       notes?: string;
       status?: string;
+      url?: string;
       type?: "fire" | "water" | "air" | "void";
     }
   ) => {
@@ -172,6 +176,9 @@ export function useItems() {
       }
       if ("status" in updates) {
         itemUpdates.status = updates.status || null;
+      }
+      if ("url" in updates) {
+        itemUpdates.url = updates.url || null;
       }
       if ("type" in updates) {
         itemUpdates.type = updates.type;
