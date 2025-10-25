@@ -71,7 +71,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
         itemType === "fire" ? finalDeadline : undefined,
         notes.trim() || undefined,
         itemType === "fire" ? (status.trim() || "To Do") : undefined,
-        itemType === "void" ? (url.trim() || undefined) : undefined
+        (itemType === "void" || itemType === "air") ? (url.trim() || undefined) : undefined
       );
       // navigation handled in parent
     }
@@ -187,6 +187,16 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="Add URL..."
+                className="text-base py-4 px-6 rounded-xl"
+                type="url"
+              />
+            )}
+
+            {itemType === "air" && (
+              <Input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Add URL (optional)..."
                 className="text-base py-4 px-6 rounded-xl"
                 type="url"
               />

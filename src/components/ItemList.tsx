@@ -149,7 +149,7 @@ export function ItemList({
                         "text-base font-medium mb-2",
                         item.type === "fire" && item.status === "Completed" && "line-through text-muted-foreground"
                       )}>
-                        {item.type === "void" && item.url ? (
+                        {(item.type === "void" || item.type === "air") && item.url ? (
                           <a 
                             href={item.url}
                             onClick={(e) => {
