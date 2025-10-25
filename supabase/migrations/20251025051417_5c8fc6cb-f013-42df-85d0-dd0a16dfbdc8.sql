@@ -1,0 +1,3 @@
+-- Add 'earth' type to the items table constraint
+ALTER TABLE public.items DROP CONSTRAINT IF EXISTS items_type_check;
+ALTER TABLE public.items ADD CONSTRAINT items_type_check CHECK (type IN ('fire', 'water', 'air', 'void', 'earth'));
