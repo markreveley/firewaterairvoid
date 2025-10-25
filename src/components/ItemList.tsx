@@ -232,11 +232,11 @@ export function ItemList({
 
                     {/* Children (backlinks) */}
                     {item.children && item.children.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
+                      <div className="mt-2 space-y-1">
                         {item.children.map((child) => (
                           <div
                             key={child.id}
-                            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/50 text-xs text-muted-foreground cursor-pointer hover:bg-muted hover:text-foreground transition-colors"
+                            className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(`/item/edit?id=${child.id}&type=${child.type}`);
@@ -244,7 +244,7 @@ export function ItemList({
                           >
                             <ArrowDown className="w-3 h-3" />
                             {getTypeIcon(child.type)}
-                            <span className="truncate max-w-[150px]">{child.title}</span>
+                            <span className="truncate">{child.title}</span>
                           </div>
                         ))}
                       </div>
