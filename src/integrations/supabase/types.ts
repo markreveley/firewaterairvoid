@@ -50,7 +50,6 @@ export type Database = {
           deadline: string | null
           id: string
           notes: string | null
-          parent_id: string | null
           status: string | null
           title: string
           type: string
@@ -61,7 +60,6 @@ export type Database = {
           deadline?: string | null
           id?: string
           notes?: string | null
-          parent_id?: string | null
           status?: string | null
           title: string
           type?: string
@@ -72,21 +70,12 @@ export type Database = {
           deadline?: string | null
           id?: string
           notes?: string | null
-          parent_id?: string | null
           status?: string | null
           title?: string
           type?: string
           url?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "items_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       tags: {
         Row: {

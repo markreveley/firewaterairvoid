@@ -24,7 +24,6 @@ interface Item {
   tags: Tag[];
   createdAt: Date;
   deadline?: Date;
-  parent_id?: string;
 }
 
 interface ItemListProps {
@@ -160,16 +159,11 @@ export function ItemList({
                       </button>
                     )}
                     
-                     <div className="flex-1">
+                    <div className="flex-1">
                       <p className={cn(
                         "text-base font-medium mb-2",
                         item.type === "fire" && item.status === "Completed" && "line-through text-muted-foreground"
                       )}>
-                        {item.parent_id && (
-                          <span className="text-muted-foreground text-sm mr-2">
-                            ← {items.find(i => i.id === item.parent_id)?.title || "Unknown"}
-                          </span>
-                        )}
                         {(item.type === "void" || item.type === "air") && item.url ? (
                           <a 
                             href={item.url}

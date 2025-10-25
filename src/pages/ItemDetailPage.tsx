@@ -32,8 +32,7 @@ export default function ItemDetailPage() {
     deadline?: Date,
     notes?: string,
     status?: string,
-    url?: string,
-    parent_id?: string
+    url?: string
   ) => {
     if (existingItem) {
       // Edit mode - update existing item
@@ -44,15 +43,14 @@ export default function ItemDetailPage() {
         deadline: deadline || null, 
         notes, 
         status,
-        url,
-        parent_id: parent_id || null
+        url
       });
     } else {
       // Create mode - add new item
-      await addItem(title, type, tags, deadline, notes, status, url, parent_id);
+      await addItem(title, type, tags, deadline, notes, status, url);
     }
     navigate(`/?type=${type}`);
   };
 
-  return <ItemDetail onAddItem={handleAddItem} existingTags={existingTags} allItems={items} existingItem={existingItem} />;
+  return <ItemDetail onAddItem={handleAddItem} existingTags={existingTags} existingItem={existingItem} />;
 }
