@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, Droplet, Circle, ExternalLink, Wind, Check, ArrowUp, ArrowDown, Mountain, ChevronDown } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, Wind, Check, ArrowUp, ArrowDown, Mountain } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
@@ -121,6 +121,17 @@ export function ItemList({
         onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`)}
       >
               <div className="space-y-3">
+                {/* Top row: Tags centered */}
+                {item.tags.length > 0 && (
+                  <div className="flex justify-center">
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
+                          {tag.name}
+                        </Badge>)}
+                    </div>
+                  </div>
+                )}
+                
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1">
                     {/* Checkbox for fire items */}
@@ -216,38 +227,53 @@ export function ItemList({
                 
                 {/* Footer: Children (left) and Parent (right) */}
                 <div className="flex items-center justify-between pt-2">
-                  {/* Children dropdown */}
-                  <div>
+                  {/* Children - show first child, with ... button if more exist */}
+                  <div className="flex items-center gap-2">
                     {item.children && item.children.length > 0 && (
-                      <div className="relative" onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs"
-                          onClick={() => toggleChildren(item.id)}
+                      <>
+                        <div
+                          className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/item/edit?id=${item.children![0].id}&type=${item.children![0].type}`);
+                          }}
                         >
-                          Children ({item.children.length})
-                          <ChevronDown className={cn("w-3 h-3 ml-1 transition-transform", expandedChildren.has(item.id) && "rotate-180")} />
-                        </Button>
-                        {expandedChildren.has(item.id) && (
-                          <div className="absolute left-0 top-full mt-1 bg-popover border rounded-md shadow-lg p-2 space-y-1 min-w-[200px] z-10">
-                            {item.children.map((child) => (
-                              <div
-                                key={child.id}
-                                className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors p-1 hover:bg-accent rounded"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/item/edit?id=${child.id}&type=${child.type}`);
-                                }}
-                              >
-                                <ArrowDown className="w-3 h-3" />
-                                {getTypeIcon(child.type)}
-                                <span className="truncate">{child.title}</span>
+                          <ArrowDown className="w-3 h-3" />
+                          {getTypeIcon(item.children[0].type)}
+                          <span className="truncate">{item.children[0].title}</span>
+                        </div>
+                        
+                        {item.children.length > 1 && (
+                          <div className="relative" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0 hover:bg-accent"
+                              onClick={() => toggleChildren(item.id)}
+                            >
+                              ...
+                            </Button>
+                            {expandedChildren.has(item.id) && (
+                              <div className="absolute left-0 top-full mt-1 bg-popover border rounded-md shadow-lg p-2 space-y-1 min-w-[200px] z-10">
+                                {item.children.slice(1).map((child) => (
+                                  <div
+                                    key={child.id}
+                                    className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors p-1 hover:bg-accent rounded"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/item/edit?id=${child.id}&type=${child.type}`);
+                                    }}
+                                  >
+                                    <ArrowDown className="w-3 h-3" />
+                                    {getTypeIcon(child.type)}
+                                    <span className="truncate">{child.title}</span>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
+                            )}
                           </div>
                         )}
-                      </div>
+                      </>
                     )}
                   </div>
                   
