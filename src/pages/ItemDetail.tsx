@@ -206,13 +206,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               autoFocus={!initialTitle}
             />
 
-            {/* Show created date for existing items */}
-            {existingItem?.createdAt && (
-              <div className="text-sm text-muted-foreground text-center">
-                Created: {format(existingItem.createdAt, "MMM d, yyyy 'at' HH:mm")}
-              </div>
-            )}
-
             {/* Row 1: Type | Status (for Fire) OR Type | Parent Item (for non-Fire) */}
             <div className="flex gap-4 items-start">
               <div className="flex-1">
@@ -276,6 +269,17 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                     Parent Item (optional)
                   </label>
                   <div className="flex gap-2">
+                    {selectedParent && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-[52px] w-[52px] shrink-0"
+                        onClick={() => setSelectedParent(null)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
                     <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
                       <PopoverTrigger asChild>
                         <Button
@@ -286,7 +290,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         >
                           <Link2 className="w-4 h-4 mr-2 shrink-0" />
                           {selectedParent ? (
-                            <span className="truncate">{selectedParent.title}</span>
+                            <span className="truncate">{selectedParent.title.length > 30 ? selectedParent.title.substring(0, 30) + "..." : selectedParent.title}</span>
                           ) : (
                             <span className="text-muted-foreground">Select parent item...</span>
                           )}
@@ -332,17 +336,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                       </Command>
                     </PopoverContent>
                     </Popover>
-                    {selectedParent && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-[52px] w-[52px] shrink-0"
-                        onClick={() => setSelectedParent(null)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
                   </div>
                 </div>
               )}
@@ -357,6 +350,17 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                     Parent Item (optional)
                   </label>
                   <div className="flex gap-2">
+                    {selectedParent && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-[52px] w-[52px] shrink-0"
+                        onClick={() => setSelectedParent(null)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
                     <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
                       <PopoverTrigger asChild>
                         <Button
@@ -367,7 +371,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         >
                           <Link2 className="w-4 h-4 mr-2 shrink-0" />
                           {selectedParent ? (
-                            <span className="truncate">{selectedParent.title}</span>
+                            <span className="truncate">{selectedParent.title.length > 30 ? selectedParent.title.substring(0, 30) + "..." : selectedParent.title}</span>
                           ) : (
                             <span className="text-muted-foreground">Select parent item...</span>
                           )}
@@ -413,17 +417,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                       </Command>
                     </PopoverContent>
                     </Popover>
-                    {selectedParent && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-[52px] w-[52px] shrink-0"
-                        onClick={() => setSelectedParent(null)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
                   </div>
                 </div>
 
@@ -498,7 +491,14 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             )}
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Tags</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium">Tags</label>
+                {existingItem?.createdAt && (
+                  <div className="text-sm text-muted-foreground">
+                    Created: {format(existingItem.createdAt, "MMM d, yyyy 'at' HH:mm")}
+                  </div>
+                )}
+              </div>
               <div className="flex flex-wrap gap-2 items-center">
                 {selectedTags.map((tag) => (
                   <Badge
