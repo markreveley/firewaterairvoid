@@ -98,7 +98,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     }
   }, [existingItem?.parent_id, allItems]);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent, shouldNavigate: boolean = false) => {
     if (e) e.preventDefault();
     if (title.trim()) {
       let finalDeadline = deadline;
@@ -118,7 +118,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
         selectedParent?.id
       );
       setHasUnsavedChanges(false);
-      // navigation handled in parent
+      
+      if (shouldNavigate) {
+        navigate(`/?type=${itemType}`);
+      }
     }
   };
 
@@ -138,6 +141,12 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     if (!selectedTags.find((t) => t.id === tag.id)) {
       setSelectedTags([...selectedTags, tag]);
     }
+  };
+
+  const addProjectTag = (tag: Tag) => {
+    // Remove all existing project tags and add the new one
+    const nonProjectTags = selectedTags.filter(t => !FIRE_TAG_NAMES.includes(t.name as any));
+    setSelectedTags([...nonProjectTags, tag]);
   };
 
   const removeTag = (tagId: string) => {
@@ -215,11 +224,16 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
       <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12">
         <div className="flex items-center gap-3 mb-6">
           <Button
-            type={hasUnsavedChanges ? "submit" : "button"}
+            type="button"
             variant="ghost"
             className="font-medium"
-            form={hasUnsavedChanges ? "item-form" : undefined}
-            onClick={hasUnsavedChanges ? undefined : () => navigate(-1)}
+            onClick={async () => {
+              if (hasUnsavedChanges) {
+                await handleSubmit(undefined, true);
+              } else {
+                navigate(`/?type=${itemType}`);
+              }
+            }}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             {hasUnsavedChanges ? "Save" : "Back"}
@@ -229,7 +243,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             <Button
               type="button"
               variant="ghost"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(`/?type=${itemType}`)}
             >
               Cancel
             </Button>
@@ -434,9 +448,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                                   <span>Edit tags</span>
                                 </CommandItem>
                               </CommandGroup>
-                              <CommandGroup heading="Project Tags">
+                               <CommandGroup heading="Project Tags">
                                 {waterProjectTags.map((tag) => (
-                                  <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                                  <CommandItem key={tag.id} onSelect={() => addProjectTag(tag)}>
                                     <span>{tag.name}</span>
                                   </CommandItem>
                                 ))}
@@ -738,8 +752,8 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             <div />
           )}
           <Button
-            type="submit"
-            form="item-form"
+            type="button"
+            onClick={() => handleSubmit(undefined, false)}
             disabled={!hasUnsavedChanges}
           >
             Save

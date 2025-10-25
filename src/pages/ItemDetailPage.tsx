@@ -48,7 +48,7 @@ export default function ItemDetailPage() {
       // Create mode - add new item
       await addItem(title, type, tags, deadline, notes, status, url, parent_id);
     }
-    navigate(`/?type=${type}`);
+    // Navigation now handled by ItemDetail component
   };
 
   return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={items} onDeleteItem={deleteItem} />;
