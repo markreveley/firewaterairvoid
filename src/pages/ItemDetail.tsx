@@ -251,12 +251,15 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               {itemType === "fire" ? (
                 <div className="flex-1">
                   <label className="text-sm font-medium mb-2 block">Status</label>
-                  <Input
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    placeholder="To Do / Completed..."
-                    className="text-base py-4 px-6 rounded-xl"
-                  />
+                  <Select value={status || "To Do"} onValueChange={setStatus}>
+                    <SelectTrigger className="w-full h-[52px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="To Do">To Do</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               ) : (
                 <div className="flex-1">
@@ -264,22 +267,23 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                     <Link2 className="w-4 h-4" />
                     Parent Item (optional)
                   </label>
-                  <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        role="combobox"
-                        className="w-full justify-start text-left font-normal h-[52px]"
-                      >
-                        <Link2 className="w-4 h-4 mr-2 shrink-0" />
-                        {selectedParent ? (
-                          <span className="truncate">{selectedParent.title}</span>
-                        ) : (
-                          <span className="text-muted-foreground">Select parent item...</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
+                  <div className="flex gap-2">
+                    <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          role="combobox"
+                          className="flex-1 justify-start text-left font-normal h-[52px]"
+                        >
+                          <Link2 className="w-4 h-4 mr-2 shrink-0" />
+                          {selectedParent ? (
+                            <span className="truncate">{selectedParent.title}</span>
+                          ) : (
+                            <span className="text-muted-foreground">Select parent item...</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0" align="start">
                       <Command>
                         <CommandInput placeholder="Search items..." />
@@ -319,7 +323,19 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         </CommandList>
                       </Command>
                     </PopoverContent>
-                  </Popover>
+                    </Popover>
+                    {selectedParent && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-[52px] w-[52px] shrink-0"
+                        onClick={() => setSelectedParent(null)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -332,22 +348,23 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                     <Link2 className="w-4 h-4" />
                     Parent Item (optional)
                   </label>
-                  <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        role="combobox"
-                        className="w-full justify-start text-left font-normal h-[52px]"
-                      >
-                        <Link2 className="w-4 h-4 mr-2 shrink-0" />
-                        {selectedParent ? (
-                          <span className="truncate">{selectedParent.title}</span>
-                        ) : (
-                          <span className="text-muted-foreground">Select parent item...</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
+                  <div className="flex gap-2">
+                    <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          role="combobox"
+                          className="flex-1 justify-start text-left font-normal h-[52px]"
+                        >
+                          <Link2 className="w-4 h-4 mr-2 shrink-0" />
+                          {selectedParent ? (
+                            <span className="truncate">{selectedParent.title}</span>
+                          ) : (
+                            <span className="text-muted-foreground">Select parent item...</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0" align="start">
                       <Command>
                         <CommandInput placeholder="Search items..." />
@@ -387,25 +404,38 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         </CommandList>
                       </Command>
                     </PopoverContent>
-                  </Popover>
+                    </Popover>
+                    {selectedParent && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-[52px] w-[52px] shrink-0"
+                        onClick={() => setSelectedParent(null)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex-1">
                   <label className="text-sm font-medium mb-2 block">Deadline</label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start h-[52px]",
-                          deadline && "bg-fire-light text-fire-dark border-fire-secondary"
-                        )}
-                      >
-                        <CalendarIcon className="w-4 h-4 mr-2" />
-                        {deadline ? format(deadline, "MMM d, yyyy") : "Set Deadline"}
-                      </Button>
-                    </PopoverTrigger>
+                  <div className="flex gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={cn(
+                            "flex-1 justify-start h-[52px]",
+                            deadline && "bg-fire-light text-fire-dark border-fire-secondary"
+                          )}
+                        >
+                          <CalendarIcon className="w-4 h-4 mr-2" />
+                          {deadline ? format(deadline, "MMM d, yyyy") : "Set Deadline"}
+                        </Button>
+                      </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
@@ -413,28 +443,35 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         onSelect={setDeadline}
                         initialFocus
                       />
-                      {deadline && (
-                        <div className="p-3 border-t">
-                          <label className="text-sm font-medium mb-2 flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            Time
-                          </label>
-                          <Select value={selectedTime} onValueChange={setSelectedTime}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-60">
-                              {timeOptions.map((time) => (
-                                <SelectItem key={time} value={time}>
-                                  {time}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
                     </PopoverContent>
-                  </Popover>
+                    </Popover>
+
+                    <Select value={selectedTime} onValueChange={setSelectedTime}>
+                      <SelectTrigger className="w-32 h-[52px]">
+                        <Clock className="w-4 h-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        {timeOptions.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {deadline && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-[52px] w-[52px] shrink-0"
+                        onClick={() => setDeadline(undefined)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

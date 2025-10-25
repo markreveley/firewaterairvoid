@@ -3,11 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Wind, Check, ArrowUp, ArrowDown, Mountain, ChevronDown } from "lucide-react";
-import { format, isPast, set } from "date-fns";
+import { Flame, Droplet, Circle, ExternalLink, Wind, Check, ArrowUp, ArrowDown, Mountain, ChevronDown } from "lucide-react";
+import { format, isPast } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
   id: string;
@@ -57,16 +54,6 @@ export function ItemList({
   onUpdateItem
 }: ItemListProps) {
   const navigate = useNavigate();
-  const [editingDeadlineId, setEditingDeadlineId] = useState<string | null>(null);
-  const [editDeadline, setEditDeadline] = useState<Date>();
-  const [editTime, setEditTime] = useState<string>("09:00");
-
-  // Generate time options in 15-minute intervals
-  const timeOptions = Array.from({ length: 96 }, (_, i) => {
-    const hours = Math.floor(i / 4);
-    const minutes = (i % 4) * 15;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  });
   const [expandedChildren, setExpandedChildren] = useState<Set<string>>(new Set());
 
   const toggleChildren = (itemId: string) => {
@@ -106,50 +93,21 @@ export function ItemList({
     }
   };
 
-  const startEditingDeadline = (item: Item) => {
-    setEditingDeadlineId(item.id);
-    setEditDeadline(item.deadline || new Date());
-    if (item.deadline) {
-      const hours = item.deadline.getHours().toString().padStart(2, '0');
-      const minutes = item.deadline.getMinutes().toString().padStart(2, '0');
-      setEditTime(`${hours}:${minutes}`);
-    }
-  };
-
-  const saveDeadline = (itemId: string, currentType: "fire" | "water" | "air" | "void" | "earth") => {
-    if (editDeadline && editTime) {
-      const [hours, minutes] = editTime.split(':').map(Number);
-      const finalDeadline = set(editDeadline, { hours, minutes, seconds: 0, milliseconds: 0 });
-      // Automatically set type to "fire" when adding a deadline
-      const updates: any = { deadline: finalDeadline };
-      if (currentType !== "fire") {
-        updates.type = "fire";
-      }
-      onUpdateItem(itemId, updates);
-    }
-    setEditingDeadlineId(null);
-  };
-
-  const deleteDeadline = (item: Item) => {
-    // Remove deadline
-    onUpdateItem(item.id, { deadline: null });
-  };
-
   const truncateNotes = (notes: string | undefined) => {
     if (!notes) return null;
     const lines = notes.split('\n');
     const firstTwoLines = lines.slice(0, 2).join('\n');
     return firstTwoLines;
   };
+
   return <div className="space-y-3">
       {filteredItems.length === 0 ? <div className="text-center py-12 text-muted-foreground">
           
         </div> : filteredItems.map(item => {
       const isOverdue = item.deadline && isPast(item.deadline);
       const hasFireTag = item.type === "fire";
-      const isEditingThisDeadline = editingDeadlineId === item.id;
       
-      return <Card 
+      return <Card
         key={item.id} 
         className={cn(
           "p-4 transition-all duration-300 hover:shadow-lg cursor-pointer", 
@@ -232,37 +190,12 @@ export function ItemList({
                     </div>
                   </div>
                   
-                  {/* Top right: Dates and deadline */}
                   <div className="flex flex-col items-end gap-1">
                     {/* For fire items with deadline - show deadline first, then created date */}
-                    {item.type === "fire" && item.deadline && !isEditingThisDeadline && (
-                      <div className="flex items-center gap-2">
-                        <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
-                          <Flame className="w-3 h-3" />
-                          {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            startEditingDeadline(item);
-                          }}
-                        >
-                          <Edit2 className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteDeadline(item);
-                          }}
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
+                    {item.type === "fire" && item.deadline && (
+                      <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
+                        <Flame className="w-3 h-3" />
+                        {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
                       </div>
                     )}
                     
@@ -276,65 +209,6 @@ export function ItemList({
                     {(!item.deadline || item.type !== "fire") && (
                       <div className="text-xs text-muted-foreground">
                         Created: {format(item.createdAt, "MMM d, yyyy")}
-                      </div>
-                    )}
-
-                    {isEditingThisDeadline && (
-                      <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 text-xs"
-                            >
-                              <CalendarIcon className="w-3 h-3 mr-1" />
-                              {editDeadline ? format(editDeadline, "MMM d, yyyy") : "Pick date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={editDeadline}
-                              onSelect={setEditDeadline}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <Select value={editTime} onValueChange={setEditTime}>
-                          <SelectTrigger className="w-24 h-7 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-60">
-                            {timeOptions.map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {time}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="h-7"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            saveDeadline(item.id, item.type);
-                          }}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingDeadlineId(null);
-                          }}
-                        >
-                          Cancel
-                        </Button>
                       </div>
                     )}
                   </div>
