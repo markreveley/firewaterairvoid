@@ -57,15 +57,6 @@ const Index = () => {
           <FireWaterToggle activeType={activeType} onToggle={setActiveType} />
         </div>
 
-        {activeType === "fire" && (
-          <div className="py-2">
-            <StatusFilter 
-              selectedStatus={selectedStatusFilter} 
-              onSelectStatus={setSelectedStatusFilter} 
-            />
-          </div>
-        )}
-
         <div className="flex justify-center py-4">
           <Button
             onClick={() => navigate(`/item/new?type=${activeType}`)}
@@ -76,6 +67,15 @@ const Index = () => {
             <Plus className="w-6 h-6" />
           </Button>
         </div>
+
+        {activeType === "fire" && (
+          <div className="py-2">
+            <StatusFilter 
+              selectedStatus={selectedStatusFilter} 
+              onSelectStatus={setSelectedStatusFilter} 
+            />
+          </div>
+        )}
 
         <div className="py-2">
           <TagFilter 
