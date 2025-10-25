@@ -145,16 +145,16 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                       Fire (Actions)
                     </div>
                   </SelectItem>
-                  <SelectItem value="earth">
-                    <div className="flex items-center gap-2">
-                      <Mountain className="w-4 h-4 text-earth-primary" />
-                      Earth (How to)
-                    </div>
-                  </SelectItem>
                   <SelectItem value="water">
                     <div className="flex items-center gap-2">
                       <Droplet className="w-4 h-4 text-water-primary" />
                       Water (Writing)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="earth">
+                    <div className="flex items-center gap-2">
+                      <Mountain className="w-4 h-4 text-earth-primary" />
+                      Earth (How to)
                     </div>
                   </SelectItem>
                   <SelectItem value="air">

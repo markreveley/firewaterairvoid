@@ -22,18 +22,6 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
         <span className="font-medium">Fire</span>
       </button>
       <button
-        onClick={() => onToggle("earth")}
-        className={cn(
-          "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
-          activeType === "earth"
-            ? "bg-earth-primary text-white shadow-lg scale-105"
-            : "text-muted-foreground hover:text-earth-primary"
-        )}
-      >
-        <Mountain className={cn("w-5 h-5", activeType === "earth" && "animate-pulse")} />
-        <span className="font-medium">Earth</span>
-      </button>
-      <button
         onClick={() => onToggle("water")}
         className={cn(
           "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
@@ -44,6 +32,18 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
       >
         <Droplet className={cn("w-5 h-5", activeType === "water" && "animate-pulse")} />
         <span className="font-medium">Water</span>
+      </button>
+      <button
+        onClick={() => onToggle("earth")}
+        className={cn(
+          "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
+          activeType === "earth"
+            ? "bg-earth-primary text-white shadow-lg scale-105"
+            : "text-muted-foreground hover:text-earth-primary"
+        )}
+      >
+        <Mountain className={cn("w-5 h-5", activeType === "earth" && "animate-pulse")} />
+        <span className="font-medium">Earth</span>
       </button>
       <button
         onClick={() => onToggle("air")}
