@@ -227,18 +227,51 @@ export function useItems(type?: "fire" | "water" | "air" | "void" | "earth", pag
 
   const deleteItem = async (itemId: string) => {
     try {
-      const { error } = await supabase
+      // Get the item data first
+      const { data: itemData, error: fetchError } = await supabase
+        .from("items")
+        .select("*")
+        .eq("id", itemId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Get the item's tags
+      const { data: itemTagsData } = await supabase
+        .from("item_tags")
+        .select("item_id, tag_id")
+        .eq("item_id", itemId);
+
+      // Insert into trashed_items table
+      const { error: trashError } = await supabase
+        .from("trashed_items")
+        .insert({
+          original_id: itemData.id,
+          title: itemData.title,
+          type: itemData.type,
+          notes: itemData.notes,
+          status: itemData.status,
+          url: itemData.url,
+          deadline: itemData.deadline,
+          parent_id: itemData.parent_id,
+          created_at: itemData.created_at,
+        });
+
+      if (trashError) throw trashError;
+
+      // Delete the item from items table (cascades to item_tags)
+      const { error: deleteError } = await supabase
         .from("items")
         .delete()
         .eq("id", itemId);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
 
       setItems([]);
       setOffset(0);
       setHasMore(true);
       await loadItems(true);
-      toast.success("Item deleted");
+      toast.success("Item moved to trash");
     } catch (error) {
       console.error("Error deleting item:", error);
       toast.error("Failed to delete item");

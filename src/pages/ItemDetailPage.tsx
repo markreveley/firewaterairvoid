@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function ItemDetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { addItem, updateItem, items, isLoading } = useItems();
+  const { addItem, updateItem, deleteItem, items, isLoading } = useItems();
   const [allTags, setAllTags] = useState<Array<{ id: string; name: string; parent_id?: string | null }>>([]);
 
   const itemId = searchParams.get("id");
@@ -69,5 +69,5 @@ export default function ItemDetailPage() {
     navigate(`/?type=${type}`);
   };
 
-  return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={items} />;
+  return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={items} onDeleteItem={deleteItem} />;
 }

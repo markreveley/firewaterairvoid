@@ -117,6 +117,48 @@ export type Database = {
           },
         ]
       }
+      trashed_items: {
+        Row: {
+          created_at: string
+          deadline: string | null
+          id: string
+          notes: string | null
+          original_id: string
+          parent_id: string | null
+          status: string | null
+          title: string
+          trashed_at: string
+          type: string
+          url: string | null
+        }
+        Insert: {
+          created_at: string
+          deadline?: string | null
+          id?: string
+          notes?: string | null
+          original_id: string
+          parent_id?: string | null
+          status?: string | null
+          title: string
+          trashed_at?: string
+          type: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          notes?: string | null
+          original_id?: string
+          parent_id?: string | null
+          status?: string | null
+          title?: string
+          trashed_at?: string
+          type?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

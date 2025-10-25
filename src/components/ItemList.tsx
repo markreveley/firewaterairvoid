@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, Wind, Check, ArrowUp, ArrowDown, Mountain } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Wind, Check, ArrowUp, ArrowDown, Mountain, ChevronDown } from "lucide-react";
 import { format, isPast, set } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
@@ -67,6 +67,20 @@ export function ItemList({
     const minutes = (i % 4) * 15;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   });
+  const [expandedChildren, setExpandedChildren] = useState<Set<string>>(new Set());
+
+  const toggleChildren = (itemId: string) => {
+    setExpandedChildren(prev => {
+      const next = new Set(prev);
+      if (next.has(itemId)) {
+        next.delete(itemId);
+      } else {
+        next.add(itemId);
+      }
+      return next;
+    });
+  };
+
   const filteredItems = items.filter(item => {
     // Fire view: only fire items
     // Water view: only water items
@@ -215,46 +229,13 @@ export function ItemList({
                       </p>
                     )}
 
-                    {/* Children (backlinks) */}
-                    {item.children && item.children.length > 0 && (
-                      <div className="mt-2 space-y-1">
-                        {item.children.map((child) => (
-                          <div
-                            key={child.id}
-                            className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/item/edit?id=${child.id}&type=${child.type}`);
-                            }}
-                          >
-                            <ArrowDown className="w-3 h-3" />
-                            {getTypeIcon(child.type)}
-                            <span className="truncate">{child.title}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
                     </div>
                   </div>
                   
-                  {/* Parent link - top right */}
-                  <div className="flex flex-col items-end gap-2">
-                    {item.parent && (
-                      <div 
-                        className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/item/edit?id=${item.parent!.id}&type=${item.parent!.type}`);
-                        }}
-                      >
-                        <ArrowUp className="w-3 h-3" />
-                        {getTypeIcon(item.parent.type)}
-                        <span className="truncate">{item.parent.title}</span>
-                      </div>
-                    )}
-                    
-                    {item.deadline && !isEditingThisDeadline && (
+                  {/* Top right: Dates and deadline */}
+                  <div className="flex flex-col items-end gap-1">
+                    {/* For fire items with deadline - show deadline first, then created date */}
+                    {item.type === "fire" && item.deadline && !isEditingThisDeadline && (
                       <div className="flex items-center gap-2">
                         <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
                           <Flame className="w-3 h-3" />
@@ -282,6 +263,19 @@ export function ItemList({
                         >
                           <X className="w-3 h-3" />
                         </Button>
+                      </div>
+                    )}
+                    
+                    {item.type === "fire" && item.deadline && (
+                      <div className="text-xs text-muted-foreground">
+                        Created: {format(item.createdAt, "MMM d, yyyy")}
+                      </div>
+                    )}
+                    
+                    {/* For all items without deadline or non-fire - show created date */}
+                    {(!item.deadline || item.type !== "fire") && (
+                      <div className="text-xs text-muted-foreground">
+                        Created: {format(item.createdAt, "MMM d, yyyy")}
                       </div>
                     )}
 
@@ -346,7 +340,7 @@ export function ItemList({
                   </div>
                 </div>
                 
-                {/* Footer: Tags (left) and Date + Trash button (right) */}
+                {/* Footer: Tags (left) and Parent/Children (right) */}
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex flex-wrap gap-2">
                     {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
@@ -354,19 +348,53 @@ export function ItemList({
                       </Badge>)}
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="text-xs text-muted-foreground">
-                      {format(item.createdAt, "MMM d, yyyy")}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteItem(item.id);
-                      }}
-                      className="text-muted-foreground hover:text-destructive transition-colors"
-                      aria-label="Delete item"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {/* Parent link */}
+                    {item.parent && (
+                      <div 
+                        className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/item/edit?id=${item.parent!.id}&type=${item.parent!.type}`);
+                        }}
+                      >
+                        <ArrowUp className="w-3 h-3" />
+                        {getTypeIcon(item.parent.type)}
+                        <span className="truncate">{item.parent.title}</span>
+                      </div>
+                    )}
+                    
+                    {/* Children dropdown */}
+                    {item.children && item.children.length > 0 && (
+                      <div className="relative" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs"
+                          onClick={() => toggleChildren(item.id)}
+                        >
+                          Children ({item.children.length})
+                          <ChevronDown className={cn("w-3 h-3 ml-1 transition-transform", expandedChildren.has(item.id) && "rotate-180")} />
+                        </Button>
+                        {expandedChildren.has(item.id) && (
+                          <div className="absolute right-0 top-full mt-1 bg-popover border rounded-md shadow-lg p-2 space-y-1 min-w-[200px] z-10">
+                            {item.children.map((child) => (
+                              <div
+                                key={child.id}
+                                className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors p-1 hover:bg-accent rounded"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/item/edit?id=${child.id}&type=${child.type}`);
+                                }}
+                              >
+                                <ArrowDown className="w-3 h-3" />
+                                {getTypeIcon(child.type)}
+                                <span className="truncate">{child.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

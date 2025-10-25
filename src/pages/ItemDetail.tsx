@@ -8,7 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Link2, Eye, FileText, ChevronRight } from "lucide-react";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Link2, Eye, FileText, ChevronRight, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -45,9 +45,10 @@ interface ItemDetailProps {
   existingTags: Tag[];
   existingItem?: Item | null;
   allItems: Item[];
+  onDeleteItem?: (itemId: string) => Promise<void>;
 }
 
-export default function ItemDetail({ onAddItem, existingTags, existingItem, allItems }: ItemDetailProps) {
+export default function ItemDetail({ onAddItem, existingTags, existingItem, allItems, onDeleteItem }: ItemDetailProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
@@ -640,6 +641,26 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             </div>
           </div>
         </form>
+        
+        {/* Delete button at bottom - only for existing items */}
+        {existingItem && onDeleteItem && (
+          <div className="max-w-4xl mx-auto mt-6 flex justify-end">
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={async () => {
+                if (confirm("Are you sure you want to move this item to trash?")) {
+                  await onDeleteItem(existingItem.id);
+                  navigate(-1);
+                }
+              }}
+              className="gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Move to Trash
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
