@@ -57,7 +57,7 @@ const Index = () => {
         </header>
 
         <div className="py-8">
-          <ItemInput onAddItem={handleAddItem} existingTags={allTags} currentType={activeType} />
+          <ItemInput currentType={activeType} />
         </div>
 
         <div className="py-4">

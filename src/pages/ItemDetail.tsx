@@ -36,12 +36,13 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
+  const typeParam = searchParams.get("type") as "fire" | "water" | "air" | "void" | "earth" | null;
 
   const [title, setTitle] = useState(initialTitle);
   const [notes, setNotes] = useState(existingItem?.notes || "");
   const [status, setStatus] = useState(existingItem?.status || "");
   const [url, setUrl] = useState(existingItem?.url || "");
-  const [itemType, setItemType] = useState<"fire" | "water" | "air" | "void" | "earth">(existingItem?.type || "fire");
+  const [itemType, setItemType] = useState<"fire" | "water" | "air" | "void" | "earth">(existingItem?.type || typeParam || "fire");
   const [selectedTags, setSelectedTags] = useState<Tag[]>(existingItem?.tags || []);
   const [deadline, setDeadline] = useState<Date | undefined>(existingItem?.deadline);
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
