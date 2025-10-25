@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal, Wind, Check } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal, Wind, Check, ArrowUp, ArrowDown, Mountain } from "lucide-react";
 import { format, isPast, set } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
@@ -17,23 +17,37 @@ interface Tag {
 interface Item {
   id: string;
   title: string;
-  type: "fire" | "water" | "air" | "void";
+  type: "fire" | "water" | "air" | "void" | "earth";
   notes?: string;
   status?: string;
   url?: string;
   tags: Tag[];
   createdAt: Date;
   deadline?: Date;
+  parent_id?: string;
+  parent?: { id: string; title: string; type: string };
+  children?: Array<{ id: string; title: string; type: string }>;
 }
 
 interface ItemListProps {
   items: Item[];
-  type: "fire" | "water" | "air" | "void";
+  type: "fire" | "water" | "air" | "void" | "earth";
   selectedTagFilter?: string;
   selectedStatusFilter?: "To Do" | "Completed";
   onDeleteItem: (itemId: string) => void;
-  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" }) => void;
+  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth"; parent_id?: string | null }) => void;
 }
+
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case "fire": return <Flame className="w-3 h-3" />;
+    case "water": return <Droplet className="w-3 h-3" />;
+    case "air": return <Wind className="w-3 h-3" />;
+    case "earth": return <Mountain className="w-3 h-3" />;
+    case "void": return <Circle className="w-3 h-3" />;
+    default: return null;
+  }
+};
 export function ItemList({
   items,
   type,
@@ -88,7 +102,7 @@ export function ItemList({
     }
   };
 
-  const saveDeadline = (itemId: string, currentType: "fire" | "water" | "air" | "void") => {
+  const saveDeadline = (itemId: string, currentType: "fire" | "water" | "air" | "void" | "earth") => {
     if (editDeadline && editTime) {
       const [hours, minutes] = editTime.split(':').map(Number);
       const finalDeadline = set(editDeadline, { hours, minutes, seconds: 0, milliseconds: 0 });
@@ -121,16 +135,31 @@ export function ItemList({
       const hasFireTag = item.type === "fire";
       const isEditingThisDeadline = editingDeadlineId === item.id;
       
-      return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", type === "air" && "border-l-4 border-l-air-primary", type === "void" && "border-l-4 border-l-void-primary", isOverdue && "bg-fire-light/50")}>
+      return <Card 
+        key={item.id} 
+        className={cn(
+          "p-4 transition-all duration-300 hover:shadow-lg cursor-pointer", 
+          type === "fire" && "border-l-4 border-l-fire-primary", 
+          type === "water" && "border-l-4 border-l-water-primary", 
+          type === "air" && "border-l-4 border-l-air-primary", 
+          type === "earth" && "border-l-4 border-l-earth-primary", 
+          type === "void" && "border-l-4 border-l-void-primary", 
+          isOverdue && "bg-fire-light/50"
+        )}
+        onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`)}
+      >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1">
                     {/* Checkbox for fire items */}
                     {item.type === "fire" && (
                       <button
-                        onClick={() => onUpdateItem(item.id, { 
-                          status: item.status === "Completed" ? "To Do" : "Completed" 
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUpdateItem(item.id, { 
+                            status: item.status === "Completed" ? "To Do" : "Completed" 
+                          });
+                        }}
                         className={cn(
                           "mt-1 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors shrink-0",
                           item.status === "Completed" 
@@ -145,15 +174,31 @@ export function ItemList({
                     )}
                     
                     <div className="flex-1">
+                      {/* Parent link */}
+                      {item.parent && (
+                        <div 
+                          className="flex items-center gap-1 text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/item/edit?id=${item.parent!.id}&type=${item.parent!.type}`);
+                          }}
+                        >
+                          <ArrowUp className="w-3 h-3" />
+                          {getTypeIcon(item.parent.type)}
+                          <span className="truncate">{item.parent.title}</span>
+                        </div>
+                      )}
+                      
                       <p className={cn(
                         "text-base font-medium mb-2",
                         item.type === "fire" && item.status === "Completed" && "line-through text-muted-foreground"
                       )}>
-                        {item.type === "void" && item.url ? (
+                        {(item.type === "void" || item.type === "air") && item.url ? (
                           <a 
                             href={item.url}
                             onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               window.open(`/redirect?to=${encodeURIComponent(item.url!)}`, '_blank', 'noopener,noreferrer');
                             }}
                             className="text-blue-600 underline hover:text-blue-700 cursor-pointer"
@@ -165,6 +210,7 @@ export function ItemList({
                             href={item.title}
                             onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               window.open(`/redirect?to=${encodeURIComponent(item.title)}`,'_blank','noopener,noreferrer');
                             }}
                             className="flex items-center gap-2 text-primary hover:underline cursor-pointer"
@@ -184,19 +230,45 @@ export function ItemList({
                       </p>
                     )}
 
+                    {/* Children (backlinks) */}
+                    {item.children && item.children.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {item.children.map((child) => (
+                          <div
+                            key={child.id}
+                            className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/item/edit?id=${child.id}&type=${child.type}`);
+                            }}
+                          >
+                            <ArrowDown className="w-3 h-3" />
+                            {getTypeIcon(child.type)}
+                            <span className="truncate">{child.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/item/edit?id=${item.id}&type=${type}`);
+                        }}
                         className="text-muted-foreground hover:text-foreground transition-colors"
                         aria-label="View details"
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => onDeleteItem(item.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteItem(item.id);
+                        }}
                         className="text-muted-foreground hover:text-destructive transition-colors"
                         aria-label="Delete item"
                       >
@@ -219,7 +291,10 @@ export function ItemList({
                           size="sm"
                           variant="ghost"
                           className="h-6 w-6 p-0"
-                          onClick={() => startEditingDeadline(item)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditingDeadline(item);
+                          }}
                         >
                           <Edit2 className="w-3 h-3" />
                         </Button>
@@ -227,7 +302,10 @@ export function ItemList({
                           size="sm"
                           variant="ghost"
                           className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                          onClick={() => deleteDeadline(item)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteDeadline(item);
+                          }}
                         >
                           <X className="w-3 h-3" />
                         </Button>
@@ -235,7 +313,7 @@ export function ItemList({
                     )}
 
                     {isEditingThisDeadline && (
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
@@ -272,7 +350,10 @@ export function ItemList({
                           size="sm"
                           variant="default"
                           className="h-7"
-                          onClick={() => saveDeadline(item.id, item.type)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            saveDeadline(item.id, item.type);
+                          }}
                         >
                           Save
                         </Button>
@@ -280,7 +361,10 @@ export function ItemList({
                           size="sm"
                           variant="ghost"
                           className="h-7"
-                          onClick={() => setEditingDeadlineId(null)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingDeadlineId(null);
+                          }}
                         >
                           Cancel
                         </Button>
