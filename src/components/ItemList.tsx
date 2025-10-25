@@ -214,30 +214,10 @@ export function ItemList({
                   </div>
                 </div>
                 
-                {/* Footer: Tags (left) and Parent/Children (right) */}
+                {/* Footer: Children (left) and Parent (right) */}
                 <div className="flex items-center justify-between pt-2">
-                  <div className="flex flex-wrap gap-2">
-                    {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
-                        {tag.name}
-                      </Badge>)}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {/* Parent link */}
-                    {item.parent && (
-                      <div 
-                        className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/item/edit?id=${item.parent!.id}&type=${item.parent!.type}`);
-                        }}
-                      >
-                        <ArrowUp className="w-3 h-3" />
-                        {getTypeIcon(item.parent.type)}
-                        <span className="truncate">{item.parent.title}</span>
-                      </div>
-                    )}
-                    
-                    {/* Children dropdown */}
+                  {/* Children dropdown */}
+                  <div>
                     {item.children && item.children.length > 0 && (
                       <div className="relative" onClick={(e) => e.stopPropagation()}>
                         <Button
@@ -250,7 +230,7 @@ export function ItemList({
                           <ChevronDown className={cn("w-3 h-3 ml-1 transition-transform", expandedChildren.has(item.id) && "rotate-180")} />
                         </Button>
                         {expandedChildren.has(item.id) && (
-                          <div className="absolute right-0 top-full mt-1 bg-popover border rounded-md shadow-lg p-2 space-y-1 min-w-[200px] z-10">
+                          <div className="absolute left-0 top-full mt-1 bg-popover border rounded-md shadow-lg p-2 space-y-1 min-w-[200px] z-10">
                             {item.children.map((child) => (
                               <div
                                 key={child.id}
@@ -267,6 +247,23 @@ export function ItemList({
                             ))}
                           </div>
                         )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Parent link */}
+                  <div>
+                    {item.parent && (
+                      <div 
+                        className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/item/edit?id=${item.parent!.id}&type=${item.parent!.type}`);
+                        }}
+                      >
+                        <ArrowUp className="w-3 h-3" />
+                        {getTypeIcon(item.parent.type)}
+                        <span className="truncate">{item.parent.title}</span>
                       </div>
                     )}
                   </div>
