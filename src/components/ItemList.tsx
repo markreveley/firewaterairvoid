@@ -205,7 +205,7 @@ export function ItemList({
                 {/* Footer: Children and Deadline (left) and Parent (right) */}
                 <div className="flex items-center justify-between pt-2">
                   {/* Bottom left: Children and Deadline for fire items */}
-                  <div className="flex flex-col items-start gap-1">
+                  <div className="flex flex-col items-start gap-1 ml-8">
                     {/* Deadline for fire items */}
                     {item.type === "fire" && item.deadline && (
                       <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
