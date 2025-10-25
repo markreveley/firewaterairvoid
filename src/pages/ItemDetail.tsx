@@ -99,7 +99,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
         itemType === "fire" ? finalDeadline : undefined,
         notes.trim() || undefined,
         itemType === "fire" ? (status.trim() || "To Do") : undefined,
-        (itemType === "void" || itemType === "air") ? (url.trim() || undefined) : undefined,
+        (itemType === "void" || itemType === "air" || itemType === "earth") ? (url.trim() || undefined) : undefined,
         selectedParent?.id
       );
       // navigation handled in parent
@@ -420,7 +420,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               </div>
             )}
 
-            {(itemType === "void" || itemType === "air") && (
+            {(itemType === "void" || itemType === "air" || itemType === "earth") && (
               <div>
                 <label className="text-sm font-medium mb-2 block">URL</label>
                 <Input

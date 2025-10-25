@@ -259,6 +259,9 @@ export function useItems(type?: "fire" | "water" | "air" | "void" | "earth", pag
     }
   ) => {
     try {
+      // Get the current item to check if type is changing
+      const currentItem = items.find(item => item.id === itemId);
+
       // Update the item fields if provided
       const itemUpdates: any = {};
       if ("title" in updates) {
@@ -278,18 +281,38 @@ export function useItems(type?: "fire" | "water" | "air" | "void" | "earth", pag
       }
       if ("type" in updates) {
         itemUpdates.type = updates.type;
+
+        // Clear type-specific fields only if type is actually changing
+        if (currentItem && currentItem.type !== updates.type) {
+          const newType = updates.type;
+
+          // Clear status and deadline if changing to non-Fire type
+          if (newType !== "fire") {
+            itemUpdates.status = null;
+            itemUpdates.deadline = null;
+          }
+
+          // Clear URL if changing to type that doesn't support it
+          if (newType !== "air" && newType !== "void" && newType !== "earth") {
+            itemUpdates.url = null;
+          }
+        }
       }
       if ("parent_id" in updates) {
         itemUpdates.parent_id = updates.parent_id || null;
       }
 
       if (Object.keys(itemUpdates).length > 0) {
+        console.log("Updating item with:", itemUpdates);
         const { error: itemError } = await supabase
           .from("items")
           .update(itemUpdates)
           .eq("id", itemId);
 
-        if (itemError) throw itemError;
+        if (itemError) {
+          console.error("Update error:", itemError);
+          throw itemError;
+        }
       }
 
       // Update tags if provided

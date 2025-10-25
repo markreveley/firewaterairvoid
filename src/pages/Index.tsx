@@ -7,7 +7,7 @@ import { StatusFilter } from "@/components/StatusFilter";
 import { useItems } from "@/hooks/useItems";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Plus, Search, User } from "lucide-react";
-import fireWaterLogo from "@/assets/firewater.png";
+import fireWaterLogo from "@/assets/firewater_logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -95,6 +95,7 @@ const Index = () => {
       <header className="border-b border-border">
         <div className="container mx-auto px-8 md:px-12 lg:px-16 py-4 flex items-center justify-between">
           <img src={fireWaterLogo} alt="Fire Water" className="h-12 w-auto" />
+          <FireWaterToggle activeType={activeType} onToggle={setActiveType} />
           <Button variant="ghost" size="icon">
             <User className="h-5 w-5" />
           </Button>
@@ -102,10 +103,6 @@ const Index = () => {
       </header>
 
       <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12 space-y-8">
-        <div className="py-4">
-          <FireWaterToggle activeType={activeType} onToggle={setActiveType} />
-        </div>
-
         <div className="py-2">
           <TagFilter
             tags={filteredTagsForType}
@@ -116,7 +113,7 @@ const Index = () => {
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* View Mode Toggle */}
+          {/* View Mode Toggle and New Item Button */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "overview")}>
@@ -134,7 +131,17 @@ const Index = () => {
               )}
             </div>
 
-            {viewMode === "overview" && (
+            {/* New Item Button - Center */}
+            <Button
+              onClick={() => navigate(`/item/new?type=${activeType}`)}
+              variant="white"
+              size="lg"
+              className="rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all"
+            >
+              <Plus className="w-6 h-6" />
+            </Button>
+
+            {viewMode === "overview" ? (
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -145,19 +152,9 @@ const Index = () => {
                   className="pl-10"
                 />
               </div>
+            ) : (
+              <div className="flex-1 max-w-md" />
             )}
-          </div>
-
-          {/* New Item Button */}
-          <div className="flex justify-start">
-            <Button
-              onClick={() => navigate(`/item/new?type=${activeType}`)}
-              variant="white"
-              size="lg"
-              className="rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all"
-            >
-              <Plus className="w-6 h-6" />
-            </Button>
           </div>
 
           {isLoading && items.length === 0 ? (
