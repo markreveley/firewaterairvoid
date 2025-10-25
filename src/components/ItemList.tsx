@@ -202,12 +202,21 @@ export function ItemList({
                   </div>
                 </div>
                 
-                {/* Footer: Children (left) and Parent (right) */}
+                {/* Footer: Children and Deadline (left) and Parent (right) */}
                 <div className="flex items-center justify-between pt-2">
-                  {/* Children - show first child, with ... button if more exist */}
-                  <div className="flex items-center gap-2">
+                  {/* Bottom left: Children and Deadline for fire items */}
+                  <div className="flex flex-col items-start gap-1">
+                    {/* Deadline for fire items */}
+                    {item.type === "fire" && item.deadline && (
+                      <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
+                        <Flame className="w-3 h-3" />
+                        {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
+                      </div>
+                    )}
+                    
+                    {/* Children */}
                     {item.children && item.children.length > 0 && (
-                      <>
+                      <div className="flex items-center gap-2">
                         <div
                           className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                           onClick={(e) => {
@@ -250,21 +259,12 @@ export function ItemList({
                             )}
                           </div>
                         )}
-                      </>
+                      </div>
                     )}
                   </div>
                   
-                  {/* Bottom right: Deadline (for fire) and/or Parent link */}
+                  {/* Bottom right: Parent link only */}
                   <div className="flex flex-col items-end gap-1">
-                    {/* For fire items with deadline - show deadline */}
-                    {item.type === "fire" && item.deadline && (
-                      <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
-                        <Flame className="w-3 h-3" />
-                        {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
-                      </div>
-                    )}
-                    
-                    {/* Parent link */}
                     {item.parent && (
                       <div 
                         className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
