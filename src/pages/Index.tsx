@@ -57,9 +57,17 @@ const Index = () => {
   // Clear tag filter when switching types if selected tag doesn't exist in new type
   useEffect(() => {
     if (selectedTagFilter && allTags.length > 0) {
-      const currentFilteredTags = activeType === "fire"
-        ? allTags.filter(tag => fireTagNames.includes(tag.name))
-        : allTags.filter(tag => !fireTagNames.includes(tag.name));
+      const primaryTags = allTags.filter(tag => fireTagNames.includes(tag.name));
+      const secondaryTags = allTags.filter(tag => !fireTagNames.includes(tag.name));
+      
+      const showPrimaryTags = activeType === "fire" || activeType === "water";
+      const showSecondaryTags = activeType === "water" || activeType === "earth" || activeType === "air" || activeType === "void";
+      
+      const currentFilteredTags = [
+        ...(showPrimaryTags ? primaryTags : []),
+        ...(showSecondaryTags ? secondaryTags : [])
+      ];
+      
       const isTagInFilteredList = currentFilteredTags.some(tag => tag.id === selectedTagFilter);
       if (!isTagInFilteredList) {
         setSelectedTagFilter(undefined);
@@ -86,9 +94,15 @@ const Index = () => {
   }, []);
 
   // Filter tags based on active type
-  const filteredTagsForType = activeType === "fire"
-    ? allTags.filter(tag => fireTagNames.includes(tag.name))
-    : allTags.filter(tag => !fireTagNames.includes(tag.name));
+  // Set 1: fire AND water tags (fire tag names)
+  const primaryTags = allTags.filter(tag => fireTagNames.includes(tag.name));
+  
+  // Set 2: water, earth, air, void tags (non-fire tag names)
+  const secondaryTags = allTags.filter(tag => !fireTagNames.includes(tag.name));
+  
+  // Determine which tags to show based on active type
+  const showPrimaryTags = activeType === "fire" || activeType === "water";
+  const showSecondaryTags = activeType === "water" || activeType === "earth" || activeType === "air" || activeType === "void";
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -105,7 +119,8 @@ const Index = () => {
       <div className="container mx-auto px-8 md:px-12 lg:px-16 pt-4 pb-12 space-y-8">
         <div className="py-2">
           <TagFilter
-            tags={filteredTagsForType}
+            primaryTags={showPrimaryTags ? primaryTags : []}
+            secondaryTags={showSecondaryTags ? secondaryTags : []}
             type={activeType}
             selectedTag={selectedTagFilter}
             onSelectTag={setSelectedTagFilter}
