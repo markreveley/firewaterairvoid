@@ -132,45 +132,60 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
               autoFocus={!initialTitle}
             />
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">Type</label>
-              <Select value={itemType} onValueChange={(value: "fire" | "water" | "air" | "void" | "earth") => setItemType(value)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fire">
-                    <div className="flex items-center gap-2">
-                      <Flame className="w-4 h-4 text-fire-primary" />
-                      Fire (Actions)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="water">
-                    <div className="flex items-center gap-2">
-                      <Droplet className="w-4 h-4 text-water-primary" />
-                      Water (Writing)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="earth">
-                    <div className="flex items-center gap-2">
-                      <Mountain className="w-4 h-4 text-earth-primary" />
-                      Earth (How to)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="air">
-                    <div className="flex items-center gap-2">
-                      <Wind className="w-4 h-4 text-air-primary" />
-                      Air (Analysis)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="void">
-                    <div className="flex items-center gap-2">
-                      <Circle className="w-4 h-4 text-black dark:text-white" />
-                      Void (Web URLs)
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Type</label>
+                <Select value={itemType} onValueChange={(value: "fire" | "water" | "air" | "void" | "earth") => setItemType(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fire">
+                      <div className="flex items-center gap-2">
+                        <Flame className="w-4 h-4 text-fire-primary" />
+                        Fire (Actions)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="water">
+                      <div className="flex items-center gap-2">
+                        <Droplet className="w-4 h-4 text-water-primary" />
+                        Water (Writing)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="earth">
+                      <div className="flex items-center gap-2">
+                        <Mountain className="w-4 h-4 text-earth-primary" />
+                        Earth (How to)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="air">
+                      <div className="flex items-center gap-2">
+                        <Wind className="w-4 h-4 text-air-primary" />
+                        Air (Analysis)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="void">
+                      <div className="flex items-center gap-2">
+                        <Circle className="w-4 h-4 text-black dark:text-white" />
+                        Void (Web URLs)
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {(itemType === "void" || itemType === "air") && (
+                <div className="flex-1">
+                  <label className="text-sm font-medium mb-2 block">URL</label>
+                  <Input
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder={itemType === "void" ? "Add URL..." : "Add URL (optional)..."}
+                    className="text-base py-4 px-6 rounded-xl"
+                    type="url"
+                  />
+                </div>
+              )}
             </div>
 
             {itemType === "fire" && (
@@ -179,26 +194,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                 onChange={(e) => setStatus(e.target.value)}
                 placeholder="Add status (optional)..."
                 className="text-base py-4 px-6 rounded-xl"
-              />
-            )}
-
-            {itemType === "void" && (
-              <Input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Add URL..."
-                className="text-base py-4 px-6 rounded-xl"
-                type="url"
-              />
-            )}
-
-            {itemType === "air" && (
-              <Input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Add URL (optional)..."
-                className="text-base py-4 px-6 rounded-xl"
-                type="url"
               />
             )}
 
