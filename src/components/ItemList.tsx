@@ -346,28 +346,28 @@ export function ItemList({
                   </div>
                 </div>
                 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2">
-                  {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
-                      {tag.name}
-                    </Badge>)}
-                </div>
-                
-                {/* Footer: Created date (left) and Trash button (right) */}
+                {/* Footer: Tags (left) and Date + Trash button (right) */}
                 <div className="flex items-center justify-between pt-2">
-                  <div className="text-xs text-muted-foreground">
-                    {format(item.createdAt, "MMM d, yyyy")}
+                  <div className="flex flex-wrap gap-2">
+                    {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
+                        {tag.name}
+                      </Badge>)}
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteItem(item.id);
-                    }}
-                    className="text-muted-foreground hover:text-destructive transition-colors"
-                    aria-label="Delete item"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs text-muted-foreground">
+                      {format(item.createdAt, "MMM d, yyyy")}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteItem(item.id);
+                      }}
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      aria-label="Delete item"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </Card>;
