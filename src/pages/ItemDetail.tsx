@@ -225,31 +225,39 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12">
-        <div className="flex items-center gap-3 mb-6">
-          <Button
-            type="button"
-            variant="ghost"
-            className="font-medium"
-            onClick={async () => {
-              if (hasUnsavedChanges) {
-                await handleSubmit(undefined, true);
-              } else {
-                navigate(`/?type=${itemType}`);
-              }
-            }}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {hasUnsavedChanges ? "Save" : "Back"}
-          </Button>
-
-          {hasUnsavedChanges && (
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
             <Button
               type="button"
               variant="ghost"
-              onClick={() => navigate(`/?type=${itemType}`)}
+              className="font-medium"
+              onClick={async () => {
+                if (hasUnsavedChanges) {
+                  await handleSubmit(undefined, true);
+                } else {
+                  navigate(`/?type=${itemType}`);
+                }
+              }}
             >
-              Cancel
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {hasUnsavedChanges ? "Save" : "Back"}
             </Button>
+
+            {hasUnsavedChanges && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => navigate(`/?type=${itemType}`)}
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
+
+          {existingItem?.createdAt && (
+            <div className="text-sm text-muted-foreground">
+              Created: {format(existingItem.createdAt, "MMM d, yyyy 'at' HH:mm")}
+            </div>
           )}
         </div>
 
@@ -412,14 +420,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             )}
 
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium">Tags</label>
-                {existingItem?.createdAt && (
-                  <div className="text-sm text-muted-foreground">
-                    Created: {format(existingItem.createdAt, "MMM d, yyyy 'at' HH:mm")}
-                  </div>
-                )}
-              </div>
+              <label className="text-sm font-medium mb-2 block">Tags</label>
               
               {/* For water items, show separate project and category tag sections */}
               {itemType === "water" ? (
@@ -504,7 +505,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                           const hasChildren = existingTags.some(t => t.parent_id === tag.id);
                           return (
                             <div key={tag.id} className="flex items-center gap-2">
-                              <Badge className="px-3 py-1 rounded-full flex items-center gap-1">
+                              <Badge className={cn(
+                                "px-3 py-1 rounded-full flex items-center gap-1",
+                                "bg-fire-light text-fire-dark border-fire-secondary"
+                              )}>
                                 <span>{tag.name}</span>
                                 <button
                                   type="button"
@@ -558,7 +562,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         const hasChildren = existingTags.some(t => t.parent_id === tag.id);
                         return (
                           <div key={tag.id} className="flex items-center gap-2">
-                            <Badge className="px-3 py-1 rounded-full flex items-center gap-1">
+                            <Badge className={cn(
+                              "px-3 py-1 rounded-full flex items-center gap-1",
+                              "bg-water-light text-water-dark border-water-secondary"
+                            )}>
                               <span>{tag.name}</span>
                               <button
                                 type="button"
@@ -625,7 +632,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                           className="rounded-full border-dashed"
                         >
                           <Plus className="w-3 h-3 mr-1" />
-                          {itemType === "fire" && hasProjectTag ? "Change Tag" : "Add Tag"}
+                          {itemType === "fire" && hasProjectTag ? "Change Project Tag" : itemType === "fire" ? "Add Project Tag" : "Add Category Tag"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 p-0" align="start">
@@ -652,20 +659,27 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                     </Popover>
                   </div>
                   <div className="flex flex-wrap gap-2 items-center">
-                    {selectedTags.map((tag) => {
-                      const hasChildren = existingTags.some(t => t.parent_id === tag.id);
-                      return (
-                        <div key={tag.id} className="flex items-center gap-2">
-                          <Badge className="px-3 py-1 rounded-full flex items-center gap-1">
-                            <span>{tag.name}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeTag(tag.id)}
-                              className="ml-1 hover:opacity-70"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </Badge>
+                      {selectedTags.map((tag) => {
+                        const hasChildren = existingTags.some(t => t.parent_id === tag.id);
+                        const isProjectTag = FIRE_TAG_NAMES.includes(tag.name as any);
+                        return (
+                          <div key={tag.id} className="flex items-center gap-2">
+                            <Badge className={cn(
+                              "px-3 py-1 rounded-full flex items-center gap-1",
+                              itemType === "fire" && "bg-fire-light text-fire-dark border-fire-secondary",
+                              itemType === "earth" && "bg-earth-light text-earth-dark border-earth-secondary",
+                              itemType === "air" && "bg-air-light text-air-dark border-air-secondary",
+                              itemType === "void" && "bg-muted text-foreground"
+                            )}>
+                              <span>{tag.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeTag(tag.id)}
+                                className="ml-1 hover:opacity-70"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </Badge>
                           {hasChildren && (
                             <Popover>
                               <PopoverTrigger asChild>
