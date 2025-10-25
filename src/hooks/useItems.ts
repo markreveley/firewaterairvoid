@@ -17,6 +17,7 @@ interface Item {
   tags: Tag[];
   createdAt: Date;
   deadline?: Date;
+  parent_id?: string;
 }
 
 export function useItems() {
@@ -56,6 +57,7 @@ export function useItems() {
           tags: itemTags,
           createdAt: new Date(item.created_at),
           deadline: item.deadline ? new Date(item.deadline) : undefined,
+          parent_id: item.parent_id || undefined,
         };
       });
 
@@ -72,7 +74,7 @@ export function useItems() {
     loadItems();
   }, []);
 
-  const addItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
+  const addItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string) => {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
@@ -82,7 +84,8 @@ export function useItems() {
           notes: notes || null,
           status: status || null,
           url: url || null,
-          deadline: deadline?.toISOString()
+          deadline: deadline?.toISOString(),
+          parent_id: parent_id || null
         })
         .select()
         .single();
@@ -160,6 +163,7 @@ export function useItems() {
       status?: string;
       url?: string;
       type?: "fire" | "water" | "air" | "void" | "earth";
+      parent_id?: string | null;
     }
   ) => {
     try {
@@ -182,6 +186,9 @@ export function useItems() {
       }
       if ("type" in updates) {
         itemUpdates.type = updates.type;
+      }
+      if ("parent_id" in updates) {
+        itemUpdates.parent_id = updates.parent_id;
       }
 
       if (Object.keys(itemUpdates).length > 0) {

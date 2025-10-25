@@ -17,9 +17,17 @@ interface Tag {
   name: string;
 }
 
+interface Item {
+  id: string;
+  title: string;
+  type: "fire" | "water" | "air" | "void" | "earth";
+  parent_id?: string;
+}
+
 interface ItemDetailProps {
-  onAddItem: (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => void;
+  onAddItem: (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string) => void;
   existingTags: Tag[];
+  allItems: Item[];
   existingItem?: {
     id: string;
     title: string;
@@ -29,10 +37,11 @@ interface ItemDetailProps {
     notes?: string;
     status?: string;
     url?: string;
+    parent_id?: string;
   } | null;
 }
 
-export default function ItemDetail({ onAddItem, existingTags, existingItem }: ItemDetailProps) {
+export default function ItemDetail({ onAddItem, existingTags, allItems, existingItem }: ItemDetailProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
@@ -48,6 +57,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
+  const [parentId, setParentId] = useState<string | undefined>(existingItem?.parent_id);
 
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
     const hours = Math.floor(i / 4);
@@ -71,7 +81,8 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
         itemType === "fire" ? finalDeadline : undefined,
         notes.trim() || undefined,
         itemType === "fire" ? (status.trim() || "To Do") : undefined,
-        (itemType === "void" || itemType === "air") ? (url.trim() || undefined) : undefined
+        (itemType === "void" || itemType === "air") ? (url.trim() || undefined) : undefined,
+        parentId
       );
       // navigation handled in parent
     }
@@ -245,6 +256,25 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                 </Popover>
               </div>
             )}
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Parent Item (optional)</label>
+              <Select value={parentId || "none"} onValueChange={(value) => setParentId(value === "none" ? undefined : value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="No parent" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No parent</SelectItem>
+                  {allItems
+                    .filter(item => item.id !== existingItem?.id)
+                    .map(item => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {item.title}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             <div>
               <label className="text-sm font-medium mb-2 block">Tags</label>
