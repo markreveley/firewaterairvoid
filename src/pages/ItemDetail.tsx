@@ -136,7 +136,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
 
   const saveEditedTag = () => {
     if (editTagName.trim() && editingTagId) {
-      setSelectedTags(selectedTags.map(t => 
+      setSelectedTags(selectedTags.map(t =>
         t.id === editingTagId ? { ...t, name: editTagName.trim() } : t
       ));
       setIsEditingTag(false);
@@ -144,6 +144,14 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
       setEditTagName("");
     }
   };
+
+  // Fire-specific tags
+  const fireTagNames = ['Tourlab', 'Dirtwire', 'Touring', 'Disorder', 'Merch', 'Emma', 'Shane', 'Odin', 'Home', 'Finances', 'Dev'];
+
+  // Filter tags based on item type
+  const filteredTags = itemType === "fire"
+    ? existingTags.filter(tag => fireTagNames.includes(tag.name))
+    : existingTags.filter(tag => !fireTagNames.includes(tag.name));
 
   return (
     <div className="min-h-screen bg-background">
@@ -178,7 +186,8 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               autoFocus={!initialTitle}
             />
 
-            <div className="flex gap-4">
+            {/* Row 1: Type | Status (for Fire) OR Type | Parent Item (for non-Fire) */}
+            <div className="flex gap-4 items-start">
               <div className="flex-1">
                 <label className="text-sm font-medium mb-2 block">Type</label>
                 <Select value={itemType} onValueChange={(value: "fire" | "water" | "air" | "void" | "earth") => setItemType(value)}>
@@ -220,139 +229,207 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                 </Select>
               </div>
 
-              {(itemType === "void" || itemType === "air") && (
+              {itemType === "fire" ? (
                 <div className="flex-1">
-                  <label className="text-sm font-medium mb-2 block">URL</label>
+                  <label className="text-sm font-medium mb-2 block">Status</label>
                   <Input
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder={itemType === "void" ? "Add URL..." : "Add URL (optional)..."}
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    placeholder="To Do / Completed..."
                     className="text-base py-4 px-6 rounded-xl"
-                    type="url"
                   />
+                </div>
+              ) : (
+                <div className="flex-1">
+                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <Link2 className="w-4 h-4" />
+                    Parent Item (optional)
+                  </label>
+                  <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-start text-left font-normal h-[52px]"
+                      >
+                        <Link2 className="w-4 h-4 mr-2 shrink-0" />
+                        {selectedParent ? (
+                          <span className="truncate">{selectedParent.title}</span>
+                        ) : (
+                          <span className="text-muted-foreground">Select parent item...</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search items..." />
+                        <CommandList>
+                          <CommandEmpty>No items found</CommandEmpty>
+                          <CommandGroup>
+                            {selectedParent && (
+                              <CommandItem
+                                onSelect={() => {
+                                  setSelectedParent(null);
+                                  setParentSearchOpen(false);
+                                }}
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                <span>No parent</span>
+                              </CommandItem>
+                            )}
+                            {allItems
+                              .filter(item => item.id !== existingItem?.id) // Can't be own parent
+                              .map((item) => (
+                                <CommandItem
+                                  key={item.id}
+                                  onSelect={() => {
+                                    setSelectedParent({ id: item.id, title: item.title });
+                                    setParentSearchOpen(false);
+                                  }}
+                                >
+                                  {item.type === "fire" && <Flame className="w-4 h-4 mr-2 text-fire-primary" />}
+                                  {item.type === "water" && <Droplet className="w-4 h-4 mr-2 text-water-primary" />}
+                                  {item.type === "air" && <Wind className="w-4 h-4 mr-2 text-air-primary" />}
+                                  {item.type === "earth" && <Mountain className="w-4 h-4 mr-2 text-earth-primary" />}
+                                  {item.type === "void" && <Circle className="w-4 h-4 mr-2 text-void-primary" />}
+                                  <span className="truncate">{item.title}</span>
+                                </CommandItem>
+                              ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               )}
             </div>
 
-            {/* Parent Item Selector */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Link2 className="w-4 h-4" />
-                Parent Item (optional)
-              </label>
-              <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <Link2 className="w-4 h-4 mr-2 shrink-0" />
-                    {selectedParent ? (
-                      <span className="truncate">{selectedParent.title}</span>
-                    ) : (
-                      <span className="text-muted-foreground">Select parent item...</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[400px] p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Search items..." />
-                    <CommandList>
-                      <CommandEmpty>No items found</CommandEmpty>
-                      <CommandGroup>
-                        {selectedParent && (
-                          <CommandItem
-                            onSelect={() => {
-                              setSelectedParent(null);
-                              setParentSearchOpen(false);
-                            }}
-                          >
-                            <X className="w-4 h-4 mr-2" />
-                            <span>No parent</span>
-                          </CommandItem>
-                        )}
-                        {allItems
-                          .filter(item => item.id !== existingItem?.id) // Can't be own parent
-                          .map((item) => (
-                            <CommandItem
-                              key={item.id}
-                              onSelect={() => {
-                                setSelectedParent({ id: item.id, title: item.title });
-                                setParentSearchOpen(false);
-                              }}
-                            >
-                              {item.type === "fire" && <Flame className="w-4 h-4 mr-2 text-fire-primary" />}
-                              {item.type === "water" && <Droplet className="w-4 h-4 mr-2 text-water-primary" />}
-                              {item.type === "air" && <Wind className="w-4 h-4 mr-2 text-air-primary" />}
-                              {item.type === "earth" && <Mountain className="w-4 h-4 mr-2 text-earth-primary" />}
-                              {item.type === "void" && <Circle className="w-4 h-4 mr-2 text-void-primary" />}
-                              <span className="truncate">{item.title}</span>
-                            </CommandItem>
-                          ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
+            {/* Row 2: Parent Item | Deadline (for Fire) */}
             {itemType === "fire" && (
-              <Input
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                placeholder="Add status (optional)..."
-                className="text-base py-4 px-6 rounded-xl"
-              />
+              <div className="flex gap-4 items-start">
+                <div className="flex-1">
+                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <Link2 className="w-4 h-4" />
+                    Parent Item (optional)
+                  </label>
+                  <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-start text-left font-normal h-[52px]"
+                      >
+                        <Link2 className="w-4 h-4 mr-2 shrink-0" />
+                        {selectedParent ? (
+                          <span className="truncate">{selectedParent.title}</span>
+                        ) : (
+                          <span className="text-muted-foreground">Select parent item...</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search items..." />
+                        <CommandList>
+                          <CommandEmpty>No items found</CommandEmpty>
+                          <CommandGroup>
+                            {selectedParent && (
+                              <CommandItem
+                                onSelect={() => {
+                                  setSelectedParent(null);
+                                  setParentSearchOpen(false);
+                                }}
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                <span>No parent</span>
+                              </CommandItem>
+                            )}
+                            {allItems
+                              .filter(item => item.id !== existingItem?.id) // Can't be own parent
+                              .map((item) => (
+                                <CommandItem
+                                  key={item.id}
+                                  onSelect={() => {
+                                    setSelectedParent({ id: item.id, title: item.title });
+                                    setParentSearchOpen(false);
+                                  }}
+                                >
+                                  {item.type === "fire" && <Flame className="w-4 h-4 mr-2 text-fire-primary" />}
+                                  {item.type === "water" && <Droplet className="w-4 h-4 mr-2 text-water-primary" />}
+                                  {item.type === "air" && <Wind className="w-4 h-4 mr-2 text-air-primary" />}
+                                  {item.type === "earth" && <Mountain className="w-4 h-4 mr-2 text-earth-primary" />}
+                                  {item.type === "void" && <Circle className="w-4 h-4 mr-2 text-void-primary" />}
+                                  <span className="truncate">{item.title}</span>
+                                </CommandItem>
+                              ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="flex-1">
+                  <label className="text-sm font-medium mb-2 block">Deadline</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start h-[52px]",
+                          deadline && "bg-fire-light text-fire-dark border-fire-secondary"
+                        )}
+                      >
+                        <CalendarIcon className="w-4 h-4 mr-2" />
+                        {deadline ? format(deadline, "MMM d, yyyy") : "Set Deadline"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={deadline}
+                        onSelect={setDeadline}
+                        initialFocus
+                      />
+                      {deadline && (
+                        <div className="p-3 border-t">
+                          <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            Time
+                          </label>
+                          <Select value={selectedTime} onValueChange={setSelectedTime}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-60">
+                              {timeOptions.map((time) => (
+                                <SelectItem key={time} value={time}>
+                                  {time}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
             )}
 
-            {itemType === "fire" && (
+            {(itemType === "void" || itemType === "air") && (
               <div>
-                <label className="text-sm font-medium mb-2 block">Deadline</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start",
-                        deadline && "bg-fire-light text-fire-dark border-fire-secondary"
-                      )}
-                    >
-                      <CalendarIcon className="w-4 h-4 mr-2" />
-                      {deadline ? format(deadline, "MMM d, yyyy") : "Set Deadline"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={deadline}
-                      onSelect={setDeadline}
-                      initialFocus
-                    />
-                    {deadline && (
-                      <div className="p-3 border-t">
-                        <label className="text-sm font-medium mb-2 flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          Time
-                        </label>
-                        <Select value={selectedTime} onValueChange={setSelectedTime}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-60">
-                            {timeOptions.map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {time}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </PopoverContent>
-                </Popover>
+                <label className="text-sm font-medium mb-2 block">URL</label>
+                <Input
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder={itemType === "void" ? "Add URL..." : "Add URL (optional)..."}
+                  className="text-base py-4 px-6 rounded-xl"
+                  type="url"
+                />
               </div>
             )}
 
@@ -404,7 +481,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                           </CommandGroup>
                           <CommandEmpty>No tags found</CommandEmpty>
                           <CommandGroup heading="Existing Tags">
-                            {existingTags.map((tag) => (
+                            {filteredTags.map((tag) => (
                               <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
                                 <span>{tag.name}</span>
                               </CommandItem>
@@ -450,7 +527,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         <CommandList>
                           <CommandEmpty>No tags found</CommandEmpty>
                           <CommandGroup heading="Select Tag to Edit">
-                            {existingTags.map((tag) => (
+                            {filteredTags.map((tag) => (
                               <CommandItem key={tag.id} onSelect={() => startEditingTag(tag)}>
                                 <span>{tag.name}</span>
                               </CommandItem>

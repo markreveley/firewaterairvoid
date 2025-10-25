@@ -22,34 +22,69 @@ interface Item {
   children?: Array<{ id: string; title: string; type: string }>;
 }
 
-export function useItems(type: "fire" | "water" | "air" | "void" | "earth") {
+export function useItems(type?: "fire" | "water" | "air" | "void" | "earth", pageSize: number = 10) {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
-  const ITEMS_PER_PAGE = 10;
 
   const loadItems = async (reset: boolean = false) => {
     try {
       const currentOffset = reset ? 0 : offset;
 
-      const { data: itemsData, error: itemsError } = await supabase
+      let query = supabase
         .from("items")
         .select("*")
-        .eq("type", type)
-        .order("created_at", { ascending: false })
-        .range(currentOffset, currentOffset + ITEMS_PER_PAGE - 1);
+        .order("created_at", { ascending: false });
+
+      // Only filter by type if type is provided
+      if (type) {
+        query = query.eq("type", type).range(currentOffset, currentOffset + pageSize - 1);
+      }
+
+      const { data: itemsData, error: itemsError } = await query;
 
       if (itemsError) throw itemsError;
 
-      // Check if we have more items
-      setHasMore(itemsData.length === ITEMS_PER_PAGE);
+      // Check if we have more items (only relevant when type is provided for pagination)
+      setHasMore(type ? itemsData.length === pageSize : false);
 
       const { data: itemTagsData, error: itemTagsError } = await supabase
         .from("item_tags")
         .select("item_id, tag_id, tags(*)");
 
       if (itemTagsError) throw itemTagsError;
+
+      // Fetch parent items that aren't in the current filtered list
+      const parentIds = itemsData
+        .map((item: any) => item.parent_id)
+        .filter((id: any) => id && !itemsData.find((i: any) => i.id === id));
+
+      let parentItems: any[] = [];
+      if (parentIds.length > 0) {
+        const { data: parentData, error: parentError } = await supabase
+          .from("items")
+          .select("id, title, type")
+          .in("id", parentIds);
+
+        if (!parentError && parentData) {
+          parentItems = parentData;
+        }
+      }
+
+      // Fetch child items (items that have these items as parent)
+      const itemIds = itemsData.map((item: any) => item.id);
+      let childItems: any[] = [];
+      if (itemIds.length > 0) {
+        const { data: childData, error: childError } = await supabase
+          .from("items")
+          .select("id, title, type, parent_id")
+          .in("parent_id", itemIds);
+
+        if (!childError && childData) {
+          childItems = childData;
+        }
+      }
 
       const itemsWithTags: Item[] = itemsData.map((item) => {
         const itemTags = itemTagsData
@@ -59,13 +94,14 @@ export function useItems(type: "fire" | "water" | "air" | "void" | "earth") {
             name: it.tags.name,
           }));
 
-        // Find parent item if parent_id exists
-        const parentItem = item.parent_id 
-          ? itemsData.find((i: any) => i.id === item.parent_id)
+        // Find parent item (check both filtered items and separately fetched parents)
+        const parentItem = item.parent_id
+          ? itemsData.find((i: any) => i.id === item.parent_id) ||
+            parentItems.find((i: any) => i.id === item.parent_id)
           : null;
 
         // Find children items (items that have this item as parent)
-        const childrenItems = itemsData
+        const childrenItems = childItems
           .filter((i: any) => i.parent_id === item.id)
           .map((i: any) => ({
             id: i.id,
@@ -93,12 +129,14 @@ export function useItems(type: "fire" | "water" | "air" | "void" | "earth") {
         };
       });
 
-      if (reset) {
+      if (reset || !type) {
+        // Reset or loading all items (no pagination)
         setItems(itemsWithTags);
-        setOffset(ITEMS_PER_PAGE);
+        setOffset(type ? pageSize : 0);
       } else {
+        // Appending more items for pagination
         setItems((prev) => [...prev, ...itemsWithTags]);
-        setOffset((prev) => prev + ITEMS_PER_PAGE);
+        setOffset((prev) => prev + pageSize);
       }
     } catch (error) {
       console.error("Error loading items:", error);
@@ -120,7 +158,7 @@ export function useItems(type: "fire" | "water" | "air" | "void" | "earth") {
     setHasMore(true);
     setIsLoading(true);
     loadItems(true);
-  }, [type]);
+  }, [type, pageSize]);
 
   const addItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string) => {
     try {

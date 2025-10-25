@@ -10,7 +10,7 @@ interface FireWaterToggleProps {
 export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) {
   return (
     <TooltipProvider>
-      <div className={cn("flex gap-2 p-1 rounded-full w-fit mx-auto", (activeType === "void" || activeType === "air") ? "bg-white border border-border" : "bg-muted")}>
+      <div className="flex gap-2 p-1 rounded-full w-fit mx-auto bg-muted border border-transparent">
         <Tooltip>
           <TooltipTrigger asChild>
             <button
