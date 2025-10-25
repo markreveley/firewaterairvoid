@@ -49,7 +49,7 @@ export default function ItemDetailPage() {
       // Create mode - add new item
       await addItem(title, type, tags, deadline, notes, status, url);
     }
-    navigate(-1);
+    navigate(`/?type=${type}`);
   };
 
   return <ItemDetail onAddItem={handleAddItem} existingTags={existingTags} existingItem={existingItem} />;
