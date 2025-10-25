@@ -104,15 +104,17 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
       <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12">
         <div className="flex items-center justify-between mb-6">
           <Button
+            type="submit"
             variant="ghost"
-            onClick={handleSubmit}
             className="font-medium"
+            form="item-form"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Save
           </Button>
           
           <Button
+            type="button"
             variant="ghost"
             onClick={() => navigate(-1)}
           >
@@ -120,7 +122,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
+        <form id="item-form" onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
           <div className="space-y-4">
             <Input
               value={title}
