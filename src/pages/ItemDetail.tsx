@@ -71,6 +71,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     selectedTags: existingItem?.tags || [],
     deadline: existingItem?.deadline,
     parentId: existingItem?.parent_id,
+    selectedTime: existingItem?.deadline ? format(existingItem.deadline, "HH:mm") : "00:00",
   };
 
   // Check if form has changed
@@ -83,6 +84,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
       itemType !== initialValues.itemType ||
       JSON.stringify(selectedTags.map(t => t.id).sort()) !== JSON.stringify(initialValues.selectedTags.map(t => t.id).sort()) ||
       deadline?.getTime() !== initialValues.deadline?.getTime() ||
+      selectedTime !== initialValues.selectedTime ||
       selectedParent?.id !== initialValues.parentId;
 
     setHasUnsavedChanges(hasChanged);
