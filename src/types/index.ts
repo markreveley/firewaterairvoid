@@ -1,0 +1,22 @@
+export type ItemType = "fire" | "water" | "air" | "void" | "earth";
+
+export interface Tag {
+  id: string;
+  name: string;
+  parent_id?: string | null;
+}
+
+export interface Item {
+  id: string;
+  title: string;
+  type: ItemType;
+  notes?: string;
+  status?: string;
+  url?: string;
+  tags: Tag[];
+  createdAt: Date;
+  deadline?: Date;
+  parent_id?: string;
+  parent?: { id: string; title: string; type: string };
+  children?: Array<{ id: string; title: string; type: string }>;
+}

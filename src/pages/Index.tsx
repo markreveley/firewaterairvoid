@@ -5,24 +5,22 @@ import { FireWaterToggle } from "@/components/FireWaterToggle";
 import { TagFilter } from "@/components/TagFilter";
 import { StatusFilter } from "@/components/StatusFilter";
 import { useItems } from "@/hooks/useItems";
+import { useTags } from "@/hooks/useTags";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Plus, Search, User } from "lucide-react";
 import fireWaterLogo from "@/assets/firewater_logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
-
-interface Tag {
-  id: string;
-  name: string;
-}
+import type { ItemType, Tag } from "@/types";
+import { getTagsForItemType } from "@/utils/tagFilters";
+import { FIRE_TAG_NAMES } from "@/constants/tags";
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const initialType = (searchParams.get("type") as "fire" | "water" | "air" | "void" | "earth") || "fire";
-  const [activeType, setActiveType] = useState<"fire" | "water" | "air" | "void" | "earth">(initialType);
+  const initialType = (searchParams.get("type") as ItemType) || "fire";
+  const [activeType, setActiveType] = useState<ItemType>(initialType);
   const [viewMode, setViewMode] = useState<"card" | "overview">("card");
   const [searchQuery, setSearchQuery] = useState("");
   const pageSize = viewMode === "overview" ? 200 : 10;
@@ -30,12 +28,9 @@ const Index = () => {
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
   const [selectedChildTagFilter, setSelectedChildTagFilter] = useState<string>();
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
-  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const { allTags } = useTags();
 
-  // Fire-specific tag names
-  const fireTagNames = ['Tourlab', 'Dirtwire', 'Touring', 'Disorder', 'Merch', 'Emma', 'Shane', 'Odin', 'Home', 'Finances', 'Dev'];
-
-  const handleAddItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
+  const handleAddItem = async (title: string, type: ItemType, tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
     // Default status to "To Do" for fire items if not provided
     const finalStatus = type === "fire" && !status ? "To Do" : status;
     await addItem(title, type, tags, deadline, notes, finalStatus, url);
@@ -60,17 +55,9 @@ const Index = () => {
   // Clear tag filter when switching types if selected tag doesn't exist in new type
   useEffect(() => {
     if (selectedTagFilter && allTags.length > 0) {
-      const primaryTags = allTags.filter(tag => fireTagNames.includes(tag.name));
-      const secondaryTags = allTags.filter(tag => !fireTagNames.includes(tag.name));
-      
-      const showPrimaryTags = activeType === "fire" || activeType === "water";
-      const showSecondaryTags = activeType === "water" || activeType === "earth" || activeType === "air" || activeType === "void";
-      
-      const currentFilteredTags = [
-        ...(showPrimaryTags ? primaryTags : []),
-        ...(showSecondaryTags ? secondaryTags : [])
-      ];
-      
+      const { primaryTags, secondaryTags } = getTagsForItemType(allTags, activeType);
+      const currentFilteredTags = [...primaryTags, ...secondaryTags];
+
       const isTagInFilteredList = currentFilteredTags.some(tag => tag.id === selectedTagFilter);
       if (!isTagInFilteredList) {
         setSelectedTagFilter(undefined);
@@ -79,34 +66,8 @@ const Index = () => {
     }
   }, [activeType, allTags, selectedTagFilter]);
 
-  // Load all tags from database
-  useEffect(() => {
-    const loadTags = async () => {
-      const { data, error } = await supabase
-        .from("tags")
-        .select("*")
-        .order("name", { ascending: true });
-
-      if (error) {
-        console.error("Error loading tags:", error);
-      } else {
-        setAllTags(data || []);
-      }
-    };
-
-    loadTags();
-  }, []);
-
-  // Filter tags based on active type
-  // Set 1: fire AND water tags (fire tag names)
-  const primaryTags = allTags.filter(tag => fireTagNames.includes(tag.name));
-  
-  // Set 2: water, earth, air, void tags (non-fire tag names)
-  const secondaryTags = allTags.filter(tag => !fireTagNames.includes(tag.name));
-  
-  // Determine which tags to show based on active type
-  const showPrimaryTags = activeType === "fire" || activeType === "water";
-  const showSecondaryTags = activeType === "water" || activeType === "earth" || activeType === "air" || activeType === "void";
+  // Get filtered tags for current type
+  const { primaryTags, secondaryTags } = getTagsForItemType(allTags, activeType);
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -123,8 +84,8 @@ const Index = () => {
       <div className="container mx-auto px-8 md:px-12 lg:px-16 pt-4 pb-12 space-y-8">
         <div className="py-2">
           <TagFilter
-            primaryTags={showPrimaryTags ? primaryTags : []}
-            secondaryTags={showSecondaryTags ? secondaryTags : []}
+            primaryTags={primaryTags}
+            secondaryTags={secondaryTags}
             allTags={allTags}
             type={activeType}
             selectedTag={selectedTagFilter}

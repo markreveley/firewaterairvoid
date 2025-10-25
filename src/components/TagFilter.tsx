@@ -1,18 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Flame, Droplet, Circle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface Tag {
-  id: string;
-  name: string;
-  parent_id?: string | null;
-}
+import type { Tag, ItemType } from "@/types";
 
 interface TagFilterProps {
   primaryTags: Tag[];
   secondaryTags: Tag[];
   allTags: Tag[];
-  type: "fire" | "water" | "air" | "void" | "earth";
+  type: ItemType;
   selectedTag?: string;
   selectedChildTag?: string;
   onSelectTag: (tagId: string | undefined) => void;

@@ -1,28 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { Tag, Item, ItemType } from "@/types";
+import { supportsUrl, supportsStatus, supportsDeadline } from "@/utils/itemTypes";
 
-interface Tag {
-  id: string;
-  name: string;
-}
-
-interface Item {
-  id: string;
-  title: string;
-  type: "fire" | "water" | "air" | "void" | "earth";
-  notes?: string;
-  status?: string;
-  url?: string;
-  tags: Tag[];
-  createdAt: Date;
-  deadline?: Date;
-  parent_id?: string;
-  parent?: { id: string; title: string; type: string };
-  children?: Array<{ id: string; title: string; type: string }>;
-}
-
-export function useItems(type?: "fire" | "water" | "air" | "void" | "earth", pageSize: number = 10) {
+export function useItems(type?: ItemType, pageSize: number = 10) {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
@@ -112,7 +94,7 @@ export function useItems(type?: "fire" | "water" | "air" | "void" | "earth", pag
         return {
           id: item.id,
           title: item.title,
-          type: item.type as "fire" | "water" | "air" | "void" | "earth",
+          type: item.type as ItemType,
           notes: item.notes || undefined,
           status: item.status || undefined,
           url: item.url || undefined,
@@ -160,7 +142,7 @@ export function useItems(type?: "fire" | "water" | "air" | "void" | "earth", pag
     loadItems(true);
   }, [type, pageSize]);
 
-  const addItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string) => {
+  const addItem = async (title: string, type: ItemType, tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string) => {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
@@ -287,7 +269,7 @@ export function useItems(type?: "fire" | "water" | "air" | "void" | "earth", pag
       notes?: string;
       status?: string;
       url?: string;
-      type?: "fire" | "water" | "air" | "void" | "earth";
+      type?: ItemType;
       parent_id?: string | null;
     }
   ) => {
@@ -320,13 +302,15 @@ export function useItems(type?: "fire" | "water" | "air" | "void" | "earth", pag
           const newType = updates.type;
 
           // Clear status and deadline if changing to non-Fire type
-          if (newType !== "fire") {
+          if (!supportsStatus(newType)) {
             itemUpdates.status = null;
+          }
+          if (!supportsDeadline(newType)) {
             itemUpdates.deadline = null;
           }
 
           // Clear URL if changing to type that doesn't support it
-          if (newType !== "air" && newType !== "void" && newType !== "earth") {
+          if (!supportsUrl(newType)) {
             itemUpdates.url = null;
           }
         }

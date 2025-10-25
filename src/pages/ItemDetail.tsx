@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,34 +8,20 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Link2, Eye, FileText, ChevronRight, Trash2 } from "lucide-react";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Eye, FileText, ChevronRight, Trash2 } from "lucide-react";
+import { ParentItemSelector } from "@/components/ParentItemSelector";
 import ReactMarkdown from "react-markdown";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
-
-interface Tag {
-  id: string;
-  name: string;
-  parent_id?: string | null;
-}
-
-interface Item {
-  id: string;
-  title: string;
-  type: "fire" | "water" | "air" | "void" | "earth";
-  tags: Tag[];
-  deadline?: Date;
-  notes?: string;
-  status?: string;
-  url?: string;
-  parent_id?: string;
-  createdAt?: Date;
-}
+import type { Tag, Item, ItemType } from "@/types";
+import { supportsUrl, supportsDeadline, supportsStatus } from "@/utils/itemTypes";
+import { filterTagsForItemType } from "@/utils/tagFilters";
+import { generateTimeOptions } from "@/utils/time";
 
 interface ItemDetailProps {
   onAddItem: (
     title: string,
-    type: "fire" | "water" | "air" | "void" | "earth",
+    type: ItemType,
     tags: Tag[],
     deadline?: Date,
     notes?: string,
@@ -53,13 +39,13 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
-  const typeParam = searchParams.get("type") as "fire" | "water" | "air" | "void" | "earth" | null;
+  const typeParam = searchParams.get("type") as ItemType | null;
 
   const [title, setTitle] = useState(initialTitle);
   const [notes, setNotes] = useState(existingItem?.notes || "");
   const [status, setStatus] = useState(existingItem?.status || "");
   const [url, setUrl] = useState(existingItem?.url || "");
-  const [itemType, setItemType] = useState<"fire" | "water" | "air" | "void" | "earth">(existingItem?.type || typeParam || "fire");
+  const [itemType, setItemType] = useState<ItemType>(existingItem?.type || typeParam || "fire");
   const [selectedTags, setSelectedTags] = useState<Tag[]>(existingItem?.tags || []);
   const [deadline, setDeadline] = useState<Date | undefined>(existingItem?.deadline);
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
@@ -69,24 +55,19 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [editTagName, setEditTagName] = useState("");
   const [selectedParent, setSelectedParent] = useState<{ id: string; title: string } | null>(null);
-  const [parentSearchOpen, setParentSearchOpen] = useState(false);
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
 
-  const timeOptions = Array.from({ length: 96 }, (_, i) => {
-    const hours = Math.floor(i / 4);
-    const minutes = (i % 4) * 15;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  });
+  const timeOptions = generateTimeOptions();
 
-  // Initialize parent selection from existing item
-  useState(() => {
+  // Initialize parent selection from existing item - FIX: Changed from useState to useEffect
+  useEffect(() => {
     if (existingItem?.parent_id) {
       const parent = allItems.find(item => item.id === existingItem.parent_id);
       if (parent) {
         setSelectedParent({ id: parent.id, title: parent.title });
       }
     }
-  });
+  }, [existingItem?.parent_id, allItems]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,10 +82,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
         title,
         itemType,
         selectedTags,
-        itemType === "fire" ? finalDeadline : undefined,
+        supportsDeadline(itemType) ? finalDeadline : undefined,
         notes.trim() || undefined,
-        itemType === "fire" ? (status.trim() || "To Do") : undefined,
-        (itemType === "void" || itemType === "air" || itemType === "earth") ? (url.trim() || undefined) : undefined,
+        supportsStatus(itemType) ? (status.trim() || "To Do") : undefined,
+        supportsUrl(itemType) ? (url.trim() || undefined) : undefined,
         selectedParent?.id
       );
       // navigation handled in parent
@@ -150,13 +131,8 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     }
   };
 
-  // Fire-specific tags
-  const fireTagNames = ['Tourlab', 'Dirtwire', 'Touring', 'Disorder', 'Merch', 'Emma', 'Shane', 'Odin', 'Home', 'Finances', 'Dev'];
-
   // Filter tags based on item type
-  const baseFilteredTags = itemType === "fire"
-    ? existingTags.filter(tag => fireTagNames.includes(tag.name))
-    : existingTags.filter(tag => !fireTagNames.includes(tag.name));
+  const baseFilteredTags = filterTagsForItemType(existingTags, itemType);
 
   // Separate parent and child tags
   const parentTags = baseFilteredTags.filter(tag => !tag.parent_id);
@@ -210,7 +186,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             <div className="flex gap-4 items-start">
               <div className="flex-1">
                 <label className="text-sm font-medium mb-2 block">Type</label>
-                <Select value={itemType} onValueChange={(value: "fire" | "water" | "air" | "void" | "earth") => setItemType(value)}>
+                <Select value={itemType} onValueChange={(value: ItemType) => setItemType(value)}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -249,7 +225,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                 </Select>
               </div>
 
-              {itemType === "fire" ? (
+              {supportsStatus(itemType) ? (
                 <div className="flex-1">
                   <label className="text-sm font-medium mb-2 block">Status</label>
                   <Select value={status || "To Do"} onValueChange={setStatus}>
@@ -263,162 +239,26 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                   </Select>
                 </div>
               ) : (
-                <div className="flex-1">
-                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
-                    <Link2 className="w-4 h-4" />
-                    Parent Item (optional)
-                  </label>
-                  <div className="flex gap-2">
-                    {selectedParent && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-[52px] w-[52px] shrink-0"
-                        onClick={() => setSelectedParent(null)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                    <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          role="combobox"
-                          className="flex-1 justify-start text-left font-normal h-[52px]"
-                        >
-                          <Link2 className="w-4 h-4 mr-2 shrink-0" />
-                          {selectedParent ? (
-                            <span className="truncate">{selectedParent.title.length > 30 ? selectedParent.title.substring(0, 30) + "..." : selectedParent.title}</span>
-                          ) : (
-                            <span className="text-muted-foreground">Select parent item...</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0" align="start">
-                      <Command>
-                        <CommandInput placeholder="Search items..." />
-                        <CommandList>
-                          <CommandEmpty>No items found</CommandEmpty>
-                          <CommandGroup>
-                            {selectedParent && (
-                              <CommandItem
-                                onSelect={() => {
-                                  setSelectedParent(null);
-                                  setParentSearchOpen(false);
-                                }}
-                              >
-                                <X className="w-4 h-4 mr-2" />
-                                <span>No parent</span>
-                              </CommandItem>
-                            )}
-                            {allItems
-                              .filter(item => item.id !== existingItem?.id) // Can't be own parent
-                              .map((item) => (
-                                <CommandItem
-                                  key={item.id}
-                                  onSelect={() => {
-                                    setSelectedParent({ id: item.id, title: item.title });
-                                    setParentSearchOpen(false);
-                                  }}
-                                >
-                                  {item.type === "fire" && <Flame className="w-4 h-4 mr-2 text-fire-primary" />}
-                                  {item.type === "water" && <Droplet className="w-4 h-4 mr-2 text-water-primary" />}
-                                  {item.type === "air" && <Wind className="w-4 h-4 mr-2 text-air-primary" />}
-                                  {item.type === "earth" && <Mountain className="w-4 h-4 mr-2 text-earth-primary" />}
-                                  {item.type === "void" && <Circle className="w-4 h-4 mr-2 text-void-primary" />}
-                                  <span className="truncate">{item.title}</span>
-                                </CommandItem>
-                              ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
+                <ParentItemSelector
+                  selectedParent={selectedParent}
+                  onSelectParent={setSelectedParent}
+                  allItems={allItems}
+                  currentItemId={existingItem?.id}
+                  className="flex-1"
+                />
               )}
             </div>
 
             {/* Row 2: Parent Item | Deadline (for Fire) */}
-            {itemType === "fire" && (
+            {supportsDeadline(itemType) && (
               <div className="flex gap-4 items-start">
-                <div className="flex-1">
-                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
-                    <Link2 className="w-4 h-4" />
-                    Parent Item (optional)
-                  </label>
-                  <div className="flex gap-2">
-                    {selectedParent && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-[52px] w-[52px] shrink-0"
-                        onClick={() => setSelectedParent(null)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                    <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          role="combobox"
-                          className="flex-1 justify-start text-left font-normal h-[52px]"
-                        >
-                          <Link2 className="w-4 h-4 mr-2 shrink-0" />
-                          {selectedParent ? (
-                            <span className="truncate">{selectedParent.title.length > 30 ? selectedParent.title.substring(0, 30) + "..." : selectedParent.title}</span>
-                          ) : (
-                            <span className="text-muted-foreground">Select parent item...</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0" align="start">
-                      <Command>
-                        <CommandInput placeholder="Search items..." />
-                        <CommandList>
-                          <CommandEmpty>No items found</CommandEmpty>
-                          <CommandGroup>
-                            {selectedParent && (
-                              <CommandItem
-                                onSelect={() => {
-                                  setSelectedParent(null);
-                                  setParentSearchOpen(false);
-                                }}
-                              >
-                                <X className="w-4 h-4 mr-2" />
-                                <span>No parent</span>
-                              </CommandItem>
-                            )}
-                            {allItems
-                              .filter(item => item.id !== existingItem?.id) // Can't be own parent
-                              .map((item) => (
-                                <CommandItem
-                                  key={item.id}
-                                  onSelect={() => {
-                                    setSelectedParent({ id: item.id, title: item.title });
-                                    setParentSearchOpen(false);
-                                  }}
-                                >
-                                  {item.type === "fire" && <Flame className="w-4 h-4 mr-2 text-fire-primary" />}
-                                  {item.type === "water" && <Droplet className="w-4 h-4 mr-2 text-water-primary" />}
-                                  {item.type === "air" && <Wind className="w-4 h-4 mr-2 text-air-primary" />}
-                                  {item.type === "earth" && <Mountain className="w-4 h-4 mr-2 text-earth-primary" />}
-                                  {item.type === "void" && <Circle className="w-4 h-4 mr-2 text-void-primary" />}
-                                  <span className="truncate">{item.title}</span>
-                                </CommandItem>
-                              ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
+                <ParentItemSelector
+                  selectedParent={selectedParent}
+                  onSelectParent={setSelectedParent}
+                  allItems={allItems}
+                  currentItemId={existingItem?.id}
+                  className="flex-1"
+                />
 
                 <div className="flex-1">
                   <label className="text-sm font-medium mb-2 block">Deadline</label>
@@ -477,7 +317,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               </div>
             )}
 
-            {(itemType === "void" || itemType === "air" || itemType === "earth") && (
+            {supportsUrl(itemType) && (
               <div>
                 <label className="text-sm font-medium mb-2 block">URL</label>
                 <Input
