@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal, Wind, Check, ArrowUp, ArrowDown, Mountain } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, Wind, Check, ArrowUp, ArrowDown, Mountain } from "lucide-react";
 import { format, isPast, set } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
@@ -174,21 +174,6 @@ export function ItemList({
                     )}
                     
                     <div className="flex-1">
-                      {/* Parent link */}
-                      {item.parent && (
-                        <div 
-                          className="flex items-center gap-1 text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/item/edit?id=${item.parent!.id}&type=${item.parent!.type}`);
-                          }}
-                        >
-                          <ArrowUp className="w-3 h-3" />
-                          {getTypeIcon(item.parent.type)}
-                          <span className="truncate">{item.parent.title}</span>
-                        </div>
-                      )}
-                      
                       <p className={cn(
                         "text-base font-medium mb-2",
                         item.type === "fire" && item.status === "Completed" && "line-through text-muted-foreground"
@@ -252,34 +237,22 @@ export function ItemList({
 
                     </div>
                   </div>
+                  
+                  {/* Parent link - top right */}
                   <div className="flex flex-col items-end gap-2">
-                    <div className="flex items-center gap-1">
-                      <button
+                    {item.parent && (
+                      <div 
+                        className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/item/edit?id=${item.id}&type=${type}`);
+                          navigate(`/item/edit?id=${item.parent!.id}&type=${item.parent!.type}`);
                         }}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label="View details"
                       >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteItem(item.id);
-                        }}
-                        className="text-muted-foreground hover:text-destructive transition-colors"
-                        aria-label="Delete item"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    
-                    {/* Created date */}
-                    <div className="text-xs text-muted-foreground">
-                      {format(item.createdAt, "MMM d, yyyy")}
-                    </div>
+                        <ArrowUp className="w-3 h-3" />
+                        {getTypeIcon(item.parent.type)}
+                        <span className="truncate">{item.parent.title}</span>
+                      </div>
+                    )}
                     
                     {item.deadline && !isEditingThisDeadline && (
                       <div className="flex items-center gap-2">
@@ -372,10 +345,29 @@ export function ItemList({
                     )}
                   </div>
                 </div>
+                
+                {/* Tags */}
                 <div className="flex flex-wrap gap-2">
                   {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
                       {tag.name}
                     </Badge>)}
+                </div>
+                
+                {/* Footer: Created date (left) and Trash button (right) */}
+                <div className="flex items-center justify-between pt-2">
+                  <div className="text-xs text-muted-foreground">
+                    {format(item.createdAt, "MMM d, yyyy")}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteItem(item.id);
+                    }}
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                    aria-label="Delete item"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </Card>;
