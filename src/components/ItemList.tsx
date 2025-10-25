@@ -192,12 +192,12 @@ export function ItemList({
                         )}
                       </div>
                     
-                      {/* Notes preview - first two lines */}
-                      {item.notes && (
-                        <p className="text-sm text-muted-foreground whitespace-pre-line">
-                          {truncateNotes(item.notes)}
-                        </p>
-                      )}
+                    {/* Notes preview - limited to two lines */}
+                    {item.notes && (
+                      <p className="text-sm text-muted-foreground whitespace-pre-line line-clamp-2">
+                        {truncateNotes(item.notes)}
+                      </p>
+                    )}
                     </div>
                   </div>
                   
@@ -209,13 +209,6 @@ export function ItemList({
                         {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
                       </div>
                     )}
-                  </div>
-                </div>
-                
-                {/* Center: Created date */}
-                <div className="flex justify-center pt-2">
-                  <div className="text-xs text-muted-foreground">
-                    Created: {format(item.createdAt, "MMM d, yyyy")}
                   </div>
                 </div>
                 

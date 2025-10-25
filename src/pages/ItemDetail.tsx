@@ -29,6 +29,7 @@ interface Item {
   status?: string;
   url?: string;
   parent_id?: string;
+  createdAt?: Date;
 }
 
 interface ItemDetailProps {
@@ -204,6 +205,13 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               className="text-lg py-6 px-6 rounded-2xl border-2"
               autoFocus={!initialTitle}
             />
+
+            {/* Show created date for existing items */}
+            {existingItem?.createdAt && (
+              <div className="text-sm text-muted-foreground text-center">
+                Created: {format(existingItem.createdAt, "MMM d, yyyy 'at' HH:mm")}
+              </div>
+            )}
 
             {/* Row 1: Type | Status (for Fire) OR Type | Parent Item (for non-Fire) */}
             <div className="flex gap-4 items-start">
