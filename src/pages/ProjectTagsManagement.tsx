@@ -97,7 +97,18 @@ export default function ProjectTagsManagement() {
         parent_id: parentTagForNew?.id || null,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === "23505") {
+          toast.error(
+            parentTagForNew
+              ? `A tag named "${newTagName}" already exists under "${parentTagForNew.name}"`
+              : `A root tag named "${newTagName}" already exists`
+          );
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       toast.success(`Tag "${newTagName}" created`);
       setNewTagName("");
