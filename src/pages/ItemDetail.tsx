@@ -100,8 +100,8 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12">
         <div className="flex items-center justify-between mb-6">
           <Button
             variant="ghost"
@@ -120,7 +120,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
           <div className="space-y-4">
             <Input
               value={title}
@@ -143,22 +143,22 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                       Fire (Actions)
                     </div>
                   </SelectItem>
+                  <SelectItem value="earth">
+                    <div className="flex items-center gap-2">
+                      <Mountain className="w-4 h-4 text-earth-primary" />
+                      Earth (How to)
+                    </div>
+                  </SelectItem>
                   <SelectItem value="water">
                     <div className="flex items-center gap-2">
                       <Droplet className="w-4 h-4 text-water-primary" />
-                      Water (Intentions)
+                      Water (Writing)
                     </div>
                   </SelectItem>
                   <SelectItem value="air">
                     <div className="flex items-center gap-2">
                       <Wind className="w-4 h-4 text-air-primary" />
                       Air (Analysis)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="earth">
-                    <div className="flex items-center gap-2">
-                      <Mountain className="w-4 h-4 text-earth-primary" />
-                      Earth (How to)
                     </div>
                   </SelectItem>
                   <SelectItem value="void">
