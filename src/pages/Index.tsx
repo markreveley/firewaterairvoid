@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { ItemInput } from "@/components/ItemInput";
 import { ItemList } from "@/components/ItemList";
 import { FireWaterToggle } from "@/components/FireWaterToggle";
 import { TagFilter } from "@/components/TagFilter";
 import { StatusFilter } from "@/components/StatusFilter";
 import { useItems } from "@/hooks/useItems";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Tag {
   id: string;
@@ -15,6 +16,7 @@ interface Tag {
 const Index = () => {
   const { items, isLoading, addItem, deleteItem, updateItem } = useItems();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialType = (searchParams.get("type") as "fire" | "water" | "air" | "void" | "earth") || "fire";
   const [activeType, setActiveType] = useState<"fire" | "water" | "air" | "void" | "earth">(initialType);
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
@@ -50,16 +52,7 @@ const Index = () => {
   }, [] as Tag[]);
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12 space-y-12">
-        <header className="text-center space-y-2">
-          
-          
-        </header>
-
-        <div className="py-8">
-          <ItemInput currentType={activeType} />
-        </div>
-
+      <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12 space-y-8">
         <div className="py-4">
           <FireWaterToggle activeType={activeType} onToggle={setActiveType} />
         </div>
@@ -80,6 +73,16 @@ const Index = () => {
             selectedTag={selectedTagFilter} 
             onSelectTag={setSelectedTagFilter} 
           />
+        </div>
+
+        <div className="flex justify-center py-4">
+          <Button
+            onClick={() => navigate(`/item/new?type=${activeType}`)}
+            size="lg"
+            className="rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all"
+          >
+            <Plus className="w-6 h-6" />
+          </Button>
         </div>
 
         <div className="max-w-4xl mx-auto">
