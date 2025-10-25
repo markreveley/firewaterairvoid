@@ -49,7 +49,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const [itemType, setItemType] = useState<ItemType>(existingItem?.type || typeParam || "fire");
   const [selectedTags, setSelectedTags] = useState<Tag[]>(existingItem?.tags || []);
   const [deadline, setDeadline] = useState<Date | undefined>(existingItem?.deadline);
-  const [selectedTime, setSelectedTime] = useState<string>("00:00");
+  const [selectedTime, setSelectedTime] = useState<string>(
+    existingItem?.deadline ? format(existingItem.deadline, "HH:mm") : "00:00"
+  );
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [isEditingTag, setIsEditingTag] = useState(false);
