@@ -8,7 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2 } from "lucide-react";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Link2 } from "lucide-react";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -17,22 +17,35 @@ interface Tag {
   name: string;
 }
 
-interface ItemDetailProps {
-  onAddItem: (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => void;
-  existingTags: Tag[];
-  existingItem?: {
-    id: string;
-    title: string;
-    type: "fire" | "water" | "air" | "void" | "earth";
-    tags: Tag[];
-    deadline?: Date;
-    notes?: string;
-    status?: string;
-    url?: string;
-  } | null;
+interface Item {
+  id: string;
+  title: string;
+  type: "fire" | "water" | "air" | "void" | "earth";
+  tags: Tag[];
+  deadline?: Date;
+  notes?: string;
+  status?: string;
+  url?: string;
+  parent_id?: string;
 }
 
-export default function ItemDetail({ onAddItem, existingTags, existingItem }: ItemDetailProps) {
+interface ItemDetailProps {
+  onAddItem: (
+    title: string,
+    type: "fire" | "water" | "air" | "void" | "earth",
+    tags: Tag[],
+    deadline?: Date,
+    notes?: string,
+    status?: string,
+    url?: string,
+    parent_id?: string
+  ) => Promise<void>;
+  existingTags: Tag[];
+  existingItem?: Item | null;
+  allItems: Item[];
+}
+
+export default function ItemDetail({ onAddItem, existingTags, existingItem, allItems }: ItemDetailProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
@@ -51,11 +64,23 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
   const [isEditingTag, setIsEditingTag] = useState(false);
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [editTagName, setEditTagName] = useState("");
+  const [selectedParent, setSelectedParent] = useState<{ id: string; title: string } | null>(null);
+  const [parentSearchOpen, setParentSearchOpen] = useState(false);
 
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
     const hours = Math.floor(i / 4);
     const minutes = (i % 4) * 15;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  });
+
+  // Initialize parent selection from existing item
+  useState(() => {
+    if (existingItem?.parent_id) {
+      const parent = allItems.find(item => item.id === existingItem.parent_id);
+      if (parent) {
+        setSelectedParent({ id: parent.id, title: parent.title });
+      }
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +99,8 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
         itemType === "fire" ? finalDeadline : undefined,
         notes.trim() || undefined,
         itemType === "fire" ? (status.trim() || "To Do") : undefined,
-        (itemType === "void" || itemType === "air") ? (url.trim() || undefined) : undefined
+        (itemType === "void" || itemType === "air") ? (url.trim() || undefined) : undefined,
+        selectedParent?.id
       );
       // navigation handled in parent
     }
@@ -206,6 +232,70 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                   />
                 </div>
               )}
+            </div>
+
+            {/* Parent Item Selector */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Link2 className="w-4 h-4" />
+                Parent Item (optional)
+              </label>
+              <Popover open={parentSearchOpen} onOpenChange={setParentSearchOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <Link2 className="w-4 h-4 mr-2 shrink-0" />
+                    {selectedParent ? (
+                      <span className="truncate">{selectedParent.title}</span>
+                    ) : (
+                      <span className="text-muted-foreground">Select parent item...</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search items..." />
+                    <CommandList>
+                      <CommandEmpty>No items found</CommandEmpty>
+                      <CommandGroup>
+                        {selectedParent && (
+                          <CommandItem
+                            onSelect={() => {
+                              setSelectedParent(null);
+                              setParentSearchOpen(false);
+                            }}
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            <span>No parent</span>
+                          </CommandItem>
+                        )}
+                        {allItems
+                          .filter(item => item.id !== existingItem?.id) // Can't be own parent
+                          .map((item) => (
+                            <CommandItem
+                              key={item.id}
+                              onSelect={() => {
+                                setSelectedParent({ id: item.id, title: item.title });
+                                setParentSearchOpen(false);
+                              }}
+                            >
+                              {item.type === "fire" && <Flame className="w-4 h-4 mr-2 text-fire-primary" />}
+                              {item.type === "water" && <Droplet className="w-4 h-4 mr-2 text-water-primary" />}
+                              {item.type === "air" && <Wind className="w-4 h-4 mr-2 text-air-primary" />}
+                              {item.type === "earth" && <Mountain className="w-4 h-4 mr-2 text-earth-primary" />}
+                              {item.type === "void" && <Circle className="w-4 h-4 mr-2 text-void-primary" />}
+                              <span className="truncate">{item.title}</span>
+                            </CommandItem>
+                          ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {itemType === "fire" && (

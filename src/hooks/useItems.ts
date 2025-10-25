@@ -17,6 +17,9 @@ interface Item {
   tags: Tag[];
   createdAt: Date;
   deadline?: Date;
+  parent_id?: string;
+  parent?: { id: string; title: string; type: string };
+  children?: Array<{ id: string; title: string; type: string }>;
 }
 
 export function useItems() {
@@ -46,6 +49,20 @@ export function useItems() {
             name: it.tags.name,
           }));
 
+        // Find parent item if parent_id exists
+        const parentItem = item.parent_id 
+          ? itemsData.find((i: any) => i.id === item.parent_id)
+          : null;
+
+        // Find children items (items that have this item as parent)
+        const childrenItems = itemsData
+          .filter((i: any) => i.parent_id === item.id)
+          .map((i: any) => ({
+            id: i.id,
+            title: i.title,
+            type: i.type,
+          }));
+
         return {
           id: item.id,
           title: item.title,
@@ -56,6 +73,13 @@ export function useItems() {
           tags: itemTags,
           createdAt: new Date(item.created_at),
           deadline: item.deadline ? new Date(item.deadline) : undefined,
+          parent_id: item.parent_id || undefined,
+          parent: parentItem ? {
+            id: parentItem.id,
+            title: parentItem.title,
+            type: parentItem.type,
+          } : undefined,
+          children: childrenItems.length > 0 ? childrenItems : undefined,
         };
       });
 
@@ -72,7 +96,7 @@ export function useItems() {
     loadItems();
   }, []);
 
-  const addItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
+  const addItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string) => {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
@@ -82,7 +106,8 @@ export function useItems() {
           notes: notes || null,
           status: status || null,
           url: url || null,
-          deadline: deadline?.toISOString()
+          deadline: deadline?.toISOString(),
+          parent_id: parent_id || null,
         })
         .select()
         .single();
@@ -160,6 +185,7 @@ export function useItems() {
       status?: string;
       url?: string;
       type?: "fire" | "water" | "air" | "void" | "earth";
+      parent_id?: string | null;
     }
   ) => {
     try {
@@ -182,6 +208,9 @@ export function useItems() {
       }
       if ("type" in updates) {
         itemUpdates.type = updates.type;
+      }
+      if ("parent_id" in updates) {
+        itemUpdates.parent_id = updates.parent_id || null;
       }
 
       if (Object.keys(itemUpdates).length > 0) {

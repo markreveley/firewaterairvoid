@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal, Wind, Check } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, X, CalendarIcon, Clock, Edit2, Trash2, MoreHorizontal, Wind, Check, ArrowUp, ArrowDown, Mountain } from "lucide-react";
 import { format, isPast, set } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
@@ -24,6 +24,9 @@ interface Item {
   tags: Tag[];
   createdAt: Date;
   deadline?: Date;
+  parent_id?: string;
+  parent?: { id: string; title: string; type: string };
+  children?: Array<{ id: string; title: string; type: string }>;
 }
 
 interface ItemListProps {
@@ -32,8 +35,19 @@ interface ItemListProps {
   selectedTagFilter?: string;
   selectedStatusFilter?: "To Do" | "Completed";
   onDeleteItem: (itemId: string) => void;
-  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth" }) => void;
+  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth"; parent_id?: string | null }) => void;
 }
+
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case "fire": return <Flame className="w-3 h-3" />;
+    case "water": return <Droplet className="w-3 h-3" />;
+    case "air": return <Wind className="w-3 h-3" />;
+    case "earth": return <Mountain className="w-3 h-3" />;
+    case "void": return <Circle className="w-3 h-3" />;
+    default: return null;
+  }
+};
 export function ItemList({
   items,
   type,
@@ -160,6 +174,21 @@ export function ItemList({
                     )}
                     
                     <div className="flex-1">
+                      {/* Parent link */}
+                      {item.parent && (
+                        <div 
+                          className="flex items-center gap-1 text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/item/edit?id=${item.parent!.id}&type=${item.parent!.type}`);
+                          }}
+                        >
+                          <ArrowUp className="w-3 h-3" />
+                          {getTypeIcon(item.parent.type)}
+                          <span className="truncate">{item.parent.title}</span>
+                        </div>
+                      )}
+                      
                       <p className={cn(
                         "text-base font-medium mb-2",
                         item.type === "fire" && item.status === "Completed" && "line-through text-muted-foreground"
@@ -199,6 +228,26 @@ export function ItemList({
                       <p className="text-sm text-muted-foreground whitespace-pre-line">
                         {truncateNotes(item.notes)}
                       </p>
+                    )}
+
+                    {/* Children (backlinks) */}
+                    {item.children && item.children.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {item.children.map((child) => (
+                          <div
+                            key={child.id}
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/50 text-xs text-muted-foreground cursor-pointer hover:bg-muted hover:text-foreground transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/item/edit?id=${child.id}&type=${child.type}`);
+                            }}
+                          >
+                            <ArrowDown className="w-3 h-3" />
+                            {getTypeIcon(child.type)}
+                            <span className="truncate max-w-[150px]">{child.title}</span>
+                          </div>
+                        ))}
+                      </div>
                     )}
 
                     </div>
