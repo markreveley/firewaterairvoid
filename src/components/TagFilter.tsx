@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 import type { Tag, ItemType } from "@/types";
 
 interface TagFilterProps {
-  primaryTags: Tag[];
-  secondaryTags: Tag[];
+  projectTags: Tag[];
+  categoryTags: Tag[];
   allTags: Tag[];
   type: ItemType;
   selectedTag?: string;
@@ -14,8 +14,8 @@ interface TagFilterProps {
   onSelectChildTag: (tagId: string | undefined) => void;
 }
 
-export function TagFilter({ primaryTags, secondaryTags, allTags, type, selectedTag, selectedChildTag, onSelectTag, onSelectChildTag }: TagFilterProps) {
-  if (primaryTags.length === 0 && secondaryTags.length === 0) return null;
+export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTag, selectedChildTag, onSelectTag, onSelectChildTag }: TagFilterProps) {
+  if (projectTags.length === 0 && categoryTags.length === 0) return null;
 
   // Get child tags for selected parent
   const childTags = selectedTag 
@@ -85,14 +85,14 @@ export function TagFilter({ primaryTags, secondaryTags, allTags, type, selectedT
 
   return (
     <div className="flex flex-col gap-2 items-center justify-center">
-      {primaryTags.length > 0 && (
+      {projectTags.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center justify-center">
-          {renderTagBadges(primaryTags)}
+          {renderTagBadges(projectTags)}
         </div>
       )}
-      {secondaryTags.length > 0 && (
+      {categoryTags.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center justify-center">
-          {renderTagBadges(secondaryTags)}
+          {renderTagBadges(categoryTags)}
         </div>
       )}
       {childTags.length > 0 && (

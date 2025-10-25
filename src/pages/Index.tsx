@@ -55,8 +55,8 @@ const Index = () => {
   // Clear tag filter when switching types if selected tag doesn't exist in new type
   useEffect(() => {
     if (selectedTagFilter && allTags.length > 0) {
-      const { primaryTags, secondaryTags } = getTagsForItemType(allTags, activeType);
-      const currentFilteredTags = [...primaryTags, ...secondaryTags];
+      const { projectTags, categoryTags } = getTagsForItemType(allTags, activeType);
+      const currentFilteredTags = [...projectTags, ...categoryTags];
 
       const isTagInFilteredList = currentFilteredTags.some(tag => tag.id === selectedTagFilter);
       if (!isTagInFilteredList) {
@@ -67,7 +67,7 @@ const Index = () => {
   }, [activeType, allTags, selectedTagFilter]);
 
   // Get filtered tags for current type
-  const { primaryTags, secondaryTags } = getTagsForItemType(allTags, activeType);
+  const { projectTags, categoryTags } = getTagsForItemType(allTags, activeType);
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -84,8 +84,8 @@ const Index = () => {
       <div className="container mx-auto px-8 md:px-12 lg:px-16 pt-4 pb-12 space-y-8">
         <div className="py-2">
           <TagFilter
-            primaryTags={primaryTags}
-            secondaryTags={secondaryTags}
+            projectTags={projectTags}
+            categoryTags={categoryTags}
             allTags={allTags}
             type={activeType}
             selectedTag={selectedTagFilter}

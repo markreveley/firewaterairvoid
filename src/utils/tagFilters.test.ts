@@ -13,37 +13,37 @@ describe('tagFilters utilities', () => {
   ];
 
   describe('getTagsForItemType', () => {
-    it('should return only fire tags for fire type', () => {
+    it('should return only project tags for fire type', () => {
       const result = getTagsForItemType(mockTags, 'fire');
-      expect(result.primaryTags).toHaveLength(3);
-      expect(result.secondaryTags).toHaveLength(0);
-      expect(result.primaryTags.map(t => t.name)).toEqual(['Tourlab', 'Dirtwire', 'Dev']);
+      expect(result.projectTags).toHaveLength(3);
+      expect(result.categoryTags).toHaveLength(0);
+      expect(result.projectTags.map(t => t.name)).toEqual(['Tourlab', 'Dirtwire', 'Dev']);
     });
 
-    it('should return both primary and secondary tags for water type', () => {
+    it('should return both project and category tags for water type', () => {
       const result = getTagsForItemType(mockTags, 'water');
-      expect(result.primaryTags).toHaveLength(3); // Fire tags
-      expect(result.secondaryTags).toHaveLength(3); // Non-fire tags
+      expect(result.projectTags).toHaveLength(3); // Project tags
+      expect(result.categoryTags).toHaveLength(3); // Category tags
     });
 
-    it('should return only secondary tags for air type', () => {
+    it('should return only category tags for air type', () => {
       const result = getTagsForItemType(mockTags, 'air');
-      expect(result.primaryTags).toHaveLength(0);
-      expect(result.secondaryTags).toHaveLength(3);
-      expect(result.secondaryTags.map(t => t.name)).toContain('Marketing');
-      expect(result.secondaryTags.map(t => t.name)).toContain('Research');
+      expect(result.projectTags).toHaveLength(0);
+      expect(result.categoryTags).toHaveLength(3);
+      expect(result.categoryTags.map(t => t.name)).toContain('Marketing');
+      expect(result.categoryTags.map(t => t.name)).toContain('Research');
     });
 
-    it('should return only secondary tags for earth type', () => {
+    it('should return only category tags for earth type', () => {
       const result = getTagsForItemType(mockTags, 'earth');
-      expect(result.primaryTags).toHaveLength(0);
-      expect(result.secondaryTags).toHaveLength(3);
+      expect(result.projectTags).toHaveLength(0);
+      expect(result.categoryTags).toHaveLength(3);
     });
 
-    it('should return only secondary tags for void type', () => {
+    it('should return only category tags for void type', () => {
       const result = getTagsForItemType(mockTags, 'void');
-      expect(result.primaryTags).toHaveLength(0);
-      expect(result.secondaryTags).toHaveLength(3);
+      expect(result.projectTags).toHaveLength(0);
+      expect(result.categoryTags).toHaveLength(3);
     });
   });
 

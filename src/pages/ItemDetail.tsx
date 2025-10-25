@@ -149,6 +149,32 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   // Check if any selected tags have children available
   const hasChildTagsAvailable = availableChildTags.length > 0;
 
+  // Full-page markdown preview
+  if (isMarkdownPreview) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setIsMarkdownPreview(false)}
+            className="mb-6"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Edit
+          </Button>
+          <div className="max-w-4xl mx-auto prose prose-lg dark:prose-invert">
+            {notes ? (
+              <ReactMarkdown>{notes}</ReactMarkdown>
+            ) : (
+              <p className="text-muted-foreground italic">No notes to preview</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12">
@@ -162,7 +188,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             <ArrowLeft className="w-4 h-4 mr-2" />
             Save
           </Button>
-          
+
           <Button
             type="button"
             variant="ghost"
@@ -528,35 +554,16 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                   onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
                   className="gap-2"
                 >
-                  {isMarkdownPreview ? (
-                    <>
-                      <FileText className="w-4 h-4" />
-                      Edit
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="w-4 h-4" />
-                      Preview
-                    </>
-                  )}
+                  <Eye className="w-4 h-4" />
+                  Preview
                 </Button>
               </div>
-              {isMarkdownPreview ? (
-                <div className="min-h-[300px] text-base py-4 px-6 rounded-xl border bg-background prose prose-sm max-w-none dark:prose-invert">
-                  {notes ? (
-                    <ReactMarkdown>{notes}</ReactMarkdown>
-                  ) : (
-                    <p className="text-muted-foreground italic">No notes to preview</p>
-                  )}
-                </div>
-              ) : (
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add notes..."
-                  className="min-h-[300px] text-base py-4 px-6 rounded-xl resize-none"
-                />
-              )}
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add notes..."
+                className="min-h-[300px] text-base py-4 px-6 rounded-xl resize-none"
+              />
             </div>
           </div>
         </form>
