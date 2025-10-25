@@ -102,14 +102,23 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-3xl mx-auto">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            onClick={handleSubmit}
+            className="font-medium"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Save
+          </Button>
+          
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+          >
+            Cancel
+          </Button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
@@ -324,14 +333,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
               />
             </div>
           </div>
-
-          <Button
-            type="submit"
-            variant="white"
-            className="w-full rounded-xl py-6 text-base"
-          >
-            {existingItem ? "Save Changes" : "Add Item"}
-          </Button>
         </form>
       </div>
     </div>
