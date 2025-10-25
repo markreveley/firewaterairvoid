@@ -19,7 +19,7 @@ export function useTags() {
       if (error) {
         console.error("Error loading tags:", error);
       } else {
-        setAllTags(data || []);
+        setAllTags((data || []) as Tag[]);
       }
       setIsLoading(false);
     };

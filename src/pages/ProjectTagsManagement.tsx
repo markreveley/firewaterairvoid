@@ -40,14 +40,12 @@ export default function ProjectTagsManagement() {
       const { data, error } = await supabase
         .from("tags")
         .select("*")
+        .eq("type", "project")
         .order("name", { ascending: true });
 
       if (error) throw error;
 
-      // Filter to only project tags (fire tags)
-      const projectTags = data?.filter(tag => 
-        FIRE_TAG_NAMES.includes(tag.name as any)
-      ) || [];
+      const projectTags = data || [];
 
       // Store flat list for parent selection
       setAllFlatTags(projectTags);
@@ -95,6 +93,7 @@ export default function ProjectTagsManagement() {
       const { error } = await supabase.from("tags").insert({
         name: newTagName.trim(),
         parent_id: parentTagForNew?.id || null,
+        type: "project",
       });
 
       if (error) {

@@ -40,14 +40,12 @@ export default function CategoryTagsManagement() {
       const { data, error } = await supabase
         .from("tags")
         .select("*")
+        .eq("type", "category")
         .order("name", { ascending: true });
 
       if (error) throw error;
 
-      // Filter to only category tags (non-fire tags)
-      const categoryTags = data?.filter(tag => 
-        !FIRE_TAG_NAMES.includes(tag.name as any)
-      ) || [];
+      const categoryTags = data || [];
 
       // Store flat list for parent selection
       setAllFlatTags(categoryTags);
@@ -95,6 +93,7 @@ export default function CategoryTagsManagement() {
       const { error } = await supabase.from("tags").insert({
         name: newTagName.trim(),
         parent_id: parentTagForNew?.id || null,
+        type: "category",
       });
 
       if (error) {

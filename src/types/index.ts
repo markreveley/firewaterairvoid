@@ -4,6 +4,7 @@ export interface Tag {
   id: string;
   name: string;
   parent_id?: string | null;
+  type?: 'project' | 'category';
 }
 
 export interface Item {

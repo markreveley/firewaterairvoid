@@ -94,18 +94,21 @@ export type Database = {
           id: string
           name: string
           parent_id: string | null
+          type: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           name: string
           parent_id?: string | null
+          type?: string
         }
         Update: {
           created_at?: string | null
           id?: string
           name?: string
           parent_id?: string | null
+          type?: string
         }
         Relationships: [
           {
