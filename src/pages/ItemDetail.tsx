@@ -193,6 +193,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     return existingTags.filter(tag => tag.parent_id === parentId);
   };
 
+  // Check if a project tag is already selected
+  const hasProjectTag = selectedTags.some(tag => FIRE_TAG_NAMES.includes(tag.name as any));
+
   // Full-page markdown preview
   if (isMarkdownPreview) {
     return (
@@ -434,7 +437,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                             className="rounded-full border-dashed"
                           >
                             <Plus className="w-3 h-3 mr-1" />
-                            Add Project Tag
+                            {hasProjectTag ? "Change Project Tag" : "Add Project Tag"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-80 p-0" align="start">
@@ -755,6 +758,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             type="button"
             onClick={() => handleSubmit(undefined, false)}
             disabled={!hasUnsavedChanges}
+            className={cn(
+              !hasUnsavedChanges && "bg-muted text-muted-foreground hover:bg-muted"
+            )}
           >
             Save
           </Button>
