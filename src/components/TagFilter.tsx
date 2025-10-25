@@ -1,8 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Flame, Droplet, Circle, X, Settings } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
 import type { Tag, ItemType } from "@/types";
 
 interface TagFilterProps {
@@ -10,27 +8,47 @@ interface TagFilterProps {
   categoryTags: Tag[];
   allTags: Tag[];
   type: ItemType;
-  selectedTags: string[];
-  selectedChildTags: string[];
-  onSelectTags: (tagIds: string[]) => void;
-  onSelectChildTags: (tagIds: string[]) => void;
+  selectedProjectTag?: string;
+  selectedProjectChildTag?: string;
+  selectedCategoryTags: string[];
+  selectedCategoryChildTags: string[];
+  onSelectProjectTag: (tagId: string | undefined) => void;
+  onSelectProjectChildTag: (tagId: string | undefined) => void;
+  onSelectCategoryTags: (tagIds: string[]) => void;
+  onSelectCategoryChildTags: (tagIds: string[]) => void;
 }
 
-export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTags, selectedChildTags, onSelectTags, onSelectChildTags }: TagFilterProps) {
-  const navigate = useNavigate();
-  
+export function TagFilter({ 
+  projectTags, 
+  categoryTags, 
+  allTags, 
+  type, 
+  selectedProjectTag,
+  selectedProjectChildTag,
+  selectedCategoryTags,
+  selectedCategoryChildTags,
+  onSelectProjectTag,
+  onSelectProjectChildTag,
+  onSelectCategoryTags,
+  onSelectCategoryChildTags
+}: TagFilterProps) {
   if (projectTags.length === 0 && categoryTags.length === 0) return null;
 
-  // Get child tags for all selected parents
-  const childTags = selectedTags.length > 0
-    ? allTags.filter(tag => tag.parent_id && selectedTags.includes(tag.parent_id))
+  // Get child tags for selected project tag
+  const projectChildTags = selectedProjectTag
+    ? allTags.filter(tag => tag.parent_id === selectedProjectTag)
     : [];
 
-  const renderTagBadges = (tags: Tag[], isChildTag = false) => {
+  // Get child tags for all selected category tags
+  const categoryChildTags = selectedCategoryTags.length > 0
+    ? allTags.filter(tag => tag.parent_id && selectedCategoryTags.includes(tag.parent_id))
+    : [];
+
+  const renderProjectTagBadges = (tags: Tag[], isChildTag = false) => {
     return tags.map((tag) => {
       const isSelected = isChildTag 
-        ? selectedChildTags.includes(tag.id) 
-        : selectedTags.includes(tag.id);
+        ? selectedProjectChildTag === tag.id
+        : selectedProjectTag === tag.id;
 
       return (
         <Badge
@@ -59,21 +77,85 @@ export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTa
           )}
           onClick={() => {
             if (isChildTag) {
+              // Exclusive: toggle child tag
+              onSelectProjectChildTag(isSelected ? undefined : tag.id);
+            } else {
+              // Exclusive: select this parent and clear child
+              onSelectProjectTag(isSelected ? undefined : tag.id);
+              onSelectProjectChildTag(undefined);
+            }
+          }}
+        >
+          <span>{tag.name}</span>
+          {isSelected && (
+            <X
+              className="w-3 h-3 ml-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isChildTag) {
+                  onSelectProjectChildTag(undefined);
+                } else {
+                  onSelectProjectTag(undefined);
+                  onSelectProjectChildTag(undefined);
+                }
+              }}
+            />
+          )}
+        </Badge>
+      );
+    });
+  };
+
+  const renderCategoryTagBadges = (tags: Tag[], isChildTag = false) => {
+    return tags.map((tag) => {
+      const isSelected = isChildTag 
+        ? selectedCategoryChildTags.includes(tag.id)
+        : selectedCategoryTags.includes(tag.id);
+
+      return (
+        <Badge
+          key={tag.id}
+          className={cn(
+            "cursor-pointer transition-all duration-200 flex items-center gap-1",
+            isSelected
+              ? type === "fire"
+                ? "bg-fire-primary text-white shadow-md scale-105"
+                : type === "water"
+                ? "bg-water-primary text-white shadow-md scale-105"
+                : type === "air"
+                ? "bg-air-primary text-white shadow-md scale-105"
+                : type === "earth"
+                ? "bg-earth-primary text-white shadow-md scale-105"
+                : "bg-white text-black shadow-md scale-105 border-2 border-black"
+              : type === "fire"
+              ? "bg-fire-light text-fire-dark hover:bg-fire-secondary"
+              : type === "water"
+              ? "bg-water-light text-water-dark hover:bg-water-secondary"
+              : type === "air"
+              ? "bg-air-light text-air-dark hover:bg-air-secondary"
+              : type === "earth"
+              ? "bg-earth-light text-earth-dark hover:bg-earth-secondary"
+              : "bg-void-light text-void-dark hover:bg-white hover:text-black hover:border-black"
+          )}
+          onClick={() => {
+            if (isChildTag) {
+              // Cumulative: toggle child tag
               if (isSelected) {
-                onSelectChildTags(selectedChildTags.filter(id => id !== tag.id));
+                onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
               } else {
-                onSelectChildTags([...selectedChildTags, tag.id]);
+                onSelectCategoryChildTags([...selectedCategoryChildTags, tag.id]);
               }
             } else {
+              // Cumulative: toggle parent tag
               if (isSelected) {
-                // Remove tag and clear any child tags belonging to this parent
-                onSelectTags(selectedTags.filter(id => id !== tag.id));
+                onSelectCategoryTags(selectedCategoryTags.filter(id => id !== tag.id));
+                // Clear child tags belonging to this parent
                 const childTagIds = allTags
                   .filter(t => t.parent_id === tag.id)
                   .map(t => t.id);
-                onSelectChildTags(selectedChildTags.filter(id => !childTagIds.includes(id)));
+                onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => !childTagIds.includes(id)));
               } else {
-                onSelectTags([...selectedTags, tag.id]);
+                onSelectCategoryTags([...selectedCategoryTags, tag.id]);
               }
             }
           }}
@@ -85,14 +167,14 @@ export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTa
               onClick={(e) => {
                 e.stopPropagation();
                 if (isChildTag) {
-                  onSelectChildTags(selectedChildTags.filter(id => id !== tag.id));
+                  onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
                 } else {
-                  onSelectTags(selectedTags.filter(id => id !== tag.id));
+                  onSelectCategoryTags(selectedCategoryTags.filter(id => id !== tag.id));
                   // Clear child tags belonging to this parent
                   const childTagIds = allTags
                     .filter(t => t.parent_id === tag.id)
                     .map(t => t.id);
-                  onSelectChildTags(selectedChildTags.filter(id => !childTagIds.includes(id)));
+                  onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => !childTagIds.includes(id)));
                 }
               }}
             />
@@ -105,35 +187,28 @@ export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTa
   return (
     <div className="flex flex-col gap-2 items-center justify-center">
       {projectTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center justify-center">
-          {renderTagBadges(projectTags)}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/tags/projects")}
-            className="h-6 px-2"
-          >
-            <Settings className="w-3 h-3" />
-          </Button>
-        </div>
+        <>
+          <div className="flex flex-wrap gap-2 items-center justify-center">
+            {renderProjectTagBadges(projectTags)}
+          </div>
+          {projectChildTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center justify-center">
+              {renderProjectTagBadges(projectChildTags, true)}
+            </div>
+          )}
+        </>
       )}
       {categoryTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center justify-center">
-          {renderTagBadges(categoryTags)}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/tags/categories")}
-            className="h-6 px-2"
-          >
-            <Settings className="w-3 h-3" />
-          </Button>
-        </div>
-      )}
-      {childTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center justify-center">
-          {renderTagBadges(childTags, true)}
-        </div>
+        <>
+          <div className="flex flex-wrap gap-2 items-center justify-center">
+            {renderCategoryTagBadges(categoryTags)}
+          </div>
+          {categoryChildTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center justify-center">
+              {renderCategoryTagBadges(categoryChildTags, true)}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

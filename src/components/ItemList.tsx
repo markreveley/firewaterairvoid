@@ -29,8 +29,10 @@ interface Item {
 interface ItemListProps {
   items: Item[];
   type: "fire" | "water" | "air" | "void" | "earth";
-  selectedTagFilters?: string[];
-  selectedChildTagFilters?: string[];
+  selectedProjectTag?: string;
+  selectedProjectChildTag?: string;
+  selectedCategoryTags?: string[];
+  selectedCategoryChildTags?: string[];
   selectedStatusFilter?: "To Do" | "Completed";
   onDeleteItem: (itemId: string) => void;
   onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth"; parent_id?: string | null }) => void;
@@ -49,8 +51,10 @@ const getTypeIcon = (type: string) => {
 export function ItemList({
   items,
   type,
-  selectedTagFilters = [],
-  selectedChildTagFilters = [],
+  selectedProjectTag,
+  selectedProjectChildTag,
+  selectedCategoryTags = [],
+  selectedCategoryChildTags = [],
   selectedStatusFilter,
   onDeleteItem,
   onUpdateItem
@@ -81,20 +85,31 @@ export function ItemList({
       if (item.status !== selectedStatusFilter) return false;
     }
     
-    // Filter by parent tags (item must have ALL selected parent tags)
-    if (selectedTagFilters.length > 0) {
-      const hasAllParentTags = selectedTagFilters.every(filterId => 
-        item.tags.some(tag => tag.id === filterId)
-      );
-      if (!hasAllParentTags) return false;
+    // Filter by project tag (exclusive - only one parent, only one child)
+    if (selectedProjectTag) {
+      const hasProjectTag = item.tags.some(tag => tag.id === selectedProjectTag);
+      if (!hasProjectTag) return false;
     }
     
-    // Filter by child tags (item must have ALL selected child tags)
-    if (selectedChildTagFilters.length > 0) {
-      const hasAllChildTags = selectedChildTagFilters.every(filterId =>
+    if (selectedProjectChildTag) {
+      const hasProjectChildTag = item.tags.some(tag => tag.id === selectedProjectChildTag);
+      if (!hasProjectChildTag) return false;
+    }
+    
+    // Filter by category tags (cumulative - item must have ALL selected category tags)
+    if (selectedCategoryTags.length > 0) {
+      const hasAllCategoryTags = selectedCategoryTags.every(filterId => 
         item.tags.some(tag => tag.id === filterId)
       );
-      if (!hasAllChildTags) return false;
+      if (!hasAllCategoryTags) return false;
+    }
+    
+    // Filter by category child tags (cumulative - item must have ALL selected child tags)
+    if (selectedCategoryChildTags.length > 0) {
+      const hasAllCategoryChildTags = selectedCategoryChildTags.every(filterId =>
+        item.tags.some(tag => tag.id === filterId)
+      );
+      if (!hasAllCategoryChildTags) return false;
     }
     
     return true;
