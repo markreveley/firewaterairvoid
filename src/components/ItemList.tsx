@@ -121,16 +121,31 @@ export function ItemList({
       const hasFireTag = item.type === "fire";
       const isEditingThisDeadline = editingDeadlineId === item.id;
       
-      return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", type === "air" && "border-l-4 border-l-air-primary", type === "earth" && "border-l-4 border-l-earth-primary", type === "void" && "border-l-4 border-l-void-primary", isOverdue && "bg-fire-light/50")}>
+      return <Card 
+        key={item.id} 
+        className={cn(
+          "p-4 transition-all duration-300 hover:shadow-lg cursor-pointer", 
+          type === "fire" && "border-l-4 border-l-fire-primary", 
+          type === "water" && "border-l-4 border-l-water-primary", 
+          type === "air" && "border-l-4 border-l-air-primary", 
+          type === "earth" && "border-l-4 border-l-earth-primary", 
+          type === "void" && "border-l-4 border-l-void-primary", 
+          isOverdue && "bg-fire-light/50"
+        )}
+        onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`)}
+      >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1">
                     {/* Checkbox for fire items */}
                     {item.type === "fire" && (
                       <button
-                        onClick={() => onUpdateItem(item.id, { 
-                          status: item.status === "Completed" ? "To Do" : "Completed" 
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUpdateItem(item.id, { 
+                            status: item.status === "Completed" ? "To Do" : "Completed" 
+                          });
+                        }}
                         className={cn(
                           "mt-1 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors shrink-0",
                           item.status === "Completed" 
@@ -154,6 +169,7 @@ export function ItemList({
                             href={item.url}
                             onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               window.open(`/redirect?to=${encodeURIComponent(item.url!)}`, '_blank', 'noopener,noreferrer');
                             }}
                             className="text-blue-600 underline hover:text-blue-700 cursor-pointer"
@@ -165,6 +181,7 @@ export function ItemList({
                             href={item.title}
                             onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               window.open(`/redirect?to=${encodeURIComponent(item.title)}`,'_blank','noopener,noreferrer');
                             }}
                             className="flex items-center gap-2 text-primary hover:underline cursor-pointer"
@@ -189,14 +206,20 @@ export function ItemList({
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/item/edit?id=${item.id}&type=${type}`);
+                        }}
                         className="text-muted-foreground hover:text-foreground transition-colors"
                         aria-label="View details"
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => onDeleteItem(item.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteItem(item.id);
+                        }}
                         className="text-muted-foreground hover:text-destructive transition-colors"
                         aria-label="Delete item"
                       >
@@ -219,7 +242,10 @@ export function ItemList({
                           size="sm"
                           variant="ghost"
                           className="h-6 w-6 p-0"
-                          onClick={() => startEditingDeadline(item)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditingDeadline(item);
+                          }}
                         >
                           <Edit2 className="w-3 h-3" />
                         </Button>
@@ -227,7 +253,10 @@ export function ItemList({
                           size="sm"
                           variant="ghost"
                           className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                          onClick={() => deleteDeadline(item)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteDeadline(item);
+                          }}
                         >
                           <X className="w-3 h-3" />
                         </Button>
@@ -235,7 +264,7 @@ export function ItemList({
                     )}
 
                     {isEditingThisDeadline && (
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
@@ -272,7 +301,10 @@ export function ItemList({
                           size="sm"
                           variant="default"
                           className="h-7"
-                          onClick={() => saveDeadline(item.id, item.type)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            saveDeadline(item.id, item.type);
+                          }}
                         >
                           Save
                         </Button>
@@ -280,7 +312,10 @@ export function ItemList({
                           size="sm"
                           variant="ghost"
                           className="h-7"
-                          onClick={() => setEditingDeadlineId(null)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingDeadlineId(null);
+                          }}
                         >
                           Cancel
                         </Button>
