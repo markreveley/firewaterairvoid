@@ -625,7 +625,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                           className="rounded-full border-dashed"
                         >
                           <Plus className="w-3 h-3 mr-1" />
-                          Add Tag
+                          {itemType === "fire" && hasProjectTag ? "Change Tag" : "Add Tag"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 p-0" align="start">
@@ -641,7 +641,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                             </CommandGroup>
                             <CommandGroup heading={itemType === "fire" ? "Fire Tags" : "Tags"}>
                               {parentTags.map((tag) => (
-                                <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                                <CommandItem key={tag.id} onSelect={() => (itemType === "fire" ? addProjectTag(tag) : addExistingTag(tag))}>
                                   <span>{tag.name}</span>
                                 </CommandItem>
                               ))}
