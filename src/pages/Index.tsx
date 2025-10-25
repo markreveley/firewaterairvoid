@@ -66,6 +66,17 @@ const Index = () => {
           </div>
         )}
 
+        <div className="flex justify-center py-4">
+          <Button
+            onClick={() => navigate(`/item/new?type=${activeType}`)}
+            variant="white"
+            size="lg"
+            className="rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all"
+          >
+            <Plus className="w-6 h-6" />
+          </Button>
+        </div>
+
         <div className="py-2">
           <TagFilter 
             tags={allTags} 
@@ -73,16 +84,6 @@ const Index = () => {
             selectedTag={selectedTagFilter} 
             onSelectTag={setSelectedTagFilter} 
           />
-        </div>
-
-        <div className="flex justify-center py-4">
-          <Button
-            onClick={() => navigate(`/item/new?type=${activeType}`)}
-            size="lg"
-            className="rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
         </div>
 
         <div className="max-w-4xl mx-auto">
