@@ -9,13 +9,13 @@ interface StatusFilterProps {
 export function StatusFilter({ selectedStatus, onSelectStatus }: StatusFilterProps) {
   return (
     <div className="flex justify-center">
-      <div className="inline-flex items-center rounded-full bg-muted p-1 gap-1">
+      <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
         <Button
           variant="ghost"
           size="sm"
           className={cn(
-            "rounded-full px-6 transition-all",
-            selectedStatus === "To Do" && "bg-background shadow-sm"
+            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            selectedStatus === "To Do" && "bg-background text-foreground shadow"
           )}
           onClick={() => onSelectStatus("To Do")}
         >
@@ -25,8 +25,8 @@ export function StatusFilter({ selectedStatus, onSelectStatus }: StatusFilterPro
           variant="ghost"
           size="sm"
           className={cn(
-            "rounded-full px-6 transition-all",
-            selectedStatus === "Completed" && "bg-background shadow-sm"
+            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            selectedStatus === "Completed" && "bg-background text-foreground shadow"
           )}
           onClick={() => onSelectStatus("Completed")}
         >

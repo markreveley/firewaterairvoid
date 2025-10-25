@@ -1,14 +1,35 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import ItemDetail from "./ItemDetail";
 import { useItems } from "@/hooks/useItems";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ItemDetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { addItem, updateItem, items, isLoading } = useItems();
-  
+  const [allTags, setAllTags] = useState<Array<{ id: string; name: string; parent_id?: string | null }>>([]);
+
   const itemId = searchParams.get("id");
   const existingItem = itemId ? items.find(item => item.id === itemId) : null;
+
+  // Load all tags from database
+  useEffect(() => {
+    const loadTags = async () => {
+      const { data, error } = await supabase
+        .from("tags")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        console.error("Error loading tags:", error);
+      } else {
+        setAllTags(data || []);
+      }
+    };
+
+    loadTags();
+  }, []);
 
   // Wait for items to load if we're editing an existing item
   if (isLoading && itemId) {
@@ -18,12 +39,6 @@ export default function ItemDetailPage() {
       </div>
     );
   }
-
-  const existingTags = Array.from(
-    new Map(
-      items.flatMap((item) => item.tags).map((tag) => [tag.id, tag])
-    ).values()
-  );
 
   const handleAddItem = async (
     title: string,
@@ -54,5 +69,5 @@ export default function ItemDetailPage() {
     navigate(`/?type=${type}`);
   };
 
-  return <ItemDetail onAddItem={handleAddItem} existingTags={existingTags} existingItem={existingItem} allItems={items} />;
+  return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={items} />;
 }

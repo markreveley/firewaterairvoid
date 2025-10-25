@@ -113,9 +113,32 @@ const Index = () => {
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* View Mode Toggle and New Item Button */}
+          {/* New Item Button and View Mode Toggle */}
           <div className="flex items-center justify-between gap-4">
+            {/* New Item Button - Left */}
+            <Button
+              onClick={() => navigate(`/item/new?type=${activeType}`)}
+              variant="white"
+              size="sm"
+              className="rounded-full w-9 h-9 p-0"
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+
             <div className="flex items-center gap-4">
+              {viewMode === "overview" && (
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search items..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              )}
+
               <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "overview")}>
                 <TabsList>
                   <TabsTrigger value="card">Card</TabsTrigger>
@@ -130,31 +153,6 @@ const Index = () => {
                 />
               )}
             </div>
-
-            {/* New Item Button - Center */}
-            <Button
-              onClick={() => navigate(`/item/new?type=${activeType}`)}
-              variant="white"
-              size="lg"
-              className="rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all"
-            >
-              <Plus className="w-6 h-6" />
-            </Button>
-
-            {viewMode === "overview" ? (
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search items..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            ) : (
-              <div className="flex-1 max-w-md" />
-            )}
           </div>
 
           {isLoading && items.length === 0 ? (

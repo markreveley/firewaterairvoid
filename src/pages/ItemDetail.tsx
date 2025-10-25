@@ -8,13 +8,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Link2 } from "lucide-react";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Link2, Eye, FileText } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface Tag {
   id: string;
   name: string;
+  parent_id?: string | null;
 }
 
 interface Item {
@@ -66,6 +68,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const [editTagName, setEditTagName] = useState("");
   const [selectedParent, setSelectedParent] = useState<{ id: string; title: string } | null>(null);
   const [parentSearchOpen, setParentSearchOpen] = useState(false);
+  const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
 
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
     const hours = Math.floor(i / 4);
@@ -149,9 +152,24 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const fireTagNames = ['Tourlab', 'Dirtwire', 'Touring', 'Disorder', 'Merch', 'Emma', 'Shane', 'Odin', 'Home', 'Finances', 'Dev'];
 
   // Filter tags based on item type
-  const filteredTags = itemType === "fire"
+  const baseFilteredTags = itemType === "fire"
     ? existingTags.filter(tag => fireTagNames.includes(tag.name))
     : existingTags.filter(tag => !fireTagNames.includes(tag.name));
+
+  // Separate parent and child tags
+  const parentTags = baseFilteredTags.filter(tag => !tag.parent_id);
+  const childTags = baseFilteredTags.filter(tag => tag.parent_id);
+
+  // Get IDs of selected tags
+  const selectedTagIds = selectedTags.map(t => t.id);
+
+  // Find child tags available based on selected parent tags
+  const availableChildTags = childTags.filter(tag =>
+    tag.parent_id && selectedTagIds.includes(tag.parent_id)
+  );
+
+  // Check if any selected tags have children available
+  const hasChildTagsAvailable = availableChildTags.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -469,24 +487,36 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                       <Command>
                         <CommandInput placeholder="Search tags..." />
                         <CommandList>
-                          <CommandGroup>
-                            <CommandItem onSelect={() => setIsAddingTag(true)}>
-                              <Plus className="w-4 h-4 mr-2" />
-                              <span>Create new tag</span>
-                            </CommandItem>
-                            <CommandItem onSelect={() => setIsEditingTag(true)}>
-                              <Edit2 className="w-4 h-4 mr-2" />
-                              <span>Edit tag</span>
-                            </CommandItem>
-                          </CommandGroup>
+                          {itemType !== "fire" && (
+                            <CommandGroup>
+                              <CommandItem onSelect={() => setIsAddingTag(true)}>
+                                <Plus className="w-4 h-4 mr-2" />
+                                <span>Create new tag</span>
+                              </CommandItem>
+                              <CommandItem onSelect={() => navigate("/tags")}>
+                                <Edit2 className="w-4 h-4 mr-2" />
+                                <span>Edit tags</span>
+                              </CommandItem>
+                            </CommandGroup>
+                          )}
                           <CommandEmpty>No tags found</CommandEmpty>
-                          <CommandGroup heading="Existing Tags">
-                            {filteredTags.map((tag) => (
+                          <CommandGroup heading={itemType === "fire" ? "Fire Tags" : "Tags"}>
+                            {parentTags.map((tag) => (
                               <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
                                 <span>{tag.name}</span>
                               </CommandItem>
                             ))}
                           </CommandGroup>
+                          {hasChildTagsAvailable && (
+                            <CommandGroup heading="Child Tags">
+                              {availableChildTags.map((tag) => (
+                                <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                                  <ChevronRight className="w-4 h-4 mr-2" />
+                                  <span>{tag.name}</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
                         </CommandList>
                       </Command>
                     </PopoverContent>
@@ -527,7 +557,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         <CommandList>
                           <CommandEmpty>No tags found</CommandEmpty>
                           <CommandGroup heading="Select Tag to Edit">
-                            {filteredTags.map((tag) => (
+                            {parentTags.map((tag) => (
                               <CommandItem key={tag.id} onSelect={() => startEditingTag(tag)}>
                                 <span>{tag.name}</span>
                               </CommandItem>
@@ -569,13 +599,44 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Notes</label>
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add notes..."
-                className="min-h-[300px] text-base py-4 px-6 rounded-xl resize-none"
-              />
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium">Notes</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
+                  className="gap-2"
+                >
+                  {isMarkdownPreview ? (
+                    <>
+                      <FileText className="w-4 h-4" />
+                      Edit
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-4 h-4" />
+                      Preview
+                    </>
+                  )}
+                </Button>
+              </div>
+              {isMarkdownPreview ? (
+                <div className="min-h-[300px] text-base py-4 px-6 rounded-xl border bg-background prose prose-sm max-w-none dark:prose-invert">
+                  {notes ? (
+                    <ReactMarkdown>{notes}</ReactMarkdown>
+                  ) : (
+                    <p className="text-muted-foreground italic">No notes to preview</p>
+                  )}
+                </div>
+              ) : (
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add notes..."
+                  className="min-h-[300px] text-base py-4 px-6 rounded-xl resize-none"
+                />
+              )}
             </div>
           </div>
         </form>
