@@ -17,9 +17,9 @@ interface Tag {
 }
 
 interface ItemInputProps {
-  onAddItem: (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => void;
+  onAddItem: (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => void;
   existingTags: Tag[];
-  currentType: "fire" | "water" | "air" | "void";
+  currentType: "fire" | "water" | "air" | "void" | "earth";
 }
 
 export function ItemInput({ onAddItem, existingTags, currentType }: ItemInputProps) {

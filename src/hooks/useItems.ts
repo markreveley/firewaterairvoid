@@ -10,7 +10,7 @@ interface Tag {
 interface Item {
   id: string;
   title: string;
-  type: "fire" | "water" | "air" | "void";
+  type: "fire" | "water" | "air" | "void" | "earth";
   notes?: string;
   status?: string;
   url?: string;
@@ -49,7 +49,7 @@ export function useItems() {
         return {
           id: item.id,
           title: item.title,
-          type: item.type as "fire" | "water" | "air" | "void",
+          type: item.type as "fire" | "water" | "air" | "void" | "earth",
           notes: item.notes || undefined,
           status: item.status || undefined,
           url: item.url || undefined,
@@ -72,7 +72,7 @@ export function useItems() {
     loadItems();
   }, []);
 
-  const addItem = async (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
+  const addItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
@@ -159,7 +159,7 @@ export function useItems() {
       notes?: string;
       status?: string;
       url?: string;
-      type?: "fire" | "water" | "air" | "void";
+      type?: "fire" | "water" | "air" | "void" | "earth";
     }
   ) => {
     try {

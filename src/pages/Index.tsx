@@ -15,12 +15,12 @@ interface Tag {
 const Index = () => {
   const { items, isLoading, addItem, deleteItem, updateItem } = useItems();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialType = (searchParams.get("type") as "fire" | "water" | "air" | "void") || "fire";
-  const [activeType, setActiveType] = useState<"fire" | "water" | "air" | "void">(initialType);
+  const initialType = (searchParams.get("type") as "fire" | "water" | "air" | "void" | "earth") || "fire";
+  const [activeType, setActiveType] = useState<"fire" | "water" | "air" | "void" | "earth">(initialType);
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
 
-  const handleAddItem = async (title: string, type: "fire" | "water" | "air" | "void", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
+  const handleAddItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
     // Default status to "To Do" for fire items if not provided
     const finalStatus = type === "fire" && !status ? "To Do" : status;
     await addItem(title, type, tags, deadline, notes, finalStatus, url);

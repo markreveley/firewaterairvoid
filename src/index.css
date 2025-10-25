@@ -66,6 +66,13 @@ All colors MUST be HSL.
     --void-light: 0 0% 100%;
     --void-dark: 240 5% 50%;
 
+    /* Earth theme colors */
+    --earth-primary: 30 55% 50%;
+    --earth-secondary: 25 50% 45%;
+    --earth-accent: 35 60% 55%;
+    --earth-light: 30 50% 95%;
+    --earth-dark: 25 50% 35%;
+
     /* Zen neutral */
     --zen-stone: 40 8% 75%;
     --zen-sand: 40 20% 88%;
@@ -127,6 +134,13 @@ All colors MUST be HSL.
     --void-accent: 0 0% 70%;
     --void-light: 0 0% 30%;
     --void-dark: 0 0% 95%;
+
+    /* Earth theme colors - adjusted for dark */
+    --earth-primary: 30 60% 55%;
+    --earth-secondary: 25 55% 50%;
+    --earth-accent: 35 65% 60%;
+    --earth-light: 30 40% 30%;
+    --earth-dark: 25 55% 50%;
 
     /* Zen neutral */
     --zen-stone: 40 5% 40%;

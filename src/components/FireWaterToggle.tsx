@@ -1,9 +1,9 @@
-import { Flame, Droplet, Circle, Wind } from "lucide-react";
+import { Flame, Droplet, Circle, Wind, Mountain } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FireWaterToggleProps {
-  activeType: "fire" | "water" | "air" | "void";
-  onToggle: (type: "fire" | "water" | "air" | "void") => void;
+  activeType: "fire" | "water" | "air" | "void" | "earth";
+  onToggle: (type: "fire" | "water" | "air" | "void" | "earth") => void;
 }
 
 export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) {
@@ -44,6 +44,18 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
       >
         <Wind className={cn("w-5 h-5", activeType === "air" && "animate-pulse")} />
         <span className="font-medium">Air</span>
+      </button>
+      <button
+        onClick={() => onToggle("earth")}
+        className={cn(
+          "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
+          activeType === "earth"
+            ? "bg-earth-primary text-white shadow-lg scale-105"
+            : "text-muted-foreground hover:text-earth-primary"
+        )}
+      >
+        <Mountain className={cn("w-5 h-5", activeType === "earth" && "animate-pulse")} />
+        <span className="font-medium">Earth</span>
       </button>
       <button
         onClick={() => onToggle("void")}

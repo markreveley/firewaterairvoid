@@ -17,7 +17,7 @@ interface Tag {
 interface Item {
   id: string;
   title: string;
-  type: "fire" | "water" | "air" | "void";
+  type: "fire" | "water" | "air" | "void" | "earth";
   notes?: string;
   status?: string;
   url?: string;
@@ -28,11 +28,11 @@ interface Item {
 
 interface ItemListProps {
   items: Item[];
-  type: "fire" | "water" | "air" | "void";
+  type: "fire" | "water" | "air" | "void" | "earth";
   selectedTagFilter?: string;
   selectedStatusFilter?: "To Do" | "Completed";
   onDeleteItem: (itemId: string) => void;
-  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" }) => void;
+  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth" }) => void;
 }
 export function ItemList({
   items,
@@ -88,7 +88,7 @@ export function ItemList({
     }
   };
 
-  const saveDeadline = (itemId: string, currentType: "fire" | "water" | "air" | "void") => {
+  const saveDeadline = (itemId: string, currentType: "fire" | "water" | "air" | "void" | "earth") => {
     if (editDeadline && editTime) {
       const [hours, minutes] = editTime.split(':').map(Number);
       const finalDeadline = set(editDeadline, { hours, minutes, seconds: 0, milliseconds: 0 });
@@ -121,7 +121,7 @@ export function ItemList({
       const hasFireTag = item.type === "fire";
       const isEditingThisDeadline = editingDeadlineId === item.id;
       
-      return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", type === "air" && "border-l-4 border-l-air-primary", type === "void" && "border-l-4 border-l-void-primary", isOverdue && "bg-fire-light/50")}>
+      return <Card key={item.id} className={cn("p-4 transition-all duration-300 hover:shadow-lg", type === "fire" && "border-l-4 border-l-fire-primary", type === "water" && "border-l-4 border-l-water-primary", type === "air" && "border-l-4 border-l-air-primary", type === "earth" && "border-l-4 border-l-earth-primary", type === "void" && "border-l-4 border-l-void-primary", isOverdue && "bg-fire-light/50")}>
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1">
