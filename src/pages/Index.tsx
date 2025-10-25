@@ -6,7 +6,8 @@ import { TagFilter } from "@/components/TagFilter";
 import { StatusFilter } from "@/components/StatusFilter";
 import { useItems } from "@/hooks/useItems";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, User } from "lucide-react";
+import fireWaterLogo from "@/assets/firewater.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -90,6 +91,16 @@ const Index = () => {
     : allTags.filter(tag => !fireTagNames.includes(tag.name));
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border">
+        <div className="container mx-auto px-8 md:px-12 lg:px-16 py-4 flex items-center justify-between">
+          <img src={fireWaterLogo} alt="Fire Water" className="h-12 w-auto" />
+          <Button variant="ghost" size="icon">
+            <User className="h-5 w-5" />
+          </Button>
+        </div>
+      </header>
+
       <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12 space-y-8">
         <div className="py-4">
           <FireWaterToggle activeType={activeType} onToggle={setActiveType} />
