@@ -15,8 +15,9 @@ import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { Tag, Item, ItemType } from "@/types";
 import { supportsUrl, supportsDeadline, supportsStatus } from "@/utils/itemTypes";
-import { filterTagsForItemType } from "@/utils/tagFilters";
+import { filterTagsForItemType, getProjectAndCategoryTags } from "@/utils/tagFilters";
 import { generateTimeOptions } from "@/utils/time";
+import { FIRE_TAG_NAMES } from "@/constants/tags";
 
 interface ItemDetailProps {
   onAddItem: (
@@ -134,6 +135,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   // Filter tags based on item type
   const baseFilteredTags = filterTagsForItemType(existingTags, itemType);
 
+  // For water items, get separate project and category tags
+  const { projectTags: waterProjectTags, categoryTags: waterCategoryTags } = getProjectAndCategoryTags(existingTags, itemType);
+
   // Separate parent and child tags
   const parentTags = baseFilteredTags.filter(tag => !tag.parent_id);
   const childTags = baseFilteredTags.filter(tag => tag.parent_id);
@@ -141,13 +145,15 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   // Get IDs of selected tags
   const selectedTagIds = selectedTags.map(t => t.id);
 
-  // Find child tags available based on selected parent tags
-  const availableChildTags = childTags.filter(tag =>
-    tag.parent_id && selectedTagIds.includes(tag.parent_id)
+  // Find which selected tags have children
+  const selectedTagsWithChildren = selectedTags.filter(tag => 
+    existingTags.some(t => t.parent_id === tag.id)
   );
 
-  // Check if any selected tags have children available
-  const hasChildTagsAvailable = availableChildTags.length > 0;
+  // Get child tags for each selected parent
+  const getChildTagsForParent = (parentId: string) => {
+    return existingTags.filter(tag => tag.parent_id === parentId);
+  };
 
   // Full-page markdown preview
   if (isMarkdownPreview) {
@@ -365,24 +371,261 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                   </div>
                 )}
               </div>
-              <div className="flex flex-wrap gap-2 items-center">
-                {selectedTags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    className="px-3 py-1 rounded-full flex items-center gap-1"
-                  >
-                    <span>{tag.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag.id)}
-                      className="ml-1 hover:opacity-70"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
+              
+              {/* For water items, show separate project and category tag sections */}
+              {itemType === "water" ? (
+                <div className="space-y-4">
+                  {/* Project Tags Section */}
+                  <div>
+                    <label className="text-xs font-medium mb-2 block text-muted-foreground">Project Tags</label>
+                    <div className="flex flex-wrap gap-2 items-center">
+                      {selectedTags
+                        .filter(tag => FIRE_TAG_NAMES.includes(tag.name as any))
+                        .map((tag) => {
+                          const hasChildren = existingTags.some(t => t.parent_id === tag.id);
+                          return (
+                            <div key={tag.id} className="flex items-center gap-2">
+                              <Badge className="px-3 py-1 rounded-full flex items-center gap-1">
+                                <span>{tag.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeTag(tag.id)}
+                                  className="ml-1 hover:opacity-70"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                              {hasChildren && (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7 px-2 text-xs"
+                                    >
+                                      <Plus className="w-3 h-3 mr-1" />
+                                      Add Sub Tag
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-80 p-0" align="start">
+                                    <Command>
+                                      <CommandInput placeholder="Search sub tags..." />
+                                      <CommandList>
+                                        <CommandEmpty>No sub tags found</CommandEmpty>
+                                        <CommandGroup heading={`${tag.name} Sub Tags`}>
+                                          {getChildTagsForParent(tag.id).map((childTag) => (
+                                            <CommandItem key={childTag.id} onSelect={() => addExistingTag(childTag)}>
+                                              <ChevronRight className="w-4 h-4 mr-2" />
+                                              <span>{childTag.name}</span>
+                                            </CommandItem>
+                                          ))}
+                                        </CommandGroup>
+                                        <CommandGroup>
+                                          <CommandItem onSelect={() => navigate("/tags")}>
+                                            <Edit2 className="w-4 h-4 mr-2" />
+                                            <span>Edit tags</span>
+                                          </CommandItem>
+                                        </CommandGroup>
+                                      </CommandList>
+                                    </Command>
+                                  </PopoverContent>
+                                </Popover>
+                              )}
+                            </div>
+                          );
+                        })}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full border-dashed"
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Add Project Tag
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search project tags..." />
+                            <CommandList>
+                              <CommandEmpty>No project tags found</CommandEmpty>
+                              <CommandGroup heading="Project Tags">
+                                {waterProjectTags.map((tag) => (
+                                  <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                                    <span>{tag.name}</span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                              <CommandGroup>
+                                <CommandItem onSelect={() => navigate("/tags")}>
+                                  <Edit2 className="w-4 h-4 mr-2" />
+                                  <span>Edit tags</span>
+                                </CommandItem>
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
 
-                {!isAddingTag && (
+                  {/* Category Tags Section */}
+                  <div>
+                    <label className="text-xs font-medium mb-2 block text-muted-foreground">Category Tags</label>
+                    <div className="flex flex-wrap gap-2 items-center">
+                      {selectedTags
+                        .filter(tag => !FIRE_TAG_NAMES.includes(tag.name as any))
+                        .map((tag) => {
+                          const hasChildren = existingTags.some(t => t.parent_id === tag.id);
+                          return (
+                            <div key={tag.id} className="flex items-center gap-2">
+                              <Badge className="px-3 py-1 rounded-full flex items-center gap-1">
+                                <span>{tag.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeTag(tag.id)}
+                                  className="ml-1 hover:opacity-70"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                              {hasChildren && (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7 px-2 text-xs"
+                                    >
+                                      <Plus className="w-3 h-3 mr-1" />
+                                      Add Sub Tag
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-80 p-0" align="start">
+                                    <Command>
+                                      <CommandInput placeholder="Search sub tags..." />
+                                      <CommandList>
+                                        <CommandEmpty>No sub tags found</CommandEmpty>
+                                        <CommandGroup heading={`${tag.name} Sub Tags`}>
+                                          {getChildTagsForParent(tag.id).map((childTag) => (
+                                            <CommandItem key={childTag.id} onSelect={() => addExistingTag(childTag)}>
+                                              <ChevronRight className="w-4 h-4 mr-2" />
+                                              <span>{childTag.name}</span>
+                                            </CommandItem>
+                                          ))}
+                                        </CommandGroup>
+                                        <CommandGroup>
+                                          <CommandItem onSelect={() => navigate("/tags")}>
+                                            <Edit2 className="w-4 h-4 mr-2" />
+                                            <span>Edit tags</span>
+                                          </CommandItem>
+                                        </CommandGroup>
+                                      </CommandList>
+                                    </Command>
+                                  </PopoverContent>
+                                </Popover>
+                              )}
+                            </div>
+                          );
+                        })}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full border-dashed"
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Add Category Tag
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search category tags..." />
+                            <CommandList>
+                              <CommandEmpty>No category tags found</CommandEmpty>
+                              <CommandGroup heading="Category Tags">
+                                {waterCategoryTags.map((tag) => (
+                                  <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                                    <span>{tag.name}</span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                              <CommandGroup>
+                                <CommandItem onSelect={() => navigate("/tags")}>
+                                  <Edit2 className="w-4 h-4 mr-2" />
+                                  <span>Edit tags</span>
+                                </CommandItem>
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* For non-water items, show single tag section */
+                <div className="flex flex-wrap gap-2 items-center">
+                  {selectedTags.map((tag) => {
+                    const hasChildren = existingTags.some(t => t.parent_id === tag.id);
+                    return (
+                      <div key={tag.id} className="flex items-center gap-2">
+                        <Badge className="px-3 py-1 rounded-full flex items-center gap-1">
+                          <span>{tag.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag.id)}
+                            className="ml-1 hover:opacity-70"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                        {hasChildren && (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Add Sub Tag
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 p-0" align="start">
+                              <Command>
+                                <CommandInput placeholder="Search sub tags..." />
+                                <CommandList>
+                                  <CommandEmpty>No sub tags found</CommandEmpty>
+                                  <CommandGroup heading={`${tag.name} Sub Tags`}>
+                                    {getChildTagsForParent(tag.id).map((childTag) => (
+                                      <CommandItem key={childTag.id} onSelect={() => addExistingTag(childTag)}>
+                                        <ChevronRight className="w-4 h-4 mr-2" />
+                                        <span>{childTag.name}</span>
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                  <CommandGroup>
+                                    <CommandItem onSelect={() => navigate("/tags")}>
+                                      <Edit2 className="w-4 h-4 mr-2" />
+                                      <span>Edit tags</span>
+                                    </CommandItem>
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      </div>
+                    );
+                  })}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -399,18 +642,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                       <Command>
                         <CommandInput placeholder="Search tags..." />
                         <CommandList>
-                          {itemType !== "fire" && (
-                            <CommandGroup>
-                              <CommandItem onSelect={() => setIsAddingTag(true)}>
-                                <Plus className="w-4 h-4 mr-2" />
-                                <span>Create new tag</span>
-                              </CommandItem>
-                              <CommandItem onSelect={() => navigate("/tags")}>
-                                <Edit2 className="w-4 h-4 mr-2" />
-                                <span>Edit tags</span>
-                              </CommandItem>
-                            </CommandGroup>
-                          )}
                           <CommandEmpty>No tags found</CommandEmpty>
                           <CommandGroup heading={itemType === "fire" ? "Fire Tags" : "Tags"}>
                             {parentTags.map((tag) => (
@@ -419,123 +650,12 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                               </CommandItem>
                             ))}
                           </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                )}
-
-                {isAddingTag && (
-                  <div className="flex items-center gap-2 p-2 border rounded-lg bg-card">
-                    <Input
-                      value={newTagName}
-                      onChange={(e) => setNewTagName(e.target.value)}
-                      placeholder="Tag name"
-                      className="flex-1"
-                      autoFocus
-                    />
-                    <Button type="button" size="sm" onClick={addNewTag}>
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setIsAddingTag(false);
-                        setNewTagName("");
-                      }}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                )}
-
-                {isEditingTag && !editingTagId && (
-                  <Popover open={isEditingTag} onOpenChange={setIsEditingTag}>
-                    <PopoverContent className="w-80 p-0" align="start">
-                      <Command>
-                        <CommandInput placeholder="Search tags to edit..." />
-                        <CommandList>
-                          <CommandEmpty>No tags found</CommandEmpty>
-                          <CommandGroup heading="Select Tag to Edit">
-                            {parentTags.map((tag) => (
-                              <CommandItem key={tag.id} onSelect={() => startEditingTag(tag)}>
-                                <span>{tag.name}</span>
-                              </CommandItem>
-                            ))}
+                          <CommandGroup>
+                            <CommandItem onSelect={() => navigate("/tags")}>
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              <span>Edit tags</span>
+                            </CommandItem>
                           </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                )}
-
-                {isEditingTag && editingTagId && (
-                  <div className="flex items-center gap-2 p-2 border rounded-lg bg-card">
-                    <Input
-                      value={editTagName}
-                      onChange={(e) => setEditTagName(e.target.value)}
-                      placeholder="Edit tag name"
-                      className="flex-1"
-                      autoFocus
-                    />
-                    <Button type="button" size="sm" onClick={saveEditedTag}>
-                      <Edit2 className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setIsEditingTag(false);
-                        setEditingTagId(null);
-                        setEditTagName("");
-                      }}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              {/* Child tags section - show when parent tags with children are selected */}
-              {hasChildTagsAvailable && (
-                <div className="mt-4">
-                  <label className="text-sm font-medium mb-2 block">Child Tags</label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full border-dashed"
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
-                        Add Child Tag
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80 p-0" align="start">
-                      <Command>
-                        <CommandInput placeholder="Search child tags..." />
-                        <CommandList>
-                          <CommandEmpty>No child tags found</CommandEmpty>
-                          <CommandGroup heading="Available Child Tags">
-                            {availableChildTags.map((tag) => (
-                              <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
-                                <ChevronRight className="w-4 h-4 mr-2" />
-                                <span>{tag.name}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                          {itemType !== "fire" && (
-                            <CommandGroup>
-                              <CommandItem onSelect={() => navigate("/tags")}>
-                                <Edit2 className="w-4 h-4 mr-2" />
-                                <span>Edit tags</span>
-                              </CommandItem>
-                            </CommandGroup>
-                          )}
                         </CommandList>
                       </Command>
                     </PopoverContent>

@@ -30,3 +30,21 @@ export const filterTagsForItemType = (existingTags: Tag[], itemType: ItemType): 
   }
   return existingTags.filter(tag => !FIRE_TAG_NAMES.includes(tag.name as any));
 };
+
+/**
+ * Get project tags (fire tags) and category tags (non-fire tags) separately
+ * Used for water items where both sets are displayed
+ */
+export const getProjectAndCategoryTags = (
+  allTags: Tag[],
+  itemType: ItemType
+): { projectTags: Tag[]; categoryTags: Tag[] } => {
+  const projectTags = allTags.filter(tag => FIRE_TAG_NAMES.includes(tag.name as any) && !tag.parent_id);
+  const categoryTags = allTags.filter(tag => !FIRE_TAG_NAMES.includes(tag.name as any) && !tag.parent_id);
+  
+  if (itemType === "water") {
+    return { projectTags, categoryTags };
+  }
+  
+  return { projectTags: [], categoryTags: [] };
+};

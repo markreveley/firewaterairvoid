@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getTagsForItemType, filterTagsForItemType } from './tagFilters';
+import { getTagsForItemType, filterTagsForItemType, getProjectAndCategoryTags } from './tagFilters';
 import type { Tag, ItemType } from '@/types';
 
 describe('tagFilters utilities', () => {
@@ -61,6 +61,33 @@ describe('tagFilters utilities', () => {
 
       const waterResult = filterTagsForItemType(mockTags, 'water');
       expect(waterResult).toHaveLength(3);
+    });
+  });
+
+  describe('getProjectAndCategoryTags', () => {
+    it('should return both project and category tags for water type', () => {
+      const result = getProjectAndCategoryTags(mockTags, 'water');
+      expect(result.projectTags).toHaveLength(3);
+      expect(result.categoryTags).toHaveLength(2); // Excludes child tag
+      expect(result.projectTags.map(t => t.name)).toEqual(['Tourlab', 'Dirtwire', 'Dev']);
+      expect(result.categoryTags.map(t => t.name)).toContain('Marketing');
+      expect(result.categoryTags.map(t => t.name)).toContain('Research');
+    });
+
+    it('should return empty arrays for non-water types', () => {
+      const fireResult = getProjectAndCategoryTags(mockTags, 'fire');
+      expect(fireResult.projectTags).toHaveLength(0);
+      expect(fireResult.categoryTags).toHaveLength(0);
+
+      const airResult = getProjectAndCategoryTags(mockTags, 'air');
+      expect(airResult.projectTags).toHaveLength(0);
+      expect(airResult.categoryTags).toHaveLength(0);
+    });
+
+    it('should exclude child tags from both project and category tags', () => {
+      const result = getProjectAndCategoryTags(mockTags, 'water');
+      expect(result.projectTags.some(t => t.parent_id)).toBe(false);
+      expect(result.categoryTags.some(t => t.parent_id)).toBe(false);
     });
   });
 });
