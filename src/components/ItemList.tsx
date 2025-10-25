@@ -200,16 +200,6 @@ export function ItemList({
                     )}
                     </div>
                   </div>
-                  
-                  <div className="flex flex-col items-end gap-1">
-                    {/* For fire items with deadline - show deadline */}
-                    {item.type === "fire" && item.deadline && (
-                      <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
-                        <Flame className="w-3 h-3" />
-                        {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
-                      </div>
-                    )}
-                  </div>
                 </div>
                 
                 {/* Footer: Children (left) and Parent (right) */}
@@ -264,8 +254,17 @@ export function ItemList({
                     )}
                   </div>
                   
-                  {/* Parent link */}
-                  <div>
+                  {/* Bottom right: Deadline (for fire) and/or Parent link */}
+                  <div className="flex flex-col items-end gap-1">
+                    {/* For fire items with deadline - show deadline */}
+                    {item.type === "fire" && item.deadline && (
+                      <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
+                        <Flame className="w-3 h-3" />
+                        {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
+                      </div>
+                    )}
+                    
+                    {/* Parent link */}
                     {item.parent && (
                       <div 
                         className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
