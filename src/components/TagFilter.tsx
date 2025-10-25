@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
-import { Flame, Droplet, Circle, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Flame, Droplet, Circle, X, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 import type { Tag, ItemType } from "@/types";
 
 interface TagFilterProps {
@@ -15,6 +17,8 @@ interface TagFilterProps {
 }
 
 export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTag, selectedChildTag, onSelectTag, onSelectChildTag }: TagFilterProps) {
+  const navigate = useNavigate();
+  
   if (projectTags.length === 0 && categoryTags.length === 0) return null;
 
   // Get child tags for selected parent
@@ -88,11 +92,27 @@ export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTa
       {projectTags.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center justify-center">
           {renderTagBadges(projectTags)}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/tags/projects")}
+            className="h-6 px-2"
+          >
+            <Settings className="w-3 h-3" />
+          </Button>
         </div>
       )}
       {categoryTags.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center justify-center">
           {renderTagBadges(categoryTags)}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/tags/categories")}
+            className="h-6 px-2"
+          >
+            <Settings className="w-3 h-3" />
+          </Button>
         </div>
       )}
       {childTags.length > 0 && (

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Edit2, Trash2, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { FIRE_TAG_NAMES } from "@/constants/tags";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,7 @@ interface Tag {
   children?: Tag[];
 }
 
-export default function TagsManagement() {
+export default function CategoryTagsManagement() {
   const navigate = useNavigate();
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,15 +44,20 @@ export default function TagsManagement() {
 
       if (error) throw error;
 
+      // Filter to only category tags (non-fire tags)
+      const categoryTags = data?.filter(tag => 
+        !FIRE_TAG_NAMES.includes(tag.name as any)
+      ) || [];
+
       // Store flat list for parent selection
-      setAllFlatTags(data || []);
+      setAllFlatTags(categoryTags);
 
       // Organize tags into parent-child structure
       const tagMap = new Map<string, Tag>();
       const rootTags: Tag[] = [];
 
       // First pass: create tag objects
-      data?.forEach((tag) => {
+      categoryTags.forEach((tag) => {
         tagMap.set(tag.id, { ...tag, children: [] });
       });
 
@@ -181,7 +187,6 @@ export default function TagsManagement() {
             onClick={() => {
               setEditingTag(tag);
               setEditTagName(tag.name);
-              // Set current parent if exists
               const currentParent = allFlatTags.find(t => t.id === tag.parent_id);
               setEditTagParent(currentParent || null);
             }}
@@ -209,15 +214,17 @@ export default function TagsManagement() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-2xl font-bold">Manage Tags</h1>
-          <div className="w-20" />
+          <h1 className="text-2xl font-bold">Manage Category Tags</h1>
+          <Button variant="outline" onClick={() => navigate("/tags/projects")}>
+            Project Tags
+          </Button>
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Create New Tag */}
           <div className="p-6 rounded-lg border bg-card space-y-4">
             <h2 className="text-lg font-semibold">
-              {parentTagForNew ? `Create Subtag for "${parentTagForNew.name}"` : "Create New Tag"}
+              {parentTagForNew ? `Create Subtag for "${parentTagForNew.name}"` : "Create New Category Tag"}
             </h2>
             {parentTagForNew && (
               <div className="flex items-center gap-2">
@@ -251,7 +258,7 @@ export default function TagsManagement() {
             {isLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading tags...</div>
             ) : tags.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">No tags yet</div>
+              <div className="text-center py-12 text-muted-foreground">No category tags yet</div>
             ) : (
               tags.map((tag) => renderTag(tag))
             )}
@@ -291,7 +298,7 @@ export default function TagsManagement() {
                   >
                     <option value="">No parent (root tag)</option>
                     {allFlatTags
-                      .filter(t => t.id !== editingTag?.id) // Can't be its own parent
+                      .filter(t => t.id !== editingTag?.id)
                       .map(tag => (
                         <option key={tag.id} value={tag.id}>{tag.name}</option>
                       ))}
