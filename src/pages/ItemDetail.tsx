@@ -88,7 +88,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
       selectedParent?.id !== initialValues.parentId;
 
     setHasUnsavedChanges(hasChanged);
-  }, [title, notes, status, url, itemType, selectedTags, deadline, selectedParent]);
+  }, [title, notes, status, url, itemType, selectedTags, deadline, selectedTime, selectedParent]);
 
   const timeOptions = generateTimeOptions();
 
@@ -376,6 +376,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         selected={deadline}
                         onSelect={setDeadline}
                         initialFocus
+                        className={cn("p-3 pointer-events-auto")}
                       />
                     </PopoverContent>
                     </Popover>
