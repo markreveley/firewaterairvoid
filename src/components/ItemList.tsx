@@ -220,7 +220,9 @@ export function ItemList({
                     {item.type === "fire" && item.deadline && (
                       <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
                         <Flame className="w-3 h-3" />
-                        {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
+                        {item.deadline.getHours() === 0 && item.deadline.getMinutes() === 0 
+                          ? format(item.deadline, "MMM d, yyyy")
+                          : format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
                       </div>
                     )}
                     

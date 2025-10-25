@@ -122,19 +122,19 @@ const Index = () => {
                 </div>
               )}
 
-              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "overview")}>
-                <TabsList>
-                  <TabsTrigger value="card">Card</TabsTrigger>
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                </TabsList>
-              </Tabs>
-
               {activeType === "fire" && (
                 <StatusFilter
                   selectedStatus={selectedStatusFilter}
                   onSelectStatus={setSelectedStatusFilter}
                 />
               )}
+
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "overview")}>
+                <TabsList>
+                  <TabsTrigger value="card">Card</TabsTrigger>
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </div>
 

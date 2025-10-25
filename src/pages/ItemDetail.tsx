@@ -49,7 +49,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const [itemType, setItemType] = useState<ItemType>(existingItem?.type || typeParam || "fire");
   const [selectedTags, setSelectedTags] = useState<Tag[]>(existingItem?.tags || []);
   const [deadline, setDeadline] = useState<Date | undefined>(existingItem?.deadline);
-  const [selectedTime, setSelectedTime] = useState<string>("09:00");
+  const [selectedTime, setSelectedTime] = useState<string>("00:00");
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [isEditingTag, setIsEditingTag] = useState(false);
@@ -256,7 +256,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
 
           {existingItem?.createdAt && (
             <div className="text-sm text-muted-foreground">
-              Created: {format(existingItem.createdAt, "MMM d, yyyy 'at' HH:mm")}
+              Created: {format(existingItem.createdAt, "MMM d, yyyy")}
             </div>
           )}
         </div>
