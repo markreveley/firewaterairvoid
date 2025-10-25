@@ -8,7 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain } from "lucide-react";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2 } from "lucide-react";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +48,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
+  const [isEditingTag, setIsEditingTag] = useState(false);
+  const [editingTagId, setEditingTagId] = useState<string | null>(null);
+  const [editTagName, setEditTagName] = useState("");
 
   const timeOptions = Array.from({ length: 96 }, (_, i) => {
     const hours = Math.floor(i / 4);
@@ -97,6 +100,23 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
 
   const removeTag = (tagId: string) => {
     setSelectedTags(selectedTags.filter((t) => t.id !== tagId));
+  };
+
+  const startEditingTag = (tag: Tag) => {
+    setEditingTagId(tag.id);
+    setEditTagName(tag.name);
+    setIsEditingTag(true);
+  };
+
+  const saveEditedTag = () => {
+    if (editTagName.trim() && editingTagId) {
+      setSelectedTags(selectedTags.map(t => 
+        t.id === editingTagId ? { ...t, name: editTagName.trim() } : t
+      ));
+      setIsEditingTag(false);
+      setEditingTagId(null);
+      setEditTagName("");
+    }
   };
 
   return (
@@ -287,6 +307,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                               <Plus className="w-4 h-4 mr-2" />
                               <span>Create new tag</span>
                             </CommandItem>
+                            <CommandItem onSelect={() => setIsEditingTag(true)}>
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              <span>Edit tag</span>
+                            </CommandItem>
                           </CommandGroup>
                           <CommandEmpty>No tags found</CommandEmpty>
                           <CommandGroup heading="Existing Tags">
@@ -321,6 +345,53 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem }: It
                       onClick={() => {
                         setIsAddingTag(false);
                         setNewTagName("");
+                      }}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+
+                {isEditingTag && !editingTagId && (
+                  <Popover open={isEditingTag} onOpenChange={setIsEditingTag}>
+                    <PopoverContent className="w-80 p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search tags to edit..." />
+                        <CommandList>
+                          <CommandEmpty>No tags found</CommandEmpty>
+                          <CommandGroup heading="Select Tag to Edit">
+                            {existingTags.map((tag) => (
+                              <CommandItem key={tag.id} onSelect={() => startEditingTag(tag)}>
+                                <span>{tag.name}</span>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                )}
+
+                {isEditingTag && editingTagId && (
+                  <div className="flex items-center gap-2 p-2 border rounded-lg bg-card">
+                    <Input
+                      value={editTagName}
+                      onChange={(e) => setEditTagName(e.target.value)}
+                      placeholder="Edit tag name"
+                      className="flex-1"
+                      autoFocus
+                    />
+                    <Button type="button" size="sm" onClick={saveEditedTag}>
+                      <Edit2 className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setIsEditingTag(false);
+                        setEditingTagId(null);
+                        setEditTagName("");
                       }}
                     >
                       <X className="w-3 h-3" />
