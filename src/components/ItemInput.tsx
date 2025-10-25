@@ -84,7 +84,9 @@ export function ItemInput({ onAddItem, existingTags, currentType }: ItemInputPro
           placeholder="Enter an item..."
           className="flex-1 text-lg py-6 px-6 rounded-2xl border-2"
         />
+      </div>
 
+      <div className="flex items-center justify-center gap-2">
         <Button
           type="submit"
           variant="white"
