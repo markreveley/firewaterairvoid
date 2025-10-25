@@ -5,22 +5,31 @@ import { cn } from "@/lib/utils";
 interface Tag {
   id: string;
   name: string;
+  parent_id?: string | null;
 }
 
 interface TagFilterProps {
   primaryTags: Tag[];
   secondaryTags: Tag[];
+  allTags: Tag[];
   type: "fire" | "water" | "air" | "void" | "earth";
   selectedTag?: string;
+  selectedChildTag?: string;
   onSelectTag: (tagId: string | undefined) => void;
+  onSelectChildTag: (tagId: string | undefined) => void;
 }
 
-export function TagFilter({ primaryTags, secondaryTags, type, selectedTag, onSelectTag }: TagFilterProps) {
+export function TagFilter({ primaryTags, secondaryTags, allTags, type, selectedTag, selectedChildTag, onSelectTag, onSelectChildTag }: TagFilterProps) {
   if (primaryTags.length === 0 && secondaryTags.length === 0) return null;
 
-  const renderTagBadges = (tags: Tag[]) => {
+  // Get child tags for selected parent
+  const childTags = selectedTag 
+    ? allTags.filter(tag => tag.parent_id === selectedTag)
+    : [];
+
+  const renderTagBadges = (tags: Tag[], isChildTag = false) => {
     return tags.map((tag) => {
-      const isSelected = selectedTag === tag.id;
+      const isSelected = isChildTag ? selectedChildTag === tag.id : selectedTag === tag.id;
 
       return (
         <Badge
@@ -47,7 +56,17 @@ export function TagFilter({ primaryTags, secondaryTags, type, selectedTag, onSel
               ? "bg-earth-light text-earth-dark hover:bg-earth-secondary"
               : "bg-void-light text-void-dark hover:bg-white hover:text-black hover:border-black"
           )}
-          onClick={() => onSelectTag(isSelected ? undefined : tag.id)}
+          onClick={() => {
+            if (isChildTag) {
+              onSelectChildTag(isSelected ? undefined : tag.id);
+            } else {
+              onSelectTag(isSelected ? undefined : tag.id);
+              // Clear child tag selection when selecting a different parent
+              if (!isSelected && selectedChildTag) {
+                onSelectChildTag(undefined);
+              }
+            }
+          }}
         >
           <span>{tag.name}</span>
           {isSelected && (
@@ -55,7 +74,12 @@ export function TagFilter({ primaryTags, secondaryTags, type, selectedTag, onSel
               className="w-3 h-3 ml-1"
               onClick={(e) => {
                 e.stopPropagation();
-                onSelectTag(undefined);
+                if (isChildTag) {
+                  onSelectChildTag(undefined);
+                } else {
+                  onSelectTag(undefined);
+                  onSelectChildTag(undefined); // Clear child when clearing parent
+                }
               }}
             />
           )}
@@ -74,6 +98,11 @@ export function TagFilter({ primaryTags, secondaryTags, type, selectedTag, onSel
       {secondaryTags.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center justify-center">
           {renderTagBadges(secondaryTags)}
+        </div>
+      )}
+      {childTags.length > 0 && (
+        <div className="flex flex-wrap gap-2 items-center justify-center">
+          {renderTagBadges(childTags, true)}
         </div>
       )}
     </div>

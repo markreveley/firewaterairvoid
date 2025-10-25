@@ -29,8 +29,10 @@ export default function TagsManagement() {
   const [newTagName, setNewTagName] = useState("");
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
   const [editTagName, setEditTagName] = useState("");
+  const [editTagParent, setEditTagParent] = useState<Tag | null>(null);
   const [deletingTag, setDeletingTag] = useState<Tag | null>(null);
   const [parentTagForNew, setParentTagForNew] = useState<Tag | null>(null);
+  const [allFlatTags, setAllFlatTags] = useState<Tag[]>([]);
 
   const loadTags = async () => {
     try {
@@ -40,6 +42,9 @@ export default function TagsManagement() {
         .order("name", { ascending: true });
 
       if (error) throw error;
+
+      // Store flat list for parent selection
+      setAllFlatTags(data || []);
 
       // Organize tags into parent-child structure
       const tagMap = new Map<string, Tag>();
@@ -104,7 +109,10 @@ export default function TagsManagement() {
     try {
       const { error } = await supabase
         .from("tags")
-        .update({ name: editTagName.trim() })
+        .update({ 
+          name: editTagName.trim(),
+          parent_id: editTagParent?.id || null 
+        })
         .eq("id", editingTag.id);
 
       if (error) throw error;
@@ -112,6 +120,7 @@ export default function TagsManagement() {
       toast.success("Tag updated");
       setEditingTag(null);
       setEditTagName("");
+      setEditTagParent(null);
       loadTags();
     } catch (error) {
       console.error("Error updating tag:", error);
@@ -172,6 +181,9 @@ export default function TagsManagement() {
             onClick={() => {
               setEditingTag(tag);
               setEditTagName(tag.name);
+              // Set current parent if exists
+              const currentParent = allFlatTags.find(t => t.id === tag.parent_id);
+              setEditTagParent(currentParent || null);
             }}
           >
             <Edit2 className="w-4 h-4" />
@@ -247,20 +259,60 @@ export default function TagsManagement() {
         </div>
 
         {/* Edit Dialog */}
-        <Dialog open={!!editingTag} onOpenChange={() => setEditingTag(null)}>
+        <Dialog open={!!editingTag} onOpenChange={() => {
+          setEditingTag(null);
+          setEditTagParent(null);
+        }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Edit Tag</DialogTitle>
-              <DialogDescription>Change the name of this tag</DialogDescription>
+              <DialogDescription>Change the name and parent of this tag</DialogDescription>
             </DialogHeader>
-            <Input
-              value={editTagName}
-              onChange={(e) => setEditTagName(e.target.value)}
-              placeholder="Tag name..."
-              onKeyDown={(e) => e.key === "Enter" && updateTag()}
-            />
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Tag Name</label>
+                <Input
+                  value={editTagName}
+                  onChange={(e) => setEditTagName(e.target.value)}
+                  placeholder="Tag name..."
+                  onKeyDown={(e) => e.key === "Enter" && updateTag()}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Parent Tag (optional)</label>
+                <div className="flex gap-2">
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    value={editTagParent?.id || ""}
+                    onChange={(e) => {
+                      const selectedTag = allFlatTags.find(t => t.id === e.target.value);
+                      setEditTagParent(selectedTag || null);
+                    }}
+                  >
+                    <option value="">No parent (root tag)</option>
+                    {allFlatTags
+                      .filter(t => t.id !== editingTag?.id) // Can't be its own parent
+                      .map(tag => (
+                        <option key={tag.id} value={tag.id}>{tag.name}</option>
+                      ))}
+                  </select>
+                  {editTagParent && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditTagParent(null)}
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setEditingTag(null)}>
+              <Button variant="outline" onClick={() => {
+                setEditingTag(null);
+                setEditTagParent(null);
+              }}>
                 Cancel
               </Button>
               <Button onClick={updateTag} disabled={!editTagName.trim()}>

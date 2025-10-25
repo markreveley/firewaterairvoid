@@ -30,6 +30,7 @@ interface ItemListProps {
   items: Item[];
   type: "fire" | "water" | "air" | "void" | "earth";
   selectedTagFilter?: string;
+  selectedChildTagFilter?: string;
   selectedStatusFilter?: "To Do" | "Completed";
   onDeleteItem: (itemId: string) => void;
   onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth"; parent_id?: string | null }) => void;
@@ -49,6 +50,7 @@ export function ItemList({
   items,
   type,
   selectedTagFilter,
+  selectedChildTagFilter,
   selectedStatusFilter,
   onDeleteItem,
   onUpdateItem
@@ -79,9 +81,17 @@ export function ItemList({
       if (item.status !== selectedStatusFilter) return false;
     }
     
+    // Filter by parent tag
     if (selectedTagFilter) {
-      return item.tags.some(tag => tag.id === selectedTagFilter);
+      const hasParentTag = item.tags.some(tag => tag.id === selectedTagFilter);
+      if (!hasParentTag) return false;
     }
+    
+    // Filter by child tag if selected
+    if (selectedChildTagFilter) {
+      return item.tags.some(tag => tag.id === selectedChildTagFilter);
+    }
+    
     return true;
   });
   const isUrl = (text: string) => {

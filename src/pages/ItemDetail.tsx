@@ -553,16 +553,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                               </CommandItem>
                             ))}
                           </CommandGroup>
-                          {hasChildTagsAvailable && (
-                            <CommandGroup heading="Child Tags">
-                              {availableChildTags.map((tag) => (
-                                <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
-                                  <ChevronRight className="w-4 h-4 mr-2" />
-                                  <span>{tag.name}</span>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          )}
                         </CommandList>
                       </Command>
                     </PopoverContent>
@@ -642,6 +632,50 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                   </div>
                 )}
               </div>
+              
+              {/* Child tags section - show when parent tags with children are selected */}
+              {hasChildTagsAvailable && (
+                <div className="mt-4">
+                  <label className="text-sm font-medium mb-2 block">Child Tags</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full border-dashed"
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Add Child Tag
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search child tags..." />
+                        <CommandList>
+                          <CommandEmpty>No child tags found</CommandEmpty>
+                          <CommandGroup heading="Available Child Tags">
+                            {availableChildTags.map((tag) => (
+                              <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                                <ChevronRight className="w-4 h-4 mr-2" />
+                                <span>{tag.name}</span>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                          {itemType !== "fire" && (
+                            <CommandGroup>
+                              <CommandItem onSelect={() => navigate("/tags")}>
+                                <Edit2 className="w-4 h-4 mr-2" />
+                                <span>Edit tags</span>
+                              </CommandItem>
+                            </CommandGroup>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
             </div>
 
             <div>

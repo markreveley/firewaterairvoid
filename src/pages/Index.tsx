@@ -28,6 +28,7 @@ const Index = () => {
   const pageSize = viewMode === "overview" ? 200 : 10;
   const { items, isLoading, hasMore, addItem, deleteItem, updateItem, loadMore } = useItems(activeType, pageSize);
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
+  const [selectedChildTagFilter, setSelectedChildTagFilter] = useState<string>();
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
   const [allTags, setAllTags] = useState<Tag[]>([]);
 
@@ -50,9 +51,11 @@ const Index = () => {
       p.set("type", activeType);
       if (selectedTagFilter) p.set("tag", selectedTagFilter);
       else p.delete("tag");
+      if (selectedChildTagFilter) p.set("childTag", selectedChildTagFilter);
+      else p.delete("childTag");
       return p;
     });
-  }, [activeType, selectedTagFilter, setSearchParams]);
+  }, [activeType, selectedTagFilter, selectedChildTagFilter, setSearchParams]);
 
   // Clear tag filter when switching types if selected tag doesn't exist in new type
   useEffect(() => {
@@ -71,6 +74,7 @@ const Index = () => {
       const isTagInFilteredList = currentFilteredTags.some(tag => tag.id === selectedTagFilter);
       if (!isTagInFilteredList) {
         setSelectedTagFilter(undefined);
+        setSelectedChildTagFilter(undefined);
       }
     }
   }, [activeType, allTags, selectedTagFilter]);
@@ -121,9 +125,12 @@ const Index = () => {
           <TagFilter
             primaryTags={showPrimaryTags ? primaryTags : []}
             secondaryTags={showSecondaryTags ? secondaryTags : []}
+            allTags={allTags}
             type={activeType}
             selectedTag={selectedTagFilter}
+            selectedChildTag={selectedChildTagFilter}
             onSelectTag={setSelectedTagFilter}
+            onSelectChildTag={setSelectedChildTagFilter}
           />
         </div>
 
@@ -180,6 +187,7 @@ const Index = () => {
                     items={items}
                     type={activeType}
                     selectedTagFilter={selectedTagFilter}
+                    selectedChildTagFilter={selectedChildTagFilter}
                     selectedStatusFilter={activeType === "fire" ? selectedStatusFilter : undefined}
                     onDeleteItem={deleteItem}
                     onUpdateItem={updateItem}
