@@ -102,7 +102,7 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12 space-y-8">
+      <div className="container mx-auto px-8 md:px-12 lg:px-16 pt-4 pb-12 space-y-8">
         <div className="py-2">
           <TagFilter
             tags={filteredTagsForType}
