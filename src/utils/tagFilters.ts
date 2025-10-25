@@ -9,8 +9,9 @@ export const getTagsForItemType = (
   allTags: Tag[],
   itemType: ItemType
 ): { projectTags: Tag[]; categoryTags: Tag[] } => {
-  const projectTags = allTags.filter(tag => tag.type === 'project');
-  const categoryTags = allTags.filter(tag => tag.type === 'category');
+  // Only get root tags (tags without a parent_id)
+  const projectTags = allTags.filter(tag => tag.type === 'project' && !tag.parent_id);
+  const categoryTags = allTags.filter(tag => tag.type === 'category' && !tag.parent_id);
 
   const showProjectTags = itemType === "fire" || itemType === "water";
   const showCategoryTags = itemType === "water" || itemType === "earth" || itemType === "air" || itemType === "void";
