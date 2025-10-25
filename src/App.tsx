@@ -9,6 +9,7 @@ import ProjectTagsManagement from "./pages/ProjectTagsManagement";
 import CategoryTagsManagement from "./pages/CategoryTagsManagement";
 import NotFound from "./pages/NotFound";
 import Redirect from "./pages/Redirect";
+import TagsRedirect from "./pages/TagsRedirect";
 
 const App = () => (
   <TooltipProvider>
@@ -19,6 +20,7 @@ const App = () => (
         <Route path="/" element={<Index />} />
         <Route path="/item/new" element={<ItemDetailPage />} />
         <Route path="/item/edit" element={<ItemDetailPage />} />
+        <Route path="/tags" element={<TagsRedirect />} />
         <Route path="/tags/projects" element={<ProjectTagsManagement />} />
         <Route path="/tags/categories" element={<CategoryTagsManagement />} />
         <Route path="/redirect" element={<Redirect />} />
