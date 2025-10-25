@@ -29,8 +29,8 @@ interface Item {
 interface ItemListProps {
   items: Item[];
   type: "fire" | "water" | "air" | "void" | "earth";
-  selectedTagFilter?: string;
-  selectedChildTagFilter?: string;
+  selectedTagFilters?: string[];
+  selectedChildTagFilters?: string[];
   selectedStatusFilter?: "To Do" | "Completed";
   onDeleteItem: (itemId: string) => void;
   onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth"; parent_id?: string | null }) => void;
@@ -49,8 +49,8 @@ const getTypeIcon = (type: string) => {
 export function ItemList({
   items,
   type,
-  selectedTagFilter,
-  selectedChildTagFilter,
+  selectedTagFilters = [],
+  selectedChildTagFilters = [],
   selectedStatusFilter,
   onDeleteItem,
   onUpdateItem
@@ -81,15 +81,20 @@ export function ItemList({
       if (item.status !== selectedStatusFilter) return false;
     }
     
-    // Filter by parent tag
-    if (selectedTagFilter) {
-      const hasParentTag = item.tags.some(tag => tag.id === selectedTagFilter);
-      if (!hasParentTag) return false;
+    // Filter by parent tags (item must have ALL selected parent tags)
+    if (selectedTagFilters.length > 0) {
+      const hasAllParentTags = selectedTagFilters.every(filterId => 
+        item.tags.some(tag => tag.id === filterId)
+      );
+      if (!hasAllParentTags) return false;
     }
     
-    // Filter by child tag if selected
-    if (selectedChildTagFilter) {
-      return item.tags.some(tag => tag.id === selectedChildTagFilter);
+    // Filter by child tags (item must have ALL selected child tags)
+    if (selectedChildTagFilters.length > 0) {
+      const hasAllChildTags = selectedChildTagFilters.every(filterId =>
+        item.tags.some(tag => tag.id === filterId)
+      );
+      if (!hasAllChildTags) return false;
     }
     
     return true;

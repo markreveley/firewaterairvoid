@@ -10,25 +10,27 @@ interface TagFilterProps {
   categoryTags: Tag[];
   allTags: Tag[];
   type: ItemType;
-  selectedTag?: string;
-  selectedChildTag?: string;
-  onSelectTag: (tagId: string | undefined) => void;
-  onSelectChildTag: (tagId: string | undefined) => void;
+  selectedTags: string[];
+  selectedChildTags: string[];
+  onSelectTags: (tagIds: string[]) => void;
+  onSelectChildTags: (tagIds: string[]) => void;
 }
 
-export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTag, selectedChildTag, onSelectTag, onSelectChildTag }: TagFilterProps) {
+export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTags, selectedChildTags, onSelectTags, onSelectChildTags }: TagFilterProps) {
   const navigate = useNavigate();
   
   if (projectTags.length === 0 && categoryTags.length === 0) return null;
 
-  // Get child tags for selected parent
-  const childTags = selectedTag 
-    ? allTags.filter(tag => tag.parent_id === selectedTag)
+  // Get child tags for all selected parents
+  const childTags = selectedTags.length > 0
+    ? allTags.filter(tag => tag.parent_id && selectedTags.includes(tag.parent_id))
     : [];
 
   const renderTagBadges = (tags: Tag[], isChildTag = false) => {
     return tags.map((tag) => {
-      const isSelected = isChildTag ? selectedChildTag === tag.id : selectedTag === tag.id;
+      const isSelected = isChildTag 
+        ? selectedChildTags.includes(tag.id) 
+        : selectedTags.includes(tag.id);
 
       return (
         <Badge
@@ -57,12 +59,21 @@ export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTa
           )}
           onClick={() => {
             if (isChildTag) {
-              onSelectChildTag(isSelected ? undefined : tag.id);
+              if (isSelected) {
+                onSelectChildTags(selectedChildTags.filter(id => id !== tag.id));
+              } else {
+                onSelectChildTags([...selectedChildTags, tag.id]);
+              }
             } else {
-              onSelectTag(isSelected ? undefined : tag.id);
-              // Clear child tag selection when selecting a different parent
-              if (!isSelected && selectedChildTag) {
-                onSelectChildTag(undefined);
+              if (isSelected) {
+                // Remove tag and clear any child tags belonging to this parent
+                onSelectTags(selectedTags.filter(id => id !== tag.id));
+                const childTagIds = allTags
+                  .filter(t => t.parent_id === tag.id)
+                  .map(t => t.id);
+                onSelectChildTags(selectedChildTags.filter(id => !childTagIds.includes(id)));
+              } else {
+                onSelectTags([...selectedTags, tag.id]);
               }
             }
           }}
@@ -74,10 +85,14 @@ export function TagFilter({ projectTags, categoryTags, allTags, type, selectedTa
               onClick={(e) => {
                 e.stopPropagation();
                 if (isChildTag) {
-                  onSelectChildTag(undefined);
+                  onSelectChildTags(selectedChildTags.filter(id => id !== tag.id));
                 } else {
-                  onSelectTag(undefined);
-                  onSelectChildTag(undefined); // Clear child when clearing parent
+                  onSelectTags(selectedTags.filter(id => id !== tag.id));
+                  // Clear child tags belonging to this parent
+                  const childTagIds = allTags
+                    .filter(t => t.parent_id === tag.id)
+                    .map(t => t.id);
+                  onSelectChildTags(selectedChildTags.filter(id => !childTagIds.includes(id)));
                 }
               }}
             />

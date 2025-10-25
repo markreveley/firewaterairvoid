@@ -25,8 +25,8 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const pageSize = viewMode === "overview" ? 200 : 10;
   const { items, isLoading, hasMore, addItem, deleteItem, updateItem, loadMore } = useItems(activeType, pageSize);
-  const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
-  const [selectedChildTagFilter, setSelectedChildTagFilter] = useState<string>();
+  const [selectedTagFilters, setSelectedTagFilters] = useState<string[]>([]);
+  const [selectedChildTagFilters, setSelectedChildTagFilters] = useState<string[]>([]);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
   const { allTags } = useTags();
 
@@ -44,27 +44,28 @@ const Index = () => {
     setSearchParams((prev) => {
       const p = new URLSearchParams(prev);
       p.set("type", activeType);
-      if (selectedTagFilter) p.set("tag", selectedTagFilter);
-      else p.delete("tag");
-      if (selectedChildTagFilter) p.set("childTag", selectedChildTagFilter);
-      else p.delete("childTag");
+      if (selectedTagFilters.length > 0) p.set("tags", selectedTagFilters.join(","));
+      else p.delete("tags");
+      if (selectedChildTagFilters.length > 0) p.set("childTags", selectedChildTagFilters.join(","));
+      else p.delete("childTags");
       return p;
     });
-  }, [activeType, selectedTagFilter, selectedChildTagFilter, setSearchParams]);
+  }, [activeType, selectedTagFilters, selectedChildTagFilters, setSearchParams]);
 
-  // Clear tag filter when switching types if selected tag doesn't exist in new type
+  // Clear tag filters when switching types if selected tags don't exist in new type
   useEffect(() => {
-    if (selectedTagFilter && allTags.length > 0) {
+    if (selectedTagFilters.length > 0 && allTags.length > 0) {
       const { projectTags, categoryTags } = getTagsForItemType(allTags, activeType);
       const currentFilteredTags = [...projectTags, ...categoryTags];
+      const validTagIds = currentFilteredTags.map(tag => tag.id);
 
-      const isTagInFilteredList = currentFilteredTags.some(tag => tag.id === selectedTagFilter);
-      if (!isTagInFilteredList) {
-        setSelectedTagFilter(undefined);
-        setSelectedChildTagFilter(undefined);
+      const validSelectedTags = selectedTagFilters.filter(id => validTagIds.includes(id));
+      if (validSelectedTags.length !== selectedTagFilters.length) {
+        setSelectedTagFilters(validSelectedTags);
+        setSelectedChildTagFilters([]);
       }
     }
-  }, [activeType, allTags, selectedTagFilter]);
+  }, [activeType, allTags, selectedTagFilters]);
 
   // Get filtered tags for current type
   const { projectTags, categoryTags } = getTagsForItemType(allTags, activeType);
@@ -88,10 +89,10 @@ const Index = () => {
             categoryTags={categoryTags}
             allTags={allTags}
             type={activeType}
-            selectedTag={selectedTagFilter}
-            selectedChildTag={selectedChildTagFilter}
-            onSelectTag={setSelectedTagFilter}
-            onSelectChildTag={setSelectedChildTagFilter}
+            selectedTags={selectedTagFilters}
+            selectedChildTags={selectedChildTagFilters}
+            onSelectTags={setSelectedTagFilters}
+            onSelectChildTags={setSelectedChildTagFilters}
           />
         </div>
 
@@ -147,8 +148,8 @@ const Index = () => {
                   <ItemList
                     items={items}
                     type={activeType}
-                    selectedTagFilter={selectedTagFilter}
-                    selectedChildTagFilter={selectedChildTagFilter}
+                    selectedTagFilters={selectedTagFilters}
+                    selectedChildTagFilters={selectedChildTagFilters}
                     selectedStatusFilter={activeType === "fire" ? selectedStatusFilter : undefined}
                     onDeleteItem={deleteItem}
                     onUpdateItem={updateItem}

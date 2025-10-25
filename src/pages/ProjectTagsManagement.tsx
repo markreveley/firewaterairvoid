@@ -175,7 +175,7 @@ export default function ProjectTagsManagement() {
           <Badge variant="outline">{tag.name}</Badge>
           {tag.children && tag.children.length > 0 && (
             <span className="text-xs text-muted-foreground">
-              ({tag.children.length} subtag{tag.children.length > 1 ? "s" : ""})
+              ({tag.children.length} child tag{tag.children.length > 1 ? "s" : ""})
             </span>
           )}
         </div>
@@ -189,7 +189,7 @@ export default function ProjectTagsManagement() {
             }}
           >
             <Plus className="w-4 h-4 mr-1" />
-            Add Subtag
+            Add Child Tag
           </Button>
           <Button
             variant="ghost"
@@ -234,7 +234,7 @@ export default function ProjectTagsManagement() {
           {/* Create New Tag */}
           <div className="p-6 rounded-lg border bg-card space-y-4">
             <h2 className="text-lg font-semibold">
-              {parentTagForNew ? `Create Subtag for "${parentTagForNew.name}"` : "Create New Project Tag"}
+              {parentTagForNew ? `Create Child Tag for "${parentTagForNew.name}"` : "Create New Project Tag"}
             </h2>
             {parentTagForNew && (
               <div className="flex items-center gap-2">
@@ -348,7 +348,7 @@ export default function ProjectTagsManagement() {
                 Are you sure you want to delete "{deletingTag?.name}"?
                 {deletingTag?.children && deletingTag.children.length > 0 && (
                   <span className="block mt-2 text-destructive">
-                    This will also delete {deletingTag.children.length} subtag
+                    This will also delete {deletingTag.children.length} child tag
                     {deletingTag.children.length > 1 ? "s" : ""}.
                   </span>
                 )}

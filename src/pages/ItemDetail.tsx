@@ -469,7 +469,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         </PopoverContent>
                       </Popover>
                       
-                      {/* Add Sub Tag buttons for project tags with children */}
+                      {/* Add Child Tag buttons for project tags with children */}
                       {selectedTags
                         .filter(tag => FIRE_TAG_NAMES.includes(tag.name as any))
                         .filter(tag => existingTags.some(t => t.parent_id === tag.id))
@@ -483,21 +483,21 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                                 className="rounded-full border-dashed"
                               >
                                 <Plus className="w-3 h-3 mr-1" />
-                                Add Sub Tag
+                                Add Child Tag
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-80 p-0" align="start">
                               <Command>
-                                <CommandInput placeholder="Search sub tags..." />
+                                <CommandInput placeholder="Search child tags..." />
                                 <CommandList>
-                                  <CommandEmpty>No sub tags found</CommandEmpty>
+                                  <CommandEmpty>No child tags found</CommandEmpty>
                                   <CommandGroup>
                                     <CommandItem onSelect={() => navigate("/tags")}>
                                       <Edit2 className="w-4 h-4 mr-2" />
                                       <span>Edit tags</span>
                                     </CommandItem>
                                   </CommandGroup>
-                                  <CommandGroup heading={`${tag.name} Sub Tags`}>
+                                  <CommandGroup heading={`${tag.name} Child Tags`}>
                                     {getChildTagsForParent(tag.id).map((childTag) => (
                                       <CommandItem key={childTag.id} onSelect={() => addExistingTag(childTag)}>
                                         <ChevronRight className="w-4 h-4 mr-2" />
@@ -575,7 +575,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         </PopoverContent>
                       </Popover>
                       
-                      {/* Add Sub Tag buttons for category tags with children */}
+                      {/* Add Child Tag buttons for category tags with children */}
                       {selectedTags
                         .filter(tag => !FIRE_TAG_NAMES.includes(tag.name as any))
                         .filter(tag => existingTags.some(t => t.parent_id === tag.id))
@@ -589,21 +589,21 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                                 className="rounded-full border-dashed"
                               >
                                 <Plus className="w-3 h-3 mr-1" />
-                                Add Sub Tag
+                                Add Child Tag
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-80 p-0" align="start">
                               <Command>
-                                <CommandInput placeholder="Search sub tags..." />
+                                <CommandInput placeholder="Search child tags..." />
                                 <CommandList>
-                                  <CommandEmpty>No sub tags found</CommandEmpty>
+                                  <CommandEmpty>No child tags found</CommandEmpty>
                                   <CommandGroup>
                                     <CommandItem onSelect={() => navigate("/tags")}>
                                       <Edit2 className="w-4 h-4 mr-2" />
                                       <span>Edit tags</span>
                                     </CommandItem>
                                   </CommandGroup>
-                                  <CommandGroup heading={`${tag.name} Sub Tags`}>
+                                  <CommandGroup heading={`${tag.name} Child Tags`}>
                                     {getChildTagsForParent(tag.id).map((childTag) => (
                                       <CommandItem key={childTag.id} onSelect={() => addExistingTag(childTag)}>
                                         <ChevronRight className="w-4 h-4 mr-2" />
@@ -680,7 +680,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                       </PopoverContent>
                     </Popover>
                     
-                    {/* Add Sub Tag buttons for tags with children */}
+                    {/* Add Child Tag buttons for tags with children */}
                     {selectedTags
                       .filter(tag => existingTags.some(t => t.parent_id === tag.id))
                       .map((tag) => (
@@ -693,21 +693,21 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                               className="rounded-full border-dashed"
                             >
                               <Plus className="w-3 h-3 mr-1" />
-                              Add Sub Tag
+                              Add Child Tag
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-80 p-0" align="start">
                             <Command>
-                              <CommandInput placeholder="Search sub tags..." />
+                              <CommandInput placeholder="Search child tags..." />
                               <CommandList>
-                                <CommandEmpty>No sub tags found</CommandEmpty>
+                                <CommandEmpty>No child tags found</CommandEmpty>
                                 <CommandGroup>
                                   <CommandItem onSelect={() => navigate("/tags")}>
                                     <Edit2 className="w-4 h-4 mr-2" />
                                     <span>Edit tags</span>
                                   </CommandItem>
                                 </CommandGroup>
-                                <CommandGroup heading={`${tag.name} Sub Tags`}>
+                                <CommandGroup heading={`${tag.name} Child Tags`}>
                                   {getChildTagsForParent(tag.id).map((childTag) => (
                                     <CommandItem key={childTag.id} onSelect={() => addExistingTag(childTag)}>
                                       <ChevronRight className="w-4 h-4 mr-2" />
