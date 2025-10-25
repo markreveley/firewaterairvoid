@@ -121,17 +121,7 @@ export function ItemList({
         onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`)}
       >
               <div className="space-y-3">
-                {/* Top row: Tags centered */}
-                {item.tags.length > 0 && (
-                  <div className="flex justify-center">
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
-                          {tag.name}
-                        </Badge>)}
-                    </div>
-                  </div>
-                )}
-                
+                {/* Title row with tags on the right */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1">
                     {/* Checkbox for fire items */}
@@ -157,71 +147,75 @@ export function ItemList({
                     )}
                     
                     <div className="flex-1">
-                      <p className={cn(
-                        "text-base font-medium mb-2",
-                        item.type === "fire" && item.status === "Completed" && "line-through text-muted-foreground"
-                      )}>
-                        {(item.type === "void" || item.type === "air") && item.url ? (
-                          <a 
-                            href={item.url}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              window.open(`/redirect?to=${encodeURIComponent(item.url!)}`, '_blank', 'noopener,noreferrer');
-                            }}
-                            className="text-blue-600 underline hover:text-blue-700 cursor-pointer"
-                          >
-                            {item.title}
-                          </a>
-                        ) : isUrl(item.title) ? (
-                          <a 
-                            href={item.title}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              window.open(`/redirect?to=${encodeURIComponent(item.title)}`,'_blank','noopener,noreferrer');
-                            }}
-                            className="flex items-center gap-2 text-primary hover:underline cursor-pointer"
-                          >
-                            {item.title}
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        ) : (
-                          item.title
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <p className={cn(
+                          "text-base font-medium flex-1",
+                          item.type === "fire" && item.status === "Completed" && "line-through text-muted-foreground"
+                        )}>
+                          {(item.type === "void" || item.type === "air") && item.url ? (
+                            <a 
+                              href={item.url}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.open(`/redirect?to=${encodeURIComponent(item.url!)}`, '_blank', 'noopener,noreferrer');
+                              }}
+                              className="text-blue-600 underline hover:text-blue-700 cursor-pointer"
+                            >
+                              {item.title}
+                            </a>
+                          ) : isUrl(item.title) ? (
+                            <a 
+                              href={item.title}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.open(`/redirect?to=${encodeURIComponent(item.title)}`,'_blank','noopener,noreferrer');
+                              }}
+                              className="flex items-center gap-2 text-primary hover:underline cursor-pointer"
+                            >
+                              {item.title}
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          ) : (
+                            item.title
+                          )}
+                        </p>
+                        
+                        {/* Tags on the right of title */}
+                        {item.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 justify-end">
+                            {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
+                                {tag.name}
+                              </Badge>)}
+                          </div>
                         )}
-                      </p>
+                      </div>
                     
-                    {/* Notes preview - first two lines */}
-                    {item.notes && (
-                      <p className="text-sm text-muted-foreground whitespace-pre-line">
-                        {truncateNotes(item.notes)}
-                      </p>
-                    )}
-
+                      {/* Notes preview - first two lines */}
+                      {item.notes && (
+                        <p className="text-sm text-muted-foreground whitespace-pre-line">
+                          {truncateNotes(item.notes)}
+                        </p>
+                      )}
                     </div>
                   </div>
                   
                   <div className="flex flex-col items-end gap-1">
-                    {/* For fire items with deadline - show deadline first, then created date */}
+                    {/* For fire items with deadline - show deadline */}
                     {item.type === "fire" && item.deadline && (
                       <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
                         <Flame className="w-3 h-3" />
                         {format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
                       </div>
                     )}
-                    
-                    {item.type === "fire" && item.deadline && (
-                      <div className="text-xs text-muted-foreground">
-                        Created: {format(item.createdAt, "MMM d, yyyy")}
-                      </div>
-                    )}
-                    
-                    {/* For all items without deadline or non-fire - show created date */}
-                    {(!item.deadline || item.type !== "fire") && (
-                      <div className="text-xs text-muted-foreground">
-                        Created: {format(item.createdAt, "MMM d, yyyy")}
-                      </div>
-                    )}
+                  </div>
+                </div>
+                
+                {/* Center: Created date */}
+                <div className="flex justify-center pt-2">
+                  <div className="text-xs text-muted-foreground">
+                    Created: {format(item.createdAt, "MMM d, yyyy")}
                   </div>
                 </div>
                 
