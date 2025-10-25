@@ -22,18 +22,28 @@ interface Item {
   children?: Array<{ id: string; title: string; type: string }>;
 }
 
-export function useItems() {
+export function useItems(type: "fire" | "water" | "air" | "void" | "earth") {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const ITEMS_PER_PAGE = 10;
 
-  const loadItems = async () => {
+  const loadItems = async (reset: boolean = false) => {
     try {
+      const currentOffset = reset ? 0 : offset;
+
       const { data: itemsData, error: itemsError } = await supabase
         .from("items")
         .select("*")
-        .order("created_at", { ascending: false });
+        .eq("type", type)
+        .order("created_at", { ascending: false })
+        .range(currentOffset, currentOffset + ITEMS_PER_PAGE - 1);
 
       if (itemsError) throw itemsError;
+
+      // Check if we have more items
+      setHasMore(itemsData.length === ITEMS_PER_PAGE);
 
       const { data: itemTagsData, error: itemTagsError } = await supabase
         .from("item_tags")
@@ -83,7 +93,13 @@ export function useItems() {
         };
       });
 
-      setItems(itemsWithTags);
+      if (reset) {
+        setItems(itemsWithTags);
+        setOffset(ITEMS_PER_PAGE);
+      } else {
+        setItems((prev) => [...prev, ...itemsWithTags]);
+        setOffset((prev) => prev + ITEMS_PER_PAGE);
+      }
     } catch (error) {
       console.error("Error loading items:", error);
       toast.error("Failed to load items");
@@ -92,9 +108,19 @@ export function useItems() {
     }
   };
 
+  const loadMore = async () => {
+    if (!hasMore || isLoading) return;
+    setIsLoading(true);
+    await loadItems(false);
+  };
+
   useEffect(() => {
-    loadItems();
-  }, []);
+    setItems([]);
+    setOffset(0);
+    setHasMore(true);
+    setIsLoading(true);
+    loadItems(true);
+  }, [type]);
 
   const addItem = async (title: string, type: "fire" | "water" | "air" | "void" | "earth", tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string) => {
     try {
@@ -150,7 +176,10 @@ export function useItems() {
         if (linkError) throw linkError;
       }
 
-      await loadItems();
+      setItems([]);
+      setOffset(0);
+      setHasMore(true);
+      await loadItems(true);
       toast.success("Item added");
     } catch (error) {
       console.error("Error adding item:", error);
@@ -167,7 +196,10 @@ export function useItems() {
 
       if (error) throw error;
 
-      await loadItems();
+      setItems([]);
+      setOffset(0);
+      setHasMore(true);
+      await loadItems(true);
       toast.success("Item deleted");
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -269,7 +301,10 @@ export function useItems() {
         }
       }
 
-      await loadItems();
+      setItems([]);
+      setOffset(0);
+      setHasMore(true);
+      await loadItems(true);
       toast.success("Item updated");
     } catch (error) {
       console.error("Error updating item:", error);
@@ -277,5 +312,5 @@ export function useItems() {
     }
   };
 
-  return { items, isLoading, addItem, deleteItem, updateItem };
+  return { items, isLoading, hasMore, addItem, deleteItem, updateItem, loadMore };
 }

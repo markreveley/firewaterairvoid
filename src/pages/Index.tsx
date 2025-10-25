@@ -14,11 +14,11 @@ interface Tag {
 }
 
 const Index = () => {
-  const { items, isLoading, addItem, deleteItem, updateItem } = useItems();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialType = (searchParams.get("type") as "fire" | "water" | "air" | "void" | "earth") || "fire";
   const [activeType, setActiveType] = useState<"fire" | "water" | "air" | "void" | "earth">(initialType);
+  const { items, isLoading, hasMore, addItem, deleteItem, updateItem, loadMore } = useItems(activeType);
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>();
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
 
@@ -86,18 +86,39 @@ const Index = () => {
           />
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          {isLoading ? (
+        <div className="max-w-4xl mx-auto space-y-6">
+          {isLoading && items.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">Loading...</div>
           ) : (
-            <ItemList 
-              items={items} 
-              type={activeType} 
-              selectedTagFilter={selectedTagFilter}
-              selectedStatusFilter={activeType === "fire" ? selectedStatusFilter : undefined}
-              onDeleteItem={deleteItem}
-              onUpdateItem={updateItem}
-            />
+            <>
+              <ItemList
+                items={items}
+                type={activeType}
+                selectedTagFilter={selectedTagFilter}
+                selectedStatusFilter={activeType === "fire" ? selectedStatusFilter : undefined}
+                onDeleteItem={deleteItem}
+                onUpdateItem={updateItem}
+              />
+
+              {items.length > 0 && (
+                <div className="text-center py-4 space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {items.length} {items.length === 1 ? 'item' : 'items'}
+                  </p>
+
+                  {hasMore && (
+                    <Button
+                      onClick={loadMore}
+                      disabled={isLoading}
+                      variant="outline"
+                      className="min-w-[200px]"
+                    >
+                      {isLoading ? 'Loading...' : 'Load More'}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
