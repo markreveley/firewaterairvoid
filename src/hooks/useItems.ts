@@ -17,12 +17,15 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       let query = supabase
         .from("items")
         .select("*")
-        // Only fetch top-level items (not sub-items)
-        .is("parent_id", null)
         // Sort by priority first (DESC), then deadline (ASC with nulls last for fire), then created_at (DESC)
         .order("priority", { ascending: false })
         .order("deadline", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false });
+
+      // Only fetch top-level items (not sub-items) when browsing by type (list view)
+      if (type) {
+        query = query.is("parent_id", null);
+      }
 
       // Only filter by type if type is provided
       if (type) {
