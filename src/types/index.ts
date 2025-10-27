@@ -19,5 +19,7 @@ export interface Item {
   deadline?: Date;
   parent_id?: string;
   parent?: { id: string; title: string; type: string };
-  children?: Array<{ id: string; title: string; type: string }>;
+  children?: Array<{ id: string; title: string; type: string; completed?: boolean }>;
+  priority: number;
+  completed: boolean;
 }

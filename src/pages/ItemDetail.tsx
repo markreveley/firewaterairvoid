@@ -8,7 +8,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Eye, FileText, ChevronRight, Trash2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Eye, FileText, ChevronRight, Trash2, Link as LinkIcon } from "lucide-react";
 import { ParentItemSelector } from "@/components/ParentItemSelector";
 import ReactMarkdown from "react-markdown";
 import { format, set } from "date-fns";
@@ -34,9 +36,24 @@ interface ItemDetailProps {
   existingItem?: Item | null;
   allItems: Item[];
   onDeleteItem?: (itemId: string) => Promise<void>;
+  onUpdateItem?: (
+    itemId: string,
+    updates: {
+      title?: string;
+      deadline?: Date | null;
+      tags?: Tag[];
+      notes?: string;
+      status?: string;
+      url?: string;
+      type?: ItemType;
+      parent_id?: string | null;
+      priority?: number;
+      completed?: boolean;
+    }
+  ) => Promise<void>;
 }
 
-export default function ItemDetail({ onAddItem, existingTags, existingItem, allItems, onDeleteItem }: ItemDetailProps) {
+export default function ItemDetail({ onAddItem, existingTags, existingItem, allItems, onDeleteItem, onUpdateItem }: ItemDetailProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
@@ -60,6 +77,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const [selectedParent, setSelectedParent] = useState<{ id: string; title: string } | null>(null);
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [notesItemsTab, setNotesItemsTab] = useState<"notes" | "items">("notes");
+  const [newSubItemTitle, setNewSubItemTitle] = useState("");
+  const [newSubItemUrl, setNewSubItemUrl] = useState("");
+  const [newSubItemType, setNewSubItemType] = useState<"task" | "url" | "note">("task");
 
   // Track initial values for change detection
   const initialValues = {
@@ -101,6 +122,37 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
       }
     }
   }, [existingItem?.parent_id, allItems]);
+
+  // Handle adding a sub-item
+  const handleAddSubItem = async () => {
+    if (!newSubItemTitle.trim() || !existingItem) return;
+
+    // Determine type and other properties based on sub-item type
+    let subItemType: ItemType = "fire"; // default for tasks
+    let subItemUrl: string | undefined = undefined;
+
+    if (newSubItemType === "url") {
+      subItemType = "void";
+      subItemUrl = newSubItemUrl.trim() || undefined;
+    } else if (newSubItemType === "note") {
+      subItemType = "water"; // notes as water items
+    }
+
+    await onAddItem(
+      newSubItemTitle.trim(),
+      subItemType,
+      [], // no tags for sub-items by default
+      undefined, // no deadline
+      undefined, // no notes
+      newSubItemType === "task" ? "To Do" : undefined, // status only for tasks
+      subItemUrl,
+      existingItem.id // parent_id is the current item
+    );
+
+    // Clear inputs
+    setNewSubItemTitle("");
+    setNewSubItemUrl("");
+  };
 
   const handleSubmit = async (e?: React.FormEvent, shouldNavigate: boolean = false) => {
     if (e) e.preventDefault();
@@ -750,27 +802,149 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               )}
             </div>
 
-            <div>
+            <Tabs value={notesItemsTab} onValueChange={(v) => setNotesItemsTab(v as "notes" | "items")} className="w-full">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium">Notes</label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
-                  className="gap-2"
-                >
-                  <Eye className="w-4 h-4" />
-                  Preview
-                </Button>
+                <TabsList>
+                  <TabsTrigger value="notes">Notes</TabsTrigger>
+                  <TabsTrigger value="items">Items</TabsTrigger>
+                </TabsList>
+                {notesItemsTab === "notes" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
+                    className="gap-2"
+                  >
+                    <Eye className="w-4 h-4" />
+                    Preview
+                  </Button>
+                )}
               </div>
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add notes..."
-                className="min-h-[300px] text-base py-4 px-6 rounded-xl resize-none"
-              />
-            </div>
+
+              <TabsContent value="notes" className="mt-0">
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add notes..."
+                  className="min-h-[300px] text-base py-4 px-6 rounded-xl resize-none"
+                />
+              </TabsContent>
+
+              <TabsContent value="items" className="mt-0">
+                <div className="border rounded-xl p-4 min-h-[300px] space-y-4">
+                  {/* Add new sub-item */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Select value={newSubItemType} onValueChange={(v) => setNewSubItemType(v as "task" | "url" | "note")}>
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="task">Task</SelectItem>
+                          <SelectItem value="url">URL</SelectItem>
+                          <SelectItem value="note">Note</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {newSubItemType === "task" && (
+                        <div className="flex items-center gap-2 flex-1">
+                          <Checkbox disabled className="shrink-0" />
+                          <Input
+                            value={newSubItemTitle}
+                            onChange={(e) => setNewSubItemTitle(e.target.value)}
+                            placeholder="Add task..."
+                            className="flex-1"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                handleAddSubItem();
+                              }
+                            }}
+                          />
+                        </div>
+                      )}
+
+                      {newSubItemType === "url" && (
+                        <div className="flex items-center gap-2 flex-1">
+                          <Input
+                            value={newSubItemTitle}
+                            onChange={(e) => setNewSubItemTitle(e.target.value)}
+                            placeholder="Title..."
+                            className="flex-1"
+                          />
+                          <Input
+                            value={newSubItemUrl}
+                            onChange={(e) => setNewSubItemUrl(e.target.value)}
+                            placeholder="URL..."
+                            className="flex-1"
+                            type="url"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                handleAddSubItem();
+                              }
+                            }}
+                          />
+                        </div>
+                      )}
+
+                      {newSubItemType === "note" && (
+                        <Input
+                          value={newSubItemTitle}
+                          onChange={(e) => setNewSubItemTitle(e.target.value)}
+                          placeholder="Add note..."
+                          className="flex-1"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleAddSubItem();
+                            }
+                          }}
+                        />
+                      )}
+
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleAddSubItem}
+                        disabled={!newSubItemTitle.trim() || (newSubItemType === "url" && !newSubItemUrl.trim())}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* List existing sub-items (children) */}
+                  <div className="space-y-2">
+                    {existingItem?.children && existingItem.children.length > 0 ? (
+                      existingItem.children.map((child) => (
+                        <div
+                          key={child.id}
+                          className="flex items-center gap-2 p-2 hover:bg-accent rounded-md cursor-pointer"
+                          onClick={() => navigate(`/item/edit?id=${child.id}&type=${child.type}`)}
+                        >
+                          {child.type === "fire" && onUpdateItem && (
+                            <Checkbox
+                              checked={child.completed}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUpdateItem(child.id, {
+                                  completed: !child.completed
+                                });
+                              }}
+                            />
+                          )}
+                          <span className={cn("flex-1", child.completed && "line-through text-muted-foreground")}>
+                            {child.title}
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-8">No sub-items yet</p>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </form>
         

@@ -17,6 +17,9 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       let query = supabase
         .from("items")
         .select("*")
+        // Sort by priority first (DESC), then deadline (ASC with nulls last for fire), then created_at (DESC)
+        .order("priority", { ascending: false })
+        .order("deadline", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false });
 
       // Only filter by type if type is provided
@@ -60,7 +63,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       if (itemIds.length > 0) {
         const { data: childData, error: childError } = await supabase
           .from("items")
-          .select("id, title, type, parent_id")
+          .select("id, title, type, parent_id, completed")
           .in("parent_id", itemIds);
 
         if (!childError && childData) {
@@ -89,6 +92,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
             id: i.id,
             title: i.title,
             type: i.type,
+            completed: i.completed || false,
           }));
 
         return {
@@ -108,6 +112,8 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
             type: parentItem.type,
           } : undefined,
           children: childrenItems.length > 0 ? childrenItems : undefined,
+          priority: item.priority || 0,
+          completed: item.completed || false,
         };
       });
 
@@ -271,6 +277,8 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       url?: string;
       type?: ItemType;
       parent_id?: string | null;
+      priority?: number;
+      completed?: boolean;
     }
   ) => {
     try {
@@ -317,6 +325,12 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       }
       if ("parent_id" in updates) {
         itemUpdates.parent_id = updates.parent_id || null;
+      }
+      if ("priority" in updates) {
+        itemUpdates.priority = updates.priority;
+      }
+      if ("completed" in updates) {
+        itemUpdates.completed = updates.completed;
       }
 
       if (Object.keys(itemUpdates).length > 0) {

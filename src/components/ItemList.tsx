@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, Droplet, Circle, ExternalLink, Wind, Check, ArrowUp, ArrowDown, Mountain } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, Wind, Check, ArrowUp, ArrowDown, Mountain, Star } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { cn } from "@/lib/utils";
 interface Tag {
@@ -23,7 +23,9 @@ interface Item {
   deadline?: Date;
   parent_id?: string;
   parent?: { id: string; title: string; type: string };
-  children?: Array<{ id: string; title: string; type: string }>;
+  children?: Array<{ id: string; title: string; type: string; completed?: boolean }>;
+  priority: number;
+  completed: boolean;
 }
 
 interface ItemListProps {
@@ -35,7 +37,7 @@ interface ItemListProps {
   selectedCategoryChildTags?: string[];
   selectedStatusFilter?: "To Do" | "Completed";
   onDeleteItem: (itemId: string) => void;
-  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth"; parent_id?: string | null }) => void;
+  onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth"; parent_id?: string | null; priority?: number; completed?: boolean }) => void;
 }
 
 const getTypeIcon = (type: string) => {
@@ -212,14 +214,31 @@ export function ItemList({
                           )}
                         </p>
                         
-                        {/* Tags on the right of title */}
-                        {item.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 justify-end">
-                            {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
-                                {tag.name}
-                              </Badge>)}
-                          </div>
-                        )}
+                        {/* Star icon and tags on the right of title */}
+                        <div className="flex items-start gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onUpdateItem(item.id, {
+                                priority: item.priority > 0 ? 0 : 1
+                              });
+                            }}
+                            className={cn(
+                              "p-1 rounded hover:bg-accent transition-colors shrink-0",
+                              item.priority > 0 && "text-yellow-500"
+                            )}
+                            title={item.priority > 0 ? "Remove from priority" : "Mark as priority"}
+                          >
+                            <Star className={cn("w-4 h-4", item.priority > 0 && "fill-current")} />
+                          </button>
+                          {item.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 justify-end">
+                              {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
+                                  {tag.name}
+                                </Badge>)}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     
                     {/* Notes preview - limited to two lines */}

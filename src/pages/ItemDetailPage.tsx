@@ -51,5 +51,5 @@ export default function ItemDetailPage() {
     // Navigation now handled by ItemDetail component
   };
 
-  return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={items} onDeleteItem={deleteItem} />;
+  return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={items} onDeleteItem={deleteItem} onUpdateItem={updateItem} />;
 }
