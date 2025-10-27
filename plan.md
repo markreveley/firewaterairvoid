@@ -7,6 +7,13 @@
 > - Before showing >500 lines, ask: "Show all (≈X tokens) or summarise?"
 > - Suggest collapsing large functions in-place with summary comments
 >
+> **Work Log Management**: After EVERY commit:
+> - YOU (agent) are responsible for updating plan.md
+> - Add work log entry using the template in Work Log section
+> - Update "Current Status" section to reflect what's next
+> - Proactively suggest committing plan.md changes
+> - DO NOT wait for user to request this - it's YOUR job
+>
 > **Memory Model**: Git is the real long-term memory; plan.md is the index to that memory.
 
 **📚 Full Documentation:**
@@ -16,24 +23,22 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: is_subitem flag implementation to distinguish parent/child relationships from sub-items
-**Blocked on**: Need to run migration file `supabase/migrations/20251027180000_add_is_subitem_flag.sql`
-**Next**: Run migration via Lovable, test both relationship types work independently
-
-## Next Actions (Priority Order)
-- [ ] Add `is_subitem` boolean column to items table (default false)
-- [ ] Update queries to filter by `is_subitem` flag
-- [ ] Update ItemDetail to set `is_subitem=true` when creating via Items tab
-- [ ] Test both parent/child arrows and sub-items work correctly
-- [ ] Update plan.md when complete
+**Working on**: Nothing - is_subitem implementation complete and tested ✅
+**Next**: Waiting for next feature request or bug report
 
 ## Work Log
 --------------------------------------------------
-2025-10-27 – is_subitem distinction
+2025-10-27 – context management workflow
+- Goal: Establish workflow for managing Claude Code context across sessions
+- Key files: USER.md (comprehensive user guide), plan.md (agent meta-instructions, work log template)
+- Decisions: Agent is responsible for maintaining work log after every commit; plan.md is lightweight index (~150 lines); git is long-term memory; COMPACT-MODE for low context situations. Based on Kimi playbook principles.
+- Next: (completed - workflow in use ✅)
+--------------------------------------------------
+2025-10-27 – is_subitem implementation complete
 - Goal: Separate parent/child relationships (hierarchical links) from sub-items (scoped content)
-- Key files: supabase/migrations/20251027180000_add_is_subitem_flag.sql, src/hooks/useItems.ts, src/pages/ItemDetailPage.tsx, src/pages/ItemDetail.tsx, DESIGN.md, USER_STORIES.md
-- Decision: Added boolean flag instead of overloading parent_id semantics; documented two relationship types in DESIGN.md
-- Next: Run migration via Lovable, test both relationship types independently
+- Key files: src/hooks/useItems.ts (main query + children query), src/pages/ItemDetail.tsx (separate sub-items fetch), src/pages/ItemDetailPage.tsx, DESIGN.md
+- Decisions: Fixed Lovable's buggy implementation - main query filters .eq("is_subitem", false), children query fetches child items (not sub-items), ItemDetail has separate fetch for sub-items with .eq("is_subitem", true). Tested: sub-items only in Items tab, parent/child arrows work correctly.
+- Next: (completed and tested ✅)
 --------------------------------------------------
 2025-10-27 – priority system & sub-items UI
 - Goal: Add star-based priority + Notes/Items tabbed interface with three sub-item types
