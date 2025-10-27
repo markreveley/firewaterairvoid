@@ -15,6 +15,7 @@ import { ParentItemSelector } from "@/components/ParentItemSelector";
 import ReactMarkdown from "react-markdown";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import type { Tag, Item, ItemType } from "@/types";
 import { supportsUrl, supportsDeadline, supportsStatus } from "@/utils/itemTypes";
 import { filterTagsForItemType, getProjectAndCategoryTags } from "@/utils/tagFilters";
@@ -125,33 +126,51 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
 
   // Handle adding a sub-item
   const handleAddSubItem = async () => {
-    if (!newSubItemTitle.trim() || !existingItem) return;
-
-    // Determine type and other properties based on sub-item type
-    let subItemType: ItemType = "fire"; // default for tasks
-    let subItemUrl: string | undefined = undefined;
-
-    if (newSubItemType === "url") {
-      subItemType = "void";
-      subItemUrl = newSubItemUrl.trim() || undefined;
-    } else if (newSubItemType === "note") {
-      subItemType = "water"; // notes as water items
+    if (!newSubItemTitle.trim()) {
+      console.log("No title provided");
+      return;
     }
 
-    await onAddItem(
-      newSubItemTitle.trim(),
-      subItemType,
-      [], // no tags for sub-items by default
-      undefined, // no deadline
-      undefined, // no notes
-      newSubItemType === "task" ? "To Do" : undefined, // status only for tasks
-      subItemUrl,
-      existingItem.id // parent_id is the current item
-    );
+    if (!existingItem) {
+      console.error("Cannot add sub-items: No existing item (you must save the parent item first)");
+      toast.error("Please save this item before adding sub-items");
+      return;
+    }
 
-    // Clear inputs
-    setNewSubItemTitle("");
-    setNewSubItemUrl("");
+    console.log("Adding sub-item:", { title: newSubItemTitle, type: newSubItemType });
+
+    try {
+      // Determine type and other properties based on sub-item type
+      let subItemType: ItemType = "fire"; // default for tasks
+      let subItemUrl: string | undefined = undefined;
+
+      if (newSubItemType === "url") {
+        subItemType = "void";
+        subItemUrl = newSubItemUrl.trim() || undefined;
+      } else if (newSubItemType === "note") {
+        subItemType = "water"; // notes as water items
+      }
+
+      await onAddItem(
+        newSubItemTitle.trim(),
+        subItemType,
+        [], // no tags for sub-items by default
+        undefined, // no deadline
+        undefined, // no notes
+        newSubItemType === "task" ? "To Do" : undefined, // status only for tasks
+        subItemUrl,
+        existingItem.id // parent_id is the current item
+      );
+
+      console.log("Sub-item added successfully");
+
+      // Clear inputs
+      setNewSubItemTitle("");
+      setNewSubItemUrl("");
+    } catch (error) {
+      console.error("Error adding sub-item:", error);
+      toast.error("Failed to add sub-item");
+    }
   };
 
   const handleSubmit = async (e?: React.FormEvent, shouldNavigate: boolean = false) => {
