@@ -28,6 +28,12 @@
 
 ## Work Log
 --------------------------------------------------
+2025-10-27 – claude.md entry point
+- Goal: Create bootstrap file for fresh Claude Code sessions
+- Key files: claude.md (session entry point with quick start instructions)
+- Decisions: claude.md serves as the first file to read in new sessions, contains pointers to plan.md and other docs, documents startup protocol
+- Next: (completed ✅)
+--------------------------------------------------
 2025-10-27 – context management workflow
 - Goal: Establish workflow for managing Claude Code context across sessions
 - Key files: USER.md (comprehensive user guide), plan.md (agent meta-instructions, work log template)
