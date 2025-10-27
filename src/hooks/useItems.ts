@@ -17,13 +17,13 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       let query = supabase
         .from("items")
         .select("*")
-        // Sort by priority first (DESC), then deadline (ASC with nulls last for fire), then created_at (DESC)
+        // Only fetch top-level items OR child items (not sub-items)
+        // Sub-items (is_subitem=true) only appear in parent's Items tab
+        .eq("is_subitem", false)
+        // Sort by priority first (DESC), then deadline (ASC with nulls last), then created_at (DESC)
         .order("priority", { ascending: false })
         .order("deadline", { ascending: true, nullsFirst: false })
-      
-      // Exclude sub-items from main list (only show top-level items and child items)
-      // Sub-items should only appear in Items tab, not as cards
-      query = query.or("parent_id.is.null,is_subitem.eq.false");
+        .order("created_at", { ascending: false });
 
       // Only filter by type if type is provided
       if (type) {
@@ -60,15 +60,16 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
         }
       }
 
-      // Fetch child items (sub-items only - these are shown in Items tab)
+      // Fetch child items (hierarchical relationships) - NOT sub-items
+      // Sub-items are fetched separately in ItemDetail
       const itemIds = itemsData.map((item: any) => item.id);
       let childItems: any[] = [];
       if (itemIds.length > 0) {
         const { data: childData, error: childError } = await supabase
           .from("items")
-          .select("id, title, type, parent_id, completed")
+          .select("id, title, type, parent_id, completed, is_subitem")
           .in("parent_id", itemIds)
-          .eq("is_subitem", true);
+          .eq("is_subitem", false); // Only child items, not sub-items
 
         if (!childError && childData) {
           childItems = childData;
@@ -118,6 +119,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
           children: childrenItems.length > 0 ? childrenItems : undefined,
           priority: item.priority || 0,
           completed: item.completed || false,
+          is_subitem: item.is_subitem || false,
         };
       });
 
@@ -154,7 +156,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
 
   const addItem = async (title: string, type: ItemType, tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string, is_subitem?: boolean) => {
     try {
-      const { data: newItem, error: itemError } = await supabase
+      const { data: newItem, error: itemError} = await supabase
         .from("items")
         .insert({
           title,
@@ -164,7 +166,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
           url: url || null,
           deadline: deadline?.toISOString(),
           parent_id: parent_id || null,
-          is_subitem: is_subitem ?? (parent_id ? true : false), // Use explicit value or default to true if parent_id exists
+          is_subitem: is_subitem || false,
         })
         .select()
         .single();

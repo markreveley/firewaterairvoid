@@ -23,4 +23,5 @@ export interface Item {
   children?: Array<{ id: string; title: string; type: string; completed?: boolean }>;
   priority: number;
   completed: boolean;
+  is_subitem: boolean; // true = sub-item (Items tab only), false = child item (hierarchical with arrows)
 }

@@ -16,6 +16,7 @@ import ReactMarkdown from "react-markdown";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import type { Tag, Item, ItemType } from "@/types";
 import { supportsUrl, supportsDeadline, supportsStatus } from "@/utils/itemTypes";
 import { filterTagsForItemType, getProjectAndCategoryTags } from "@/utils/tagFilters";
@@ -83,6 +84,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const [newSubItemTitle, setNewSubItemTitle] = useState("");
   const [newSubItemUrl, setNewSubItemUrl] = useState("");
   const [newSubItemType, setNewSubItemType] = useState<"task" | "url" | "note">("task");
+  const [subItems, setSubItems] = useState<Array<{ id: string; title: string; type: string; completed?: boolean }>>([]);
 
   // Track initial values for change detection
   const initialValues = {
@@ -125,12 +127,34 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     }
   }, [existingItem?.parent_id, allItems]);
 
-  // Auto-select Items tab if this item has children
+  // Fetch sub-items (is_subitem=true) for this item
   useEffect(() => {
-    if (existingItem?.children && existingItem.children.length > 0) {
+    const fetchSubItems = async () => {
+      if (!existingItem?.id) {
+        setSubItems([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("items")
+        .select("id, title, type, completed")
+        .eq("parent_id", existingItem.id)
+        .eq("is_subitem", true);
+
+      if (!error && data) {
+        setSubItems(data);
+      }
+    };
+
+    fetchSubItems();
+  }, [existingItem?.id]);
+
+  // Auto-select Items tab if this item has sub-items
+  useEffect(() => {
+    if (subItems.length > 0) {
       setNotesItemsTab("items");
     }
-  }, [existingItem?.id]); // Only run when item ID changes
+  }, [subItems.length]); // Run when sub-items count changes
 
   // Handle adding a sub-item
   const handleAddSubItem = async () => {
@@ -175,6 +199,19 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
       // Clear inputs
       setNewSubItemTitle("");
       setNewSubItemUrl("");
+
+      // Refetch sub-items to update the list
+      if (existingItem?.id) {
+        const { data } = await supabase
+          .from("items")
+          .select("id, title, type, completed")
+          .eq("parent_id", existingItem.id)
+          .eq("is_subitem", true);
+
+        if (data) {
+          setSubItems(data);
+        }
+      }
 
       toast.success("Sub-item added!");
     } catch (error) {
@@ -947,10 +984,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                     </div>
                   </div>
 
-                  {/* List existing sub-items (children) */}
+                  {/* List existing sub-items */}
                   <div className="space-y-2">
-                    {existingItem?.children && existingItem.children.length > 0 ? (
-                      existingItem.children.map((child) => (
+                    {subItems.length > 0 ? (
+                      subItems.map((child) => (
                         <div
                           key={child.id}
                           className="flex items-center gap-2 p-2 hover:bg-accent rounded-md cursor-pointer"
