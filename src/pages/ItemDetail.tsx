@@ -124,7 +124,12 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     }
   }, [existingItem?.parent_id, allItems]);
 
-  // Don't auto-switch tabs - let user stay where they are
+  // Auto-select Items tab if this item has children
+  useEffect(() => {
+    if (existingItem?.children && existingItem.children.length > 0) {
+      setNotesItemsTab("items");
+    }
+  }, [existingItem?.id]); // Only run when item ID changes
 
   // Handle adding a sub-item
   const handleAddSubItem = async () => {
@@ -154,8 +159,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
         subItemType = "water"; // notes as water items
       }
 
-      console.log("Calling onAddItem with parent_id:", existingItem.id);
-
       await onAddItem(
         newSubItemTitle.trim(),
         subItemType,
@@ -166,8 +169,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
         subItemUrl,
         existingItem.id // parent_id is the current item
       );
-
-      console.log("Sub-item added successfully, clearing inputs");
 
       // Clear inputs
       setNewSubItemTitle("");
@@ -945,10 +946,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
 
                   {/* List existing sub-items (children) */}
                   <div className="space-y-2">
-                    {(() => {
-                      console.log("Rendering children list. existingItem:", existingItem?.id, "children count:", existingItem?.children?.length || 0);
-                      return null;
-                    })()}
                     {existingItem?.children && existingItem.children.length > 0 ? (
                       existingItem.children.map((child) => (
                         <div

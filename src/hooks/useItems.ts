@@ -17,6 +17,8 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       let query = supabase
         .from("items")
         .select("*")
+        // Only fetch top-level items (not sub-items)
+        .is("parent_id", null)
         // Sort by priority first (DESC), then deadline (ASC with nulls last for fire), then created_at (DESC)
         .order("priority", { ascending: false })
         .order("deadline", { ascending: true, nullsFirst: false })
@@ -152,7 +154,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
-        .insert({ 
+        .insert({
           title,
           type,
           notes: notes || null,
@@ -207,9 +209,12 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       setHasMore(true);
       await loadItems(true);
       toast.success("Item added");
+
+      return newItem; // Return the created item
     } catch (error) {
       console.error("Error adding item:", error);
       toast.error("Failed to add item");
+      return null;
     }
   };
 

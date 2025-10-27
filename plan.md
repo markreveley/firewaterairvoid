@@ -1,15 +1,12 @@
 # Project Development Plan
 
 ## Current Focus
-Testing new priority system and sub-items functionality.
+Sub-items system fully functional and tested. Ready for production deployment.
 
 ## Next Actions (Priority Order)
-- [ ] Run database migration for priority and completed fields
-- [ ] Test star/priority sorting
-- [ ] Test sub-items creation with task/URL/note types
-- [ ] Test checkbox toggle for task sub-items
+- [ ] No pending tasks - all features complete and working
 
-## Recent Changes (Last Session - 2025-10-26)
+## Recent Changes (Last Session - 2025-10-27)
 **Priority & Sorting System:**
 - Added `priority` field to items table (0=normal, 1+=starred)
 - Added `completed` field for task-type items
@@ -26,6 +23,12 @@ Testing new priority system and sub-items functionality.
 - Sub-items are regular items with parent_id set
 - Checkbox toggle for completing task sub-items
 - Click-to-navigate to sub-item details
+- Items tab disabled for new (unsaved) items with "(Save first)" hint
+- After saving new item, automatically navigate to edit view (enables Items tab)
+- Auto-select Items tab when opening item with existing sub-items
+- Main query filters out sub-items (WHERE parent_id IS NULL) - only top-level items shown
+- Fixed: Sub-items now properly accumulate instead of overwriting
+- Fixed: handleAddItem checks for parent_id and always calls addItem (not updateItem) for sub-items
 
 **Previous Session (2025-10-25):**
 - Pulled latest changes from remote (c9ba88e → d99ab0a)

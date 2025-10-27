@@ -11,6 +11,7 @@ export default function ItemDetailPage() {
   const { allTags } = useTags();
 
   const itemId = searchParams.get("id");
+  const typeParam = searchParams.get("type");
   const existingItem = itemId ? items.find(item => item.id === itemId) : null;
 
   // Wait for items to load if we're editing an existing item
@@ -32,6 +33,13 @@ export default function ItemDetailPage() {
     url?: string,
     parent_id?: string
   ) => {
+    // If parent_id is provided, we're creating a sub-item - always use addItem
+    if (parent_id) {
+      await addItem(title, type, tags, deadline, notes, status, url, parent_id);
+      return;
+    }
+
+    // Otherwise, we're saving the current item
     if (existingItem) {
       // Edit mode - update existing item
       await updateItem(existingItem.id, {
@@ -42,16 +50,17 @@ export default function ItemDetailPage() {
         notes,
         status,
         url,
-        parent_id: parent_id || null,
+        parent_id: null,
       });
     } else {
       // Create mode - add new item
-      await addItem(title, type, tags, deadline, notes, status, url, parent_id);
-    }
-    // Navigation now handled by ItemDetail component
+      const newItem = await addItem(title, type, tags, deadline, notes, status, url, parent_id);
 
-    // If this was a sub-item (has parent_id), the items will reload
-    // The existingItem will automatically update via the items.find() above
+      // Navigate to edit view of the newly created item so Items tab becomes enabled
+      if (newItem) {
+        navigate(`/item/edit?id=${newItem.id}&type=${type}`);
+      }
+    }
   };
 
   return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={items} onDeleteItem={deleteItem} onUpdateItem={updateItem} />;
