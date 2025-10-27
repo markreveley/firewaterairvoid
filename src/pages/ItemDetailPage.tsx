@@ -34,12 +34,12 @@ export default function ItemDetailPage() {
   ) => {
     if (existingItem) {
       // Edit mode - update existing item
-      await updateItem(existingItem.id, { 
+      await updateItem(existingItem.id, {
         title,
-        type, 
-        tags, 
-        deadline: deadline || null, 
-        notes, 
+        type,
+        tags,
+        deadline: deadline || null,
+        notes,
         status,
         url,
         parent_id: parent_id || null,
@@ -49,6 +49,9 @@ export default function ItemDetailPage() {
       await addItem(title, type, tags, deadline, notes, status, url, parent_id);
     }
     // Navigation now handled by ItemDetail component
+
+    // If this was a sub-item (has parent_id), the items will reload
+    // The existingItem will automatically update via the items.find() above
   };
 
   return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={items} onDeleteItem={deleteItem} onUpdateItem={updateItem} />;
