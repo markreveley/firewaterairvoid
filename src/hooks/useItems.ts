@@ -20,10 +20,8 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
         // Sort by priority first (DESC), then deadline (ASC with nulls last for fire), then created_at (DESC)
         .order("priority", { ascending: false })
         .order("deadline", { ascending: true, nullsFirst: false })
-        .order("created_at", { ascending: false });
-
-      // Only fetch top-level items (not sub-items) when browsing by type (list view)
-      if (type) {
+      // Fetch top-level only for Fire. For other types, include sub-items too so links (e.g., Void URLs) show as cards
+      if (type === "fire") {
         query = query.is("parent_id", null);
       }
 
