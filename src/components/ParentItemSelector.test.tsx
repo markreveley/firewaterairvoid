@@ -11,6 +11,8 @@ describe('ParentItemSelector', () => {
       type: 'fire',
       tags: [],
       createdAt: new Date(),
+      priority: 0,
+      completed: false,
     },
     {
       id: '2',
@@ -18,6 +20,8 @@ describe('ParentItemSelector', () => {
       type: 'water',
       tags: [],
       createdAt: new Date(),
+      priority: 0,
+      completed: false,
     },
     {
       id: '3',
@@ -25,6 +29,8 @@ describe('ParentItemSelector', () => {
       type: 'air',
       tags: [],
       createdAt: new Date(),
+      priority: 0,
+      completed: false,
     },
   ];
 

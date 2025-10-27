@@ -46,33 +46,39 @@ export type Database = {
       }
       items: {
         Row: {
+          completed: boolean
           created_at: string | null
           deadline: string | null
           id: string
           notes: string | null
           parent_id: string | null
+          priority: number
           status: string | null
           title: string
           type: string
           url: string | null
         }
         Insert: {
+          completed?: boolean
           created_at?: string | null
           deadline?: string | null
           id?: string
           notes?: string | null
           parent_id?: string | null
+          priority?: number
           status?: string | null
           title: string
           type?: string
           url?: string | null
         }
         Update: {
+          completed?: boolean
           created_at?: string | null
           deadline?: string | null
           id?: string
           notes?: string | null
           parent_id?: string | null
+          priority?: number
           status?: string | null
           title?: string
           type?: string
