@@ -124,39 +124,24 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     }
   }, [existingItem?.parent_id, allItems]);
 
+  // Switch to Notes tab if Items tab is selected but item isn't saved yet
+  useEffect(() => {
+    if (!existingItem && notesItemsTab === "items") {
+      setNotesItemsTab("notes");
+    }
+  }, [existingItem, notesItemsTab]);
+
   // Handle adding a sub-item
   const handleAddSubItem = async () => {
     if (!newSubItemTitle.trim()) {
-      console.log("No title provided");
       return;
     }
 
-    // If this is a new item (not saved yet), save it first
+    // This should never happen now since Items tab is disabled for new items
     if (!existingItem) {
-      if (!title.trim()) {
-        toast.error("Please add a title to this item first");
-        return;
-      }
-
-      console.log("Auto-saving parent item before adding sub-item...");
-      toast.info("Saving item...");
-
-      try {
-        // Save the parent item first
-        await handleSubmit(undefined, false);
-
-        // After saving, we need to wait a moment for the item to be available
-        // The handleSubmit will trigger a reload through onAddItem
-        toast.info("Item saved! Please click + again to add the sub-item.");
-        return;
-      } catch (error) {
-        console.error("Error saving parent item:", error);
-        toast.error("Failed to save item");
-        return;
-      }
+      toast.error("Please save this item first");
+      return;
     }
-
-    console.log("Adding sub-item:", { title: newSubItemTitle, type: newSubItemType });
 
     try {
       // Determine type and other properties based on sub-item type
@@ -166,6 +151,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
       if (newSubItemType === "url") {
         subItemType = "void";
         subItemUrl = newSubItemUrl.trim() || undefined;
+        if (!subItemUrl) {
+          toast.error("Please enter a URL");
+          return;
+        }
       } else if (newSubItemType === "note") {
         subItemType = "water"; // notes as water items
       }
@@ -180,8 +169,6 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
         subItemUrl,
         existingItem.id // parent_id is the current item
       );
-
-      console.log("Sub-item added successfully");
 
       // Clear inputs
       setNewSubItemTitle("");
@@ -844,7 +831,12 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               <div className="flex items-center justify-between mb-2">
                 <TabsList>
                   <TabsTrigger value="notes">Notes</TabsTrigger>
-                  <TabsTrigger value="items">Items</TabsTrigger>
+                  <TabsTrigger value="items" disabled={!existingItem}>
+                    Items
+                    {!existingItem && (
+                      <span className="ml-1 text-xs text-muted-foreground">(Save first)</span>
+                    )}
+                  </TabsTrigger>
                 </TabsList>
                 {notesItemsTab === "notes" && (
                   <Button
