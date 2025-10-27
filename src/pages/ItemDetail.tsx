@@ -31,7 +31,8 @@ interface ItemDetailProps {
     notes?: string,
     status?: string,
     url?: string,
-    parent_id?: string
+    parent_id?: string,
+    is_subitem?: boolean
   ) => Promise<void>;
   existingTags: Tag[];
   existingItem?: Item | null;
@@ -167,7 +168,8 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
         undefined, // no notes
         newSubItemType === "task" ? "To Do" : undefined, // status only for tasks
         subItemUrl,
-        existingItem.id // parent_id is the current item
+        existingItem.id, // parent_id is the current item
+        true // is_subitem = true for items created via Items tab
       );
 
       // Clear inputs
@@ -190,16 +192,17 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
         finalDeadline = set(deadline, { hours, minutes, seconds: 0, milliseconds: 0 });
       }
 
-      await onAddItem(
-        title,
-        itemType,
-        selectedTags,
-        supportsDeadline(itemType) ? finalDeadline : undefined,
-        notes.trim() || undefined,
-        supportsStatus(itemType) ? (status.trim() || "To Do") : undefined,
-        supportsUrl(itemType) ? (url.trim() || undefined) : undefined,
-        selectedParent?.id
-      );
+    await onAddItem(
+      title,
+      itemType,
+      selectedTags,
+      supportsDeadline(itemType) ? finalDeadline : undefined,
+      notes.trim() || undefined,
+      supportsStatus(itemType) ? (status.trim() || "To Do") : undefined,
+      supportsUrl(itemType) ? (url.trim() || undefined) : undefined,
+      selectedParent?.id, // Pass parent_id for hierarchical linking
+      false // is_subitem = false for main items (parent-child relationships)
+    );
       setHasUnsavedChanges(false);
       
       if (shouldNavigate) {

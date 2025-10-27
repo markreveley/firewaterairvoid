@@ -31,15 +31,16 @@ export default function ItemDetailPage() {
     notes?: string,
     status?: string,
     url?: string,
-    parent_id?: string
+    parent_id?: string,
+    is_subitem?: boolean
   ) => {
-    // If parent_id is provided, we're creating a sub-item - always use addItem
-    if (parent_id) {
-      await addItem(title, type, tags, deadline, notes, status, url, parent_id);
+    // If parent_id is provided AND is_subitem is true, we're creating a sub-item via Items tab
+    if (parent_id && is_subitem) {
+      await addItem(title, type, tags, deadline, notes, status, url, parent_id, true);
       return;
     }
 
-    // Otherwise, we're saving the current item
+    // Otherwise, we're saving the current item (not a sub-item)
     if (existingItem) {
       // Edit mode - update existing item
       await updateItem(existingItem.id, {
@@ -50,11 +51,11 @@ export default function ItemDetailPage() {
         notes,
         status,
         url,
-        parent_id: null,
+        parent_id: parent_id || null, // Use parent_id for hierarchical linking
       });
     } else {
-      // Create mode - add new item
-      const newItem = await addItem(title, type, tags, deadline, notes, status, url, parent_id);
+      // Create mode - add new item (not a sub-item, even if it has a parent)
+      const newItem = await addItem(title, type, tags, deadline, notes, status, url, parent_id, false);
 
       // Navigate to edit view of the newly created item so Items tab becomes enabled
       if (newItem) {

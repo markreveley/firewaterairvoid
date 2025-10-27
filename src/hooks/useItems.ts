@@ -20,10 +20,10 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
         // Sort by priority first (DESC), then deadline (ASC with nulls last for fire), then created_at (DESC)
         .order("priority", { ascending: false })
         .order("deadline", { ascending: true, nullsFirst: false })
-      // Fetch top-level only for Fire. For other types, include sub-items too so links (e.g., Void URLs) show as cards
-      if (type === "fire") {
-        query = query.is("parent_id", null);
-      }
+      
+      // Exclude sub-items from main list (only show top-level items and child items)
+      // Sub-items should only appear in Items tab, not as cards
+      query = query.or("parent_id.is.null,is_subitem.eq.false");
 
       // Only filter by type if type is provided
       if (type) {
@@ -60,14 +60,15 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
         }
       }
 
-      // Fetch child items (items that have these items as parent)
+      // Fetch child items (sub-items only - these are shown in Items tab)
       const itemIds = itemsData.map((item: any) => item.id);
       let childItems: any[] = [];
       if (itemIds.length > 0) {
         const { data: childData, error: childError } = await supabase
           .from("items")
           .select("id, title, type, parent_id, completed")
-          .in("parent_id", itemIds);
+          .in("parent_id", itemIds)
+          .eq("is_subitem", true);
 
         if (!childError && childData) {
           childItems = childData;
@@ -151,7 +152,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
     loadItems(true);
   }, [type, pageSize]);
 
-  const addItem = async (title: string, type: ItemType, tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string) => {
+  const addItem = async (title: string, type: ItemType, tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string, is_subitem?: boolean) => {
     try {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
@@ -163,6 +164,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
           url: url || null,
           deadline: deadline?.toISOString(),
           parent_id: parent_id || null,
+          is_subitem: is_subitem ?? (parent_id ? true : false), // Use explicit value or default to true if parent_id exists
         })
         .select()
         .single();
