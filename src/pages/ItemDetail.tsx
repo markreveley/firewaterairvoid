@@ -131,10 +131,29 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
       return;
     }
 
+    // If this is a new item (not saved yet), save it first
     if (!existingItem) {
-      console.error("Cannot add sub-items: No existing item (you must save the parent item first)");
-      toast.error("Please save this item before adding sub-items");
-      return;
+      if (!title.trim()) {
+        toast.error("Please add a title to this item first");
+        return;
+      }
+
+      console.log("Auto-saving parent item before adding sub-item...");
+      toast.info("Saving item...");
+
+      try {
+        // Save the parent item first
+        await handleSubmit(undefined, false);
+
+        // After saving, we need to wait a moment for the item to be available
+        // The handleSubmit will trigger a reload through onAddItem
+        toast.info("Item saved! Please click + again to add the sub-item.");
+        return;
+      } catch (error) {
+        console.error("Error saving parent item:", error);
+        toast.error("Failed to save item");
+        return;
+      }
     }
 
     console.log("Adding sub-item:", { title: newSubItemTitle, type: newSubItemType });
