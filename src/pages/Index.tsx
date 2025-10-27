@@ -29,7 +29,7 @@ const Index = () => {
   const [selectedProjectChildTag, setSelectedProjectChildTag] = useState<string>();
   const [selectedCategoryTags, setSelectedCategoryTags] = useState<string[]>([]);
   const [selectedCategoryChildTags, setSelectedCategoryChildTags] = useState<string[]>([]);
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<"All" | "To Do" | "Completed">("All");
   const { allTags } = useTags();
 
   const handleAddItem = async (title: string, type: ItemType, tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {

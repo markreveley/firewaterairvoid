@@ -35,7 +35,7 @@ interface ItemListProps {
   selectedProjectChildTag?: string;
   selectedCategoryTags?: string[];
   selectedCategoryChildTags?: string[];
-  selectedStatusFilter?: "To Do" | "Completed";
+  selectedStatusFilter?: "All" | "To Do" | "Completed";
   onDeleteItem: (itemId: string) => void;
   onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth"; parent_id?: string | null; priority?: number; completed?: boolean }) => void;
 }
@@ -83,7 +83,7 @@ export function ItemList({
     if (item.type !== type) return false;
     
     // Filter by status for fire items
-    if (type === "fire" && selectedStatusFilter) {
+    if (type === "fire" && selectedStatusFilter && selectedStatusFilter !== "All") {
       if (item.status !== selectedStatusFilter) return false;
     }
     
