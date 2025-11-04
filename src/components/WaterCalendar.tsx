@@ -87,6 +87,12 @@ export function WaterCalendar({ items }: WaterCalendarProps) {
     navigate(`/item/edit?id=${event.id}&type=water`);
   };
 
+  const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
+    // Format the date as ISO string for URL param
+    const deadlineISO = slotInfo.start.toISOString();
+    navigate(`/item/new?type=water&deadline=${encodeURIComponent(deadlineISO)}`);
+  };
+
   const handleNavigate = (newDate: Date) => {
     setDate(newDate);
   };
@@ -109,6 +115,8 @@ export function WaterCalendar({ items }: WaterCalendarProps) {
           onNavigate={handleNavigate}
           onView={handleViewChange}
           onSelectEvent={handleSelectEvent}
+          onSelectSlot={handleSelectSlot}
+          selectable
           views={['month', 'week', 'agenda']}
           eventPropGetter={(event) => ({
             className: cn(

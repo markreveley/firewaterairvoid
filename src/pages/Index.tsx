@@ -165,7 +165,9 @@ const Index = () => {
                   {activeType === "water" && (
                     <TabsTrigger value="calendar">Calendar</TabsTrigger>
                   )}
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  {activeType !== "water" && (
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                  )}
                 </TabsList>
               </Tabs>
             </div>

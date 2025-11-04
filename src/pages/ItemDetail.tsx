@@ -109,6 +109,11 @@ export default function ItemDetail({
   const [searchParams] = useSearchParams();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
   const typeParam = searchParams.get("type") as ItemType | null;
+  const deadlineParam = searchParams.get("deadline");
+
+  // Parse deadline from URL param if present
+  const initialDeadline = existingItem?.deadline ||
+    (deadlineParam ? new Date(deadlineParam) : undefined);
 
   const [title, setTitle] = useState(initialTitle);
   const [notes, setNotes] = useState(existingItem?.notes || "");
@@ -121,10 +126,10 @@ export default function ItemDetail({
     existingItem?.tags || [],
   );
   const [deadline, setDeadline] = useState<Date | undefined>(
-    existingItem?.deadline,
+    initialDeadline,
   );
   const [selectedTime, setSelectedTime] = useState<string>(
-    existingItem?.deadline ? format(existingItem.deadline, "HH:mm") : "00:00",
+    initialDeadline ? format(initialDeadline, "HH:mm") : "00:00",
   );
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
@@ -157,10 +162,10 @@ export default function ItemDetail({
     url: existingItem?.url || "",
     itemType: existingItem?.type || typeParam || "fire",
     selectedTags: existingItem?.tags || [],
-    deadline: existingItem?.deadline,
+    deadline: initialDeadline,
     parentId: existingItem?.parent_id,
-    selectedTime: existingItem?.deadline
-      ? format(existingItem.deadline, "HH:mm")
+    selectedTime: initialDeadline
+      ? format(initialDeadline, "HH:mm")
       : "00:00",
   };
 
