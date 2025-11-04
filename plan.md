@@ -23,10 +23,16 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - water calendar view complete ✅
+**Working on**: Nothing - water calendar UX complete ✅
 **Next**: Waiting for next feature request or bug report
 
 ## Work Log
+--------------------------------------------------
+2025-11-03 – water calendar UX enhancements
+- Goal: Streamline water calendar interface and add quick-create functionality
+- Key files: src/pages/Index.tsx (remove overview tab), src/components/WaterCalendar.tsx (onSelectSlot handler), src/pages/ItemDetail.tsx (deadline URL param)
+- Decisions: Removed Overview tab for water (agenda view in calendar serves same purpose); clicking empty calendar slots now opens new item form with that date pre-filled; calendar made selectable for better UX
+- Next: (completed ✅)
 --------------------------------------------------
 2025-11-03 – water calendar default view
 - Goal: Make calendar the default view when navigating to water items
