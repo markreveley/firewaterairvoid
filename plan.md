@@ -23,10 +23,17 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - bug fixes complete ✅
+**Working on**: Nothing - refactoring complete ✅
 **Next**: Ready for user testing
 
 ## Work Log
+--------------------------------------------------
+2025-11-04 – TanStack Query migration and status filter simplification
+- Goal: Modernize data fetching with TanStack Query for better caching and performance
+- Key files: src/App.tsx (QueryClientProvider), src/hooks/useItems.ts (useQuery/useMutation), src/components/StatusFilter.tsx, src/components/ItemList.tsx, src/pages/Index.tsx
+- Changes: Wrapped app in QueryClientProvider with 5-min staleTime and 10-min cache; converted useItems from useState/useEffect to useQuery for fetching and useMutation for updates; implemented optimistic UI updates for instant feedback; removed "All" option from fire status filter (now defaults to "To Do"); cleaned up debug console.logs from WaterCalendar
+- Benefits: Automatic cache invalidation, background refetching, optimistic updates for snappier UX, reduced boilerplate
+- Next: (completed ✅)
 --------------------------------------------------
 2025-11-04 – parent item link navigation fix
 - Goal: Fix bug where clicking parent item links navigated to blank page
