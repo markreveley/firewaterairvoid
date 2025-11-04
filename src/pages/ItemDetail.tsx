@@ -177,6 +177,8 @@ export default function ItemDetail({
     selectedTime: initialDeadline
       ? format(initialDeadline, "HH:mm")
       : "00:00",
+    recurrenceType: existingItem?.recurrence_type || "none",
+    recurrenceEndDate: existingItem?.recurrence_end_date,
   };
 
   // Check if form has changed
@@ -191,7 +193,9 @@ export default function ItemDetail({
         JSON.stringify(initialValues.selectedTags.map((t) => t.id).sort()) ||
       deadline?.getTime() !== initialValues.deadline?.getTime() ||
       selectedTime !== initialValues.selectedTime ||
-      selectedParent?.id !== initialValues.parentId;
+      selectedParent?.id !== initialValues.parentId ||
+      recurrenceType !== initialValues.recurrenceType ||
+      recurrenceEndDate?.getTime() !== initialValues.recurrenceEndDate?.getTime();
 
     setHasUnsavedChanges(hasChanged);
   }, [
@@ -204,6 +208,8 @@ export default function ItemDetail({
     deadline,
     selectedTime,
     selectedParent,
+    recurrenceType,
+    recurrenceEndDate,
   ]);
 
   const timeOptions = generateTimeOptions();
