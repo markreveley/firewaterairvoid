@@ -28,6 +28,13 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-04 – bulk delete for completed fire items
+- Goal: Add ability to clear all completed fire items at once
+- Key files: src/hooks/useItems.ts (bulkDeleteItemsMutation), src/pages/Index.tsx (Clear Completed button)
+- Changes: Added bulkDeleteItems mutation that processes multiple items; added "Clear Completed" button that appears when viewing completed fire items; button shows count of items and displays loading spinner during deletion; includes confirmation dialog before deletion; all items moved to trash before deletion
+- UX: Button only visible when fire type is active and Completed filter is selected; disabled during deletion with animated spinner; shows success toast with item count
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-04 – TanStack Query migration and status filter simplification
 - Goal: Modernize data fetching with TanStack Query for better caching and performance
 - Key files: src/App.tsx (QueryClientProvider), src/hooks/useItems.ts (useQuery/useMutation), src/components/StatusFilter.tsx, src/components/ItemList.tsx, src/pages/Index.tsx
