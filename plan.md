@@ -23,10 +23,17 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - unified calendar view complete ✅
-**Next**: Waiting for next feature request or bug report
+**Working on**: Nothing - recurring water items complete ✅
+**Next**: User needs to apply database migration (see MIGRATION_INSTRUCTIONS.md)
 
 ## Work Log
+--------------------------------------------------
+2025-11-03 – recurring water items
+- Goal: Enable weekly and yearly recurring events for water items
+- Key files: supabase/migrations/20251103224411_add_recurrence_fields.sql (new migration), src/types/index.ts (RecurrenceType), src/pages/ItemDetail.tsx (recurrence UI), src/hooks/useItems.ts (CRUD with recurrence), src/components/WaterCalendar.tsx (generate recurring instances)
+- Decisions: Added recurrence_type ('none'|'weekly'|'yearly') and optional recurrence_end_date; UI shows repeat selector and end date picker for water items with deadlines; calendar generates up to 2 years of future instances; weekly = every 7 days, yearly = same date each year
+- Migration required: User must apply SQL migration in Supabase Dashboard (see MIGRATION_INSTRUCTIONS.md)
+- Next: (completed ✅ - awaiting migration application)
 --------------------------------------------------
 2025-11-03 – unified calendar with fire todos
 - Goal: Show fire task deadlines on water calendar for unified time management
