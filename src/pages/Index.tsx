@@ -63,8 +63,9 @@ const Index = () => {
     if (allTags.length > 0) {
       const { projectTags, categoryTags } = getTagsForItemType(allTags, activeType);
       
-      // Check project tag
-      if (selectedProjectTag && !projectTags.some(t => t.id === selectedProjectTag)) {
+      // Check project tag - validate against ALL project tags, not just root tags
+      const allProjectTags = allTags.filter(t => t.type === 'project');
+      if (selectedProjectTag && !allProjectTags.some(t => t.id === selectedProjectTag)) {
         setSelectedProjectTag(undefined);
         setSelectedProjectChildTag(undefined);
       }

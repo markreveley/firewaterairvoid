@@ -34,21 +34,53 @@ export function TagFilter({
 }: TagFilterProps) {
   if (projectTags.length === 0 && categoryTags.length === 0) return null;
 
-  // Get child tags for selected project tag
+  // Always show root tags in the first row
+  const projectParentTags = projectTags;
+
+  // Find the root ancestor of selectedProjectTag for highlighting
+  const selectedParent = selectedProjectTag ? allTags.find(t => t.id === selectedProjectTag) : null;
+  let rootAncestorId = selectedProjectTag;
+  if (selectedParent) {
+    let current = selectedParent;
+    while (current.parent_id) {
+      const parent = allTags.find(t => t.id === current.parent_id);
+      if (!parent) break;
+      rootAncestorId = parent.id;
+      current = parent;
+    }
+  }
+
+  // Get child tags for selected project tag (second row)
+  // If selectedProjectTag is not a root tag, show it and its siblings
+  const selectedParentTag = selectedProjectTag ? allTags.find(t => t.id === selectedProjectTag) : null;
   const projectChildTags = selectedProjectTag
+    ? selectedParentTag?.parent_id
+      ? [selectedParentTag] // Show the selected non-root tag itself
+      : allTags.filter(tag => tag.parent_id === selectedProjectTag) // Show children of root tag
+    : [];
+
+  // Get grandchild tags (third row) - children of selected parent tag if it's not a root
+  const projectGrandchildTags = selectedProjectTag && selectedParentTag?.parent_id
     ? allTags.filter(tag => tag.parent_id === selectedProjectTag)
+    : selectedProjectChildTag
+    ? allTags.filter(tag => tag.parent_id === selectedProjectChildTag)
     : [];
 
   // Get child tags for all selected category tags
-  const categoryChildTags = selectedCategoryTags.length > 0
+  // If child tags are selected, show their children; otherwise show children of selected parent tags
+  const categoryChildTags = selectedCategoryChildTags.length > 0
+    ? allTags.filter(tag => tag.parent_id && selectedCategoryChildTags.includes(tag.parent_id))
+    : selectedCategoryTags.length > 0
     ? allTags.filter(tag => tag.parent_id && selectedCategoryTags.includes(tag.parent_id))
     : [];
 
-  const renderProjectTagBadges = (tags: Tag[], isChildTag = false) => {
+  const renderProjectTagBadges = (tags: Tag[], isChildTag = false, isGrandchildTag = false) => {
     return tags.map((tag) => {
-      const isSelected = isChildTag 
+      const isSelected = isGrandchildTag
         ? selectedProjectChildTag === tag.id
-        : selectedProjectTag === tag.id;
+        : isChildTag
+        ? (selectedProjectChildTag === tag.id || selectedProjectTag === tag.id) // Highlight if selected as parent or child
+        : (selectedProjectTag === tag.id || rootAncestorId === tag.id); // Highlight if selected or is ancestor
 
       return (
         <Badge
@@ -76,11 +108,22 @@ export function TagFilter({
               : "bg-void-light text-void-dark hover:bg-white hover:text-black hover:border-black"
           )}
           onClick={() => {
-            if (isChildTag) {
-              // Exclusive: toggle child tag
+            if (isGrandchildTag) {
+              // Grandchild tag clicked - promote parent to selectedProjectTag
+              // and this tag to selectedProjectChildTag
+              if (isSelected) {
+                // Deselect: go back to just having the parent selected
+                onSelectProjectChildTag(undefined);
+              } else {
+                // Select: set parent as selectedProjectTag and this as selectedProjectChildTag
+                onSelectProjectTag(tag.parent_id || selectedProjectTag);
+                onSelectProjectChildTag(tag.id);
+              }
+            } else if (isChildTag) {
+              // Select/deselect child tag (both leaf and branch tags)
               onSelectProjectChildTag(isSelected ? undefined : tag.id);
             } else {
-              // Exclusive: select this parent and clear child
+              // Parent tag clicked - toggle selection
               onSelectProjectTag(isSelected ? undefined : tag.id);
               onSelectProjectChildTag(undefined);
             }
@@ -92,9 +135,14 @@ export function TagFilter({
               className="w-3 h-3 ml-1"
               onClick={(e) => {
                 e.stopPropagation();
-                if (isChildTag) {
+                if (isGrandchildTag) {
+                  // Clear grandchild selection, keep parent (go back to showing just Rust)
+                  onSelectProjectChildTag(undefined);
+                } else if (isChildTag) {
+                  // Clear child selection, keep parent
                   onSelectProjectChildTag(undefined);
                 } else {
+                  // Clear parent selection
                   onSelectProjectTag(undefined);
                   onSelectProjectChildTag(undefined);
                 }
@@ -139,11 +187,20 @@ export function TagFilter({
           )}
           onClick={() => {
             if (isChildTag) {
-              // Cumulative: toggle child tag
-              if (isSelected) {
-                onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
+              // Check if this child tag has its own children
+              const hasChildren = allTags.some(t => t.parent_id === tag.id);
+              if (hasChildren) {
+                // Promote to parent level for deeper navigation
+                // Clear current selections and select this as parent
+                onSelectCategoryTags([tag.id]);
+                onSelectCategoryChildTags([]);
               } else {
-                onSelectCategoryChildTags([...selectedCategoryChildTags, tag.id]);
+                // Leaf tag: cumulative toggle
+                if (isSelected) {
+                  onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
+                } else {
+                  onSelectCategoryChildTags([...selectedCategoryChildTags, tag.id]);
+                }
               }
             } else {
               // Cumulative: toggle parent tag
@@ -189,11 +246,16 @@ export function TagFilter({
       {projectTags.length > 0 && (
         <>
           <div className="flex flex-wrap gap-2 items-center justify-center">
-            {renderProjectTagBadges(projectTags)}
+            {renderProjectTagBadges(projectParentTags)}
           </div>
           {projectChildTags.length > 0 && (
             <div className="flex flex-wrap gap-2 items-center justify-center">
               {renderProjectTagBadges(projectChildTags, true)}
+            </div>
+          )}
+          {projectGrandchildTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center justify-center">
+              {renderProjectTagBadges(projectGrandchildTags, false, true)}
             </div>
           )}
         </>
