@@ -7,11 +7,13 @@ import type { ItemType, Tag } from "@/types";
 export default function ItemDetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { addItem, updateItem, deleteItem, items, isLoading } = useItems();
+  const itemId = searchParams.get("id");
+  const typeParam = searchParams.get("type") as ItemType | null;
+
+  // Use typeParam to fetch items of that type so we can find the existing item
+  const { addItem, updateItem, deleteItem, items, isLoading } = useItems(typeParam || undefined);
   const { allTags } = useTags();
 
-  const itemId = searchParams.get("id");
-  const typeParam = searchParams.get("type");
   const existingItem = itemId ? items.find(item => item.id === itemId) : null;
 
   // Wait for items to load if we're editing an existing item
