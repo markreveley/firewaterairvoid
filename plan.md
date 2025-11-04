@@ -28,6 +28,12 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-03 – water calendar default view
+- Goal: Make calendar the default view when navigating to water items
+- Key files: src/pages/Index.tsx (auto-switch logic)
+- Decisions: Water auto-opens in calendar view; switching to water from other types triggers calendar view; leaving water resets to card view; URL params still respected if explicitly set
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-03 – water calendar view
 - Goal: Add calendar display for water items with month/week/agenda views
 - Key files: src/components/WaterCalendar.tsx (new), src/components/WaterCalendar.css (new), src/pages/Index.tsx (calendar view mode), src/components/ItemList.tsx (water deadline display), src/utils/itemTypes.ts (enable deadline for water), src/pages/ItemDetail.tsx (comment update)
