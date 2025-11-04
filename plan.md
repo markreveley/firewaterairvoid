@@ -23,10 +23,17 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - is_subitem implementation complete and tested ✅
+**Working on**: Nothing - deep tag hierarchy navigation complete ✅
 **Next**: Waiting for next feature request or bug report
 
 ## Work Log
+--------------------------------------------------
+2025-11-03 – deep tag hierarchy navigation
+- Goal: Support 3-level tag hierarchies (e.g., Dev/Rust/Built in Rust) with proper UI navigation and filtering
+- Key files: src/components/TagFilter.tsx (3-row display, ancestor highlighting), src/pages/Index.tsx (fixed tag validation)
+- Decisions: Display root tags (row 1), children (row 2), grandchildren (row 3) separately; highlight full ancestor path; validate against all project tags not just root tags to prevent clearing non-root selections
+- Tag reorganization: FireWaterVoid→top-level, created Dev/Rust, moved Built in Rust→Dev/Rust/Built in Rust, Rust VST→Disorder, Tourlab→Dirtwire, Emma/Odin/Shane→1181
+- Next: (completed ✅)
 --------------------------------------------------
 2025-10-27 – claude.md entry point
 - Goal: Create bootstrap file for fresh Claude Code sessions
