@@ -25,7 +25,7 @@ const Index = () => {
   const [activeType, setActiveType] = useState<ItemType>(initialType);
   const [viewMode, setViewMode] = useState<"card" | "calendar" | "overview">(initialView);
   const [searchQuery, setSearchQuery] = useState("");
-  const pageSize = viewMode === "overview" ? 200 : 10;
+  const pageSize = viewMode === "overview" ? 200 : 50;
   const { items, isLoading, hasMore, addItem, deleteItem, updateItem, loadMore } = useItems(activeType, pageSize);
   // Also fetch fire items for water calendar view to show todos
   const { items: fireItems } = useItems(activeType === "water" && viewMode === "calendar" ? "fire" : undefined, 200);
@@ -33,7 +33,7 @@ const Index = () => {
   const [selectedProjectChildTag, setSelectedProjectChildTag] = useState<string>();
   const [selectedCategoryTags, setSelectedCategoryTags] = useState<string[]>([]);
   const [selectedCategoryChildTags, setSelectedCategoryChildTags] = useState<string[]>([]);
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState<"All" | "To Do" | "Completed">("All");
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
   const { allTags } = useTags();
 
   const handleAddItem = async (title: string, type: ItemType, tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
@@ -63,9 +63,9 @@ const Index = () => {
     });
   }, [activeType, viewMode, selectedProjectTag, selectedProjectChildTag, selectedCategoryTags, selectedCategoryChildTags, setSearchParams]);
 
-  // Auto-switch to calendar when navigating to water, and reset to card when leaving water
+  // Water always shows calendar view; other types show card/overview
   useEffect(() => {
-    if (activeType === "water" && viewMode === "card") {
+    if (activeType === "water" && viewMode !== "calendar") {
       setViewMode("calendar");
     } else if (viewMode === "calendar" && activeType !== "water") {
       setViewMode("card");
@@ -129,51 +129,50 @@ const Index = () => {
 
         <div className="max-w-4xl mx-auto space-y-6">
           {/* New Item Button and View Mode Toggle */}
-          <div className="flex items-center justify-between gap-4">
-            {/* New Item Button - Left */}
-            <Button
-              onClick={() => navigate(`/item/new?type=${activeType}`)}
-              variant="white"
-              size="sm"
-              className="rounded-full w-9 h-9 p-0"
-            >
-              <Plus className="w-5 h-5" />
-            </Button>
+          {activeType !== "water" && (
+            <div className="flex items-center justify-between gap-4">
+              {/* New Item Button - Left */}
+              <Button
+                onClick={() => navigate(`/item/new?type=${activeType}`)}
+                variant="white"
+                size="sm"
+                className="rounded-full w-9 h-9 p-0"
+              >
+                <Plus className="w-5 h-5" />
+              </Button>
 
-            <div className="flex items-center gap-4">
-              {viewMode === "overview" && (
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Search items..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+              <div className="flex items-center gap-4">
+                {viewMode === "overview" && (
+                  <div className="relative w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Search items..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                )}
+
+                {activeType === "fire" && (
+                  <StatusFilter
+                    selectedStatus={selectedStatusFilter}
+                    onSelectStatus={setSelectedStatusFilter}
                   />
-                </div>
-              )}
+                )}
 
-              {activeType === "fire" && (
-                <StatusFilter
-                  selectedStatus={selectedStatusFilter}
-                  onSelectStatus={setSelectedStatusFilter}
-                />
-              )}
-
-              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "calendar" | "overview")}>
-                <TabsList>
-                  <TabsTrigger value="card">Card</TabsTrigger>
-                  {activeType === "water" && (
-                    <TabsTrigger value="calendar">Calendar</TabsTrigger>
-                  )}
-                  {activeType !== "water" && (
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                  )}
-                </TabsList>
-              </Tabs>
+                <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "calendar" | "overview")}>
+                  <TabsList>
+                    <TabsTrigger value="card">Card</TabsTrigger>
+                    {activeType !== "water" && (
+                      <TabsTrigger value="overview">Overview</TabsTrigger>
+                    )}
+                  </TabsList>
+                </Tabs>
+              </div>
             </div>
-          </div>
+          )}
 
           {isLoading && items.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">Loading...</div>
