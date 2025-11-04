@@ -21,7 +21,7 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialType = (searchParams.get("type") as ItemType) || "fire";
-  const initialView = (searchParams.get("view") as "card" | "calendar" | "overview") || "card";
+  const initialView = (searchParams.get("view") as "card" | "calendar" | "overview") || (initialType === "water" ? "calendar" : "card");
   const [activeType, setActiveType] = useState<ItemType>(initialType);
   const [viewMode, setViewMode] = useState<"card" | "calendar" | "overview">(initialView);
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,9 +61,11 @@ const Index = () => {
     });
   }, [activeType, viewMode, selectedProjectTag, selectedProjectChildTag, selectedCategoryTags, selectedCategoryChildTags, setSearchParams]);
 
-  // Reset calendar view when switching away from water
+  // Auto-switch to calendar when navigating to water, and reset to card when leaving water
   useEffect(() => {
-    if (viewMode === "calendar" && activeType !== "water") {
+    if (activeType === "water" && viewMode === "card") {
+      setViewMode("calendar");
+    } else if (viewMode === "calendar" && activeType !== "water") {
       setViewMode("card");
     }
   }, [activeType, viewMode]);
