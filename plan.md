@@ -23,10 +23,17 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - water calendar UX complete ✅
+**Working on**: Nothing - unified calendar view complete ✅
 **Next**: Waiting for next feature request or bug report
 
 ## Work Log
+--------------------------------------------------
+2025-11-03 – unified calendar with fire todos
+- Goal: Show fire task deadlines on water calendar for unified time management
+- Key files: src/pages/Index.tsx (fetch fire items), src/components/WaterCalendar.tsx (merge events, type-aware navigation), src/components/WaterCalendar.css (fire event styling)
+- Decisions: Water calendar now displays both water events (blue) and fire task deadlines (red); clicking events navigates to correct item type; fetch 200 fire items for calendar display; priority items get yellow glow for both types
+- UX benefit: Unified view of all time-based items across element types
+- Next: (completed ✅)
 --------------------------------------------------
 2025-11-03 – water calendar UX enhancements
 - Goal: Streamline water calendar interface and add quick-create functionality
