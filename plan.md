@@ -23,10 +23,17 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - recurring water items complete ✅
-**Next**: User needs to run migration in Lovable (see RUN_MIGRATION.md)
+**Working on**: Nothing - bug fixes complete ✅
+**Next**: Ready for user testing
 
 ## Work Log
+--------------------------------------------------
+2025-11-04 – parent item link navigation fix
+- Goal: Fix bug where clicking parent item links navigated to blank page
+- Key files: src/pages/ItemDetailPage.tsx (pass type to useItems)
+- Issue: ItemDetailPage called useItems() without type parameter, causing query to be disabled and returning empty items array; existingItem lookup always failed
+- Solution: Extract type from URL params and pass to useItems(typeParam) so items are fetched and existing item can be found by ID
+- Next: (completed ✅)
 --------------------------------------------------
 2025-11-03 – recurring water items
 - Goal: Enable weekly and yearly recurring events for water items
