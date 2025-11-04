@@ -24,7 +24,7 @@
 
 ## Current Status
 **Working on**: Nothing - recurring water items complete ✅
-**Next**: User needs to apply database migration (see MIGRATION_INSTRUCTIONS.md)
+**Next**: User needs to run migration in Lovable (see RUN_MIGRATION.md)
 
 ## Work Log
 --------------------------------------------------
