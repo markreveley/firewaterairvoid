@@ -8,24 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Droplet } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { Item } from '@/types';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './WaterCalendar.css';
-
-interface Tag {
-  id: string;
-  name: string;
-}
-
-interface Item {
-  id: string;
-  title: string;
-  type: 'fire' | 'water' | 'air' | 'void' | 'earth';
-  notes?: string;
-  tags: Tag[];
-  deadline?: Date;
-  priority: number;
-  completed: boolean;
-}
 
 interface WaterCalendarProps {
   items: Item[];

@@ -13,6 +13,8 @@ describe('ParentItemSelector', () => {
       createdAt: new Date(),
       priority: 0,
       completed: false,
+      is_subitem: false,
+      recurrence_type: 'none',
     },
     {
       id: '2',
@@ -22,6 +24,8 @@ describe('ParentItemSelector', () => {
       createdAt: new Date(),
       priority: 0,
       completed: false,
+      is_subitem: false,
+      recurrence_type: 'none',
     },
     {
       id: '3',
@@ -31,6 +35,8 @@ describe('ParentItemSelector', () => {
       createdAt: new Date(),
       priority: 0,
       completed: false,
+      is_subitem: false,
+      recurrence_type: 'none',
     },
   ];
 

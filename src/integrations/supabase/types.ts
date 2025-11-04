@@ -54,6 +54,8 @@ export type Database = {
           notes: string | null
           parent_id: string | null
           priority: number
+          recurrence_end_date: string | null
+          recurrence_type: string
           status: string | null
           title: string
           type: string
@@ -68,6 +70,8 @@ export type Database = {
           notes?: string | null
           parent_id?: string | null
           priority?: number
+          recurrence_end_date?: string | null
+          recurrence_type?: string
           status?: string | null
           title: string
           type?: string
@@ -82,6 +86,8 @@ export type Database = {
           notes?: string | null
           parent_id?: string | null
           priority?: number
+          recurrence_end_date?: string | null
+          recurrence_type?: string
           status?: string | null
           title?: string
           type?: string

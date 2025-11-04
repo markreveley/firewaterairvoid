@@ -19,7 +19,6 @@ export interface Item {
   createdAt: Date;
   deadline?: Date;
   parent_id?: string;
-  is_subitem?: boolean;
   parent?: { id: string; title: string; type: string };
   children?: Array<{ id: string; title: string; type: string; completed?: boolean }>;
   priority: number;
