@@ -51,7 +51,7 @@ import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tag, Item, ItemType } from "@/types";
+import type { Tag, Item, ItemType, RecurrenceType } from "@/types";
 import {
   supportsUrl,
   supportsDeadline,
@@ -75,6 +75,8 @@ interface ItemDetailProps {
     url?: string,
     parent_id?: string,
     is_subitem?: boolean,
+    recurrence_type?: RecurrenceType,
+    recurrence_end_date?: Date,
   ) => Promise<void>;
   existingTags: Tag[];
   existingItem?: Item | null;
@@ -93,6 +95,8 @@ interface ItemDetailProps {
       parent_id?: string | null;
       priority?: number;
       completed?: boolean;
+      recurrence_type?: RecurrenceType;
+      recurrence_end_date?: Date | null;
     },
   ) => Promise<void>;
 }
@@ -130,6 +134,12 @@ export default function ItemDetail({
   );
   const [selectedTime, setSelectedTime] = useState<string>(
     initialDeadline ? format(initialDeadline, "HH:mm") : "00:00",
+  );
+  const [recurrenceType, setRecurrenceType] = useState<RecurrenceType>(
+    existingItem?.recurrence_type || "none",
+  );
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | undefined>(
+    existingItem?.recurrence_end_date,
   );
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
@@ -330,6 +340,8 @@ export default function ItemDetail({
         supportsUrl(itemType) ? url.trim() || undefined : undefined,
         selectedParent?.id, // Pass parent_id for hierarchical linking
         false, // is_subitem = false for main items (parent-child relationships)
+        recurrenceType,
+        recurrenceEndDate,
       );
       setHasUnsavedChanges(false);
 
@@ -644,6 +656,80 @@ export default function ItemDetail({
                     )}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Row 3: Recurrence (for Water items with deadlines) */}
+            {itemType === "water" && deadline && (
+              <div className="flex gap-4 items-start">
+                <div className="flex-1">
+                  <label className="text-sm font-medium mb-2 block">
+                    Repeat
+                  </label>
+                  <Select
+                    value={recurrenceType}
+                    onValueChange={(value: RecurrenceType) => setRecurrenceType(value)}
+                  >
+                    <SelectTrigger className="w-full h-[52px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Does not repeat</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {recurrenceType !== "none" && (
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-2 block">
+                      End Date (optional)
+                    </label>
+                    <div className="flex gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={cn(
+                              "flex-1 justify-start h-[52px]",
+                              recurrenceEndDate &&
+                                "bg-water-light text-water-dark border-water-secondary",
+                            )}
+                          >
+                            <CalendarIcon className="w-4 h-4 mr-2" />
+                            {recurrenceEndDate
+                              ? format(recurrenceEndDate, "MMM d, yyyy")
+                              : "Never ends"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={recurrenceEndDate}
+                            onSelect={setRecurrenceEndDate}
+                            disabled={(date) => deadline ? date < deadline : false}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+
+                      {recurrenceEndDate && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-[52px] w-[52px] shrink-0"
+                          onClick={() => setRecurrenceEndDate(undefined)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

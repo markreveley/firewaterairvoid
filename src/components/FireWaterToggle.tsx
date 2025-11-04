@@ -1,13 +1,21 @@
 import { Flame, Droplet, Circle, Wind, Mountain } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FireWaterToggleProps {
   activeType: "fire" | "water" | "air" | "void" | "earth";
   onToggle: (type: "fire" | "water" | "air" | "void" | "earth") => void;
 }
 
-export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) {
+export function FireWaterToggle({
+  activeType,
+  onToggle,
+}: FireWaterToggleProps) {
   return (
     <TooltipProvider>
       <div className="flex gap-2 p-1 rounded-full w-fit mx-auto bg-muted border border-transparent">
@@ -19,10 +27,15 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
                 "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
                 activeType === "fire"
                   ? "bg-fire-primary text-white shadow-lg scale-105"
-                  : "text-muted-foreground hover:text-fire-primary"
+                  : "text-muted-foreground hover:text-fire-primary",
               )}
             >
-              <Flame className={cn("w-5 h-5", activeType === "fire" && "animate-pulse")} />
+              <Flame
+                className={cn(
+                  "w-5 h-5",
+                  activeType === "fire" && "animate-pulse",
+                )}
+              />
               <span className="font-medium">Fire</span>
             </button>
           </TooltipTrigger>
@@ -39,15 +52,20 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
                 "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
                 activeType === "water"
                   ? "bg-water-primary text-white shadow-lg scale-105"
-                  : "text-muted-foreground hover:text-water-primary"
+                  : "text-muted-foreground hover:text-water-primary",
               )}
             >
-              <Droplet className={cn("w-5 h-5", activeType === "water" && "animate-pulse")} />
+              <Droplet
+                className={cn(
+                  "w-5 h-5",
+                  activeType === "water" && "animate-pulse",
+                )}
+              />
               <span className="font-medium">Water</span>
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Writing - Creative and written content</p>
+            <p>Calendar - Events and Todos</p>
           </TooltipContent>
         </Tooltip>
 
@@ -59,15 +77,20 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
                 "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
                 activeType === "earth"
                   ? "bg-earth-primary text-white shadow-lg scale-105"
-                  : "text-muted-foreground hover:text-earth-primary"
+                  : "text-muted-foreground hover:text-earth-primary",
               )}
             >
-              <Mountain className={cn("w-5 h-5", activeType === "earth" && "animate-pulse")} />
+              <Mountain
+                className={cn(
+                  "w-5 h-5",
+                  activeType === "earth" && "animate-pulse",
+                )}
+              />
               <span className="font-medium">Earth</span>
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>How to - Guides and instructions</p>
+            <p>Companies - Income</p>
           </TooltipContent>
         </Tooltip>
 
@@ -79,15 +102,20 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
                 "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
                 activeType === "air"
                   ? "bg-air-primary text-white shadow-lg scale-105"
-                  : "text-muted-foreground hover:text-air-primary"
+                  : "text-muted-foreground hover:text-air-primary",
               )}
             >
-              <Wind className={cn("w-5 h-5", activeType === "air" && "animate-pulse")} />
+              <Wind
+                className={cn(
+                  "w-5 h-5",
+                  activeType === "air" && "animate-pulse",
+                )}
+              />
               <span className="font-medium">Air</span>
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Analysis - Research and insights</p>
+            <p>Knowledge Base - Links</p>
           </TooltipContent>
         </Tooltip>
 
@@ -99,15 +127,20 @@ export function FireWaterToggle({ activeType, onToggle }: FireWaterToggleProps) 
                 "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
                 activeType === "void"
                   ? "bg-white text-black shadow-lg scale-105"
-                  : "text-muted-foreground hover:text-black"
+                  : "text-muted-foreground hover:text-black",
               )}
             >
-              <Circle className={cn("w-5 h-5", activeType === "void" && "animate-pulse")} />
+              <Circle
+                className={cn(
+                  "w-5 h-5",
+                  activeType === "void" && "animate-pulse",
+                )}
+              />
               <span className="font-medium">Void</span>
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Web URLs - Bookmarks and links</p>
+            <p>Me</p>
           </TooltipContent>
         </Tooltip>
       </div>

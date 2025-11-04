@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { Tag, Item, ItemType } from "@/types";
+import type { Tag, Item, ItemType, RecurrenceType } from "@/types";
 import { supportsUrl, supportsStatus, supportsDeadline } from "@/utils/itemTypes";
 
 export function useItems(type?: ItemType, pageSize: number = 10) {
@@ -120,6 +120,8 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
           priority: item.priority || 0,
           completed: item.completed || false,
           is_subitem: item.is_subitem || false,
+          recurrence_type: (item.recurrence_type as RecurrenceType) || 'none',
+          recurrence_end_date: item.recurrence_end_date ? new Date(item.recurrence_end_date) : undefined,
         };
       });
 
@@ -154,7 +156,19 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
     loadItems(true);
   }, [type, pageSize]);
 
-  const addItem = async (title: string, type: ItemType, tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string, parent_id?: string, is_subitem?: boolean) => {
+  const addItem = async (
+    title: string,
+    type: ItemType,
+    tags: Tag[],
+    deadline?: Date,
+    notes?: string,
+    status?: string,
+    url?: string,
+    parent_id?: string,
+    is_subitem?: boolean,
+    recurrence_type?: RecurrenceType,
+    recurrence_end_date?: Date
+  ) => {
     try {
       const { data: newItem, error: itemError} = await supabase
         .from("items")
@@ -167,6 +181,8 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
           deadline: deadline?.toISOString(),
           parent_id: parent_id || null,
           is_subitem: is_subitem || false,
+          recurrence_type: recurrence_type || 'none',
+          recurrence_end_date: recurrence_end_date?.toISOString() || null,
         })
         .select()
         .single();
@@ -289,11 +305,43 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       parent_id?: string | null;
       priority?: number;
       completed?: boolean;
+      recurrence_type?: RecurrenceType;
+      recurrence_end_date?: Date | null;
     }
   ) => {
+    // Optimistic UI update: update local state immediately, then sync with server.
+    // If the server update fails, rollback to the previous state.
+    let previousItem: Item | undefined;
+
     try {
       // Get the current item to check if type is changing
       const currentItem = items.find(item => item.id === itemId);
+
+      // Optimistically update the item in local state
+      setItems(prev => {
+        return prev.map(item => {
+          if (item.id !== itemId) return item;
+          previousItem = item; // Save for potential rollback
+          
+          // Apply updates to the item
+          const updatedItem = { ...item };
+          
+          if ("title" in updates) updatedItem.title = updates.title!;
+          if ("deadline" in updates) updatedItem.deadline = updates.deadline || undefined;
+          if ("notes" in updates) updatedItem.notes = updates.notes;
+          if ("status" in updates) updatedItem.status = updates.status;
+          if ("url" in updates) updatedItem.url = updates.url;
+          if ("type" in updates) updatedItem.type = updates.type!;
+          if ("parent_id" in updates) updatedItem.parent_id = updates.parent_id || undefined;
+          if ("priority" in updates) updatedItem.priority = updates.priority!;
+          if ("completed" in updates) updatedItem.completed = updates.completed!;
+          if ("tags" in updates) updatedItem.tags = updates.tags!;
+          if ("recurrence_type" in updates) updatedItem.recurrence_type = updates.recurrence_type!;
+          if ("recurrence_end_date" in updates) updatedItem.recurrence_end_date = updates.recurrence_end_date || undefined;
+
+          return updatedItem;
+        });
+      });
 
       // Update the item fields if provided
       const itemUpdates: any = {};
@@ -341,6 +389,12 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       }
       if ("completed" in updates) {
         itemUpdates.completed = updates.completed;
+      }
+      if ("recurrence_type" in updates) {
+        itemUpdates.recurrence_type = updates.recurrence_type;
+      }
+      if ("recurrence_end_date" in updates) {
+        itemUpdates.recurrence_end_date = updates.recurrence_end_date?.toISOString() || null;
       }
 
       if (Object.keys(itemUpdates).length > 0) {
@@ -403,13 +457,18 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
         }
       }
 
-      setItems([]);
-      setOffset(0);
-      setHasMore(true);
-      await loadItems(true);
+      // No list reload - optimistic update is already applied
       toast.success("Item updated");
     } catch (error) {
       console.error("Error updating item:", error);
+      
+      // Rollback optimistic update on error
+      if (previousItem) {
+        setItems(prev => 
+          prev.map(item => item.id === itemId ? previousItem! : item)
+        );
+      }
+      
       toast.error("Failed to update item");
     }
   };

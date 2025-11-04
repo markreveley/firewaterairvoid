@@ -1,5 +1,5 @@
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { format, parse, startOfWeek, getDay, addWeeks, addYears, isBefore, isAfter } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -60,26 +60,67 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
   const [date, setDate] = useState(new Date());
 
   // Transform water and fire items with deadlines into calendar events
+  // For recurring items, generate instances up to 2 years in the future
   const events: CalendarEvent[] = useMemo(() => {
     // Combine water and fire items
     const allItems = [...items, ...fireItems];
+    const calendarEvents: CalendarEvent[] = [];
+    const maxDate = addYears(new Date(), 2); // Generate up to 2 years of recurrences
 
-    return allItems
+    allItems
       .filter(item => item.deadline)
-      .map(item => {
+      .forEach(item => {
         const deadline = item.deadline!;
-        // If no time is set (midnight), make it an all-day event
         const isAllDay = deadline.getHours() === 0 && deadline.getMinutes() === 0;
+        const duration = isAllDay ? 0 : 60 * 60 * 1000; // 1 hour for timed events
 
-        return {
-          id: item.id,
-          title: item.title,
-          start: deadline,
-          // All-day events should end at the same day; timed events are 1 hour by default
-          end: isAllDay ? deadline : new Date(deadline.getTime() + 60 * 60 * 1000),
-          resource: item,
-        };
+        // Check if item recurs
+        const recurrenceType = item.recurrence_type || 'none';
+        const recurrenceEndDate = item.recurrence_end_date;
+
+        if (recurrenceType === 'none') {
+          // Non-recurring event - add single instance
+          calendarEvents.push({
+            id: item.id,
+            title: item.title,
+            start: deadline,
+            end: isAllDay ? deadline : new Date(deadline.getTime() + duration),
+            resource: item,
+          });
+        } else {
+          // Recurring event - generate instances
+          let currentDate = deadline;
+          const endDate = recurrenceEndDate
+            ? (isBefore(recurrenceEndDate, maxDate) ? recurrenceEndDate : maxDate)
+            : maxDate;
+
+          while (isBefore(currentDate, endDate) || currentDate.getTime() === endDate.getTime()) {
+            calendarEvents.push({
+              id: `${item.id}-${currentDate.getTime()}`,
+              title: item.title,
+              start: currentDate,
+              end: isAllDay ? currentDate : new Date(currentDate.getTime() + duration),
+              resource: item,
+            });
+
+            // Generate next occurrence
+            if (recurrenceType === 'weekly') {
+              currentDate = addWeeks(currentDate, 1);
+            } else if (recurrenceType === 'yearly') {
+              currentDate = addYears(currentDate, 1);
+            } else {
+              break; // Safety break
+            }
+
+            // Stop if we've gone past the end date
+            if (isAfter(currentDate, endDate)) {
+              break;
+            }
+          }
+        }
       });
+
+    return calendarEvents;
   }, [items, fireItems]);
 
   // Items without deadlines (unscheduled)
