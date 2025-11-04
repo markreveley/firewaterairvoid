@@ -5,6 +5,7 @@ import { WaterCalendar } from "@/components/WaterCalendar";
 import { FireWaterToggle } from "@/components/FireWaterToggle";
 import { TagFilter } from "@/components/TagFilter";
 import { StatusFilter } from "@/components/StatusFilter";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useItems } from "@/hooks/useItems";
 import { useTags } from "@/hooks/useTags";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -101,11 +102,14 @@ const Index = () => {
       {/* Header */}
       <header className="border-b border-border">
         <div className="container mx-auto px-8 md:px-12 lg:px-16 py-4 flex items-center justify-between">
-          <img src={fireWaterLogo} alt="Fire Water" className="h-12 w-auto" />
+          <img src={fireWaterLogo} alt="Fire Water" className="h-12 w-auto dark:invert" />
           <FireWaterToggle activeType={activeType} onToggle={setActiveType} />
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button variant="ghost" size="icon">
+              <User className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </header>
 
