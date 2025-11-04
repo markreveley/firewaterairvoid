@@ -23,10 +23,18 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - dark mode complete ✅
+**Working on**: Nothing - all tasks complete ✅
 **Next**: Ready for user testing
 
 ## Work Log
+--------------------------------------------------
+2025-11-04 – dark mode text legibility improvements
+- Goal: Fix hard-to-read text colors in dark mode for tags and calendar
+- Key files: src/components/TagFilter.tsx (dark mode text), src/components/WaterCalendar.css (calendar day headings)
+- Changes: Added dark:text-foreground utility to all non-selected tag badges; added .dark CSS override for calendar day headings to use foreground color
+- Issue: Tags were using type-specific dark colors (water-dark, fire-dark, etc.) in dark mode which had poor contrast; calendar day headings also used water-dark color
+- Solution: Override text color in dark mode to use semantic foreground token (light gray-white matching type menu)
+- Next: (completed ✅)
 --------------------------------------------------
 2025-11-04 – dark mode implementation
 - Goal: Add dark mode toggle and fix logo visibility in both themes
