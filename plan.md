@@ -28,6 +28,14 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-04 – remove tags from water section
+- Goal: Hide all tag UI elements from water type while preserving infrastructure
+- Key files: src/pages/Index.tsx (hide TagFilter), src/components/WaterCalendar.tsx (remove tag display), src/components/ItemList.tsx (conditional hide tags), src/pages/ItemDetail.tsx (hide tag editing section)
+- Changes: Wrapped TagFilter in Index.tsx with `{activeType !== "water" && ...}`; removed tag badges from WaterCalendar unscheduled items; added `item.type !== "water"` condition to ItemList tag display; wrapped entire tag editing section in ItemDetail with `{itemType !== "water" && ...}` and removed water-specific tag UI code
+- Infrastructure: Database schema, tag relationships, and all backend functionality remain intact; tags can be reintroduced to water items in the future if needed
+- Code cleanup: Removed 310 lines of water-specific tag UI code, simplified component logic
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-04 – dark mode text legibility improvements
 - Goal: Fix hard-to-read text colors in dark mode for tags and calendar
 - Key files: src/components/TagFilter.tsx (dark mode text), src/components/WaterCalendar.css (calendar day headings)
