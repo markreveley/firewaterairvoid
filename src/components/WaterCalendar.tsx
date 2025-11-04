@@ -29,6 +29,7 @@ interface Item {
 
 interface WaterCalendarProps {
   items: Item[];
+  fireItems?: Item[];
 }
 
 // Setup the localizer for react-big-calendar
@@ -53,14 +54,17 @@ interface CalendarEvent {
   resource: Item;
 }
 
-export function WaterCalendar({ items }: WaterCalendarProps) {
+export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
   const navigate = useNavigate();
   const [view, setView] = useState<View>('month');
   const [date, setDate] = useState(new Date());
 
-  // Transform items with deadlines into calendar events
+  // Transform water and fire items with deadlines into calendar events
   const events: CalendarEvent[] = useMemo(() => {
-    return items
+    // Combine water and fire items
+    const allItems = [...items, ...fireItems];
+
+    return allItems
       .filter(item => item.deadline)
       .map(item => {
         const deadline = item.deadline!;
@@ -76,7 +80,7 @@ export function WaterCalendar({ items }: WaterCalendarProps) {
           resource: item,
         };
       });
-  }, [items]);
+  }, [items, fireItems]);
 
   // Items without deadlines (unscheduled)
   const unscheduledItems = useMemo(() => {
@@ -84,7 +88,8 @@ export function WaterCalendar({ items }: WaterCalendarProps) {
   }, [items]);
 
   const handleSelectEvent = (event: CalendarEvent) => {
-    navigate(`/item/edit?id=${event.id}&type=water`);
+    // Navigate to the item's actual type (water or fire)
+    navigate(`/item/edit?id=${event.id}&type=${event.resource.type}`);
   };
 
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
@@ -120,8 +125,11 @@ export function WaterCalendar({ items }: WaterCalendarProps) {
           views={['month', 'week', 'agenda']}
           eventPropGetter={(event) => ({
             className: cn(
-              'water-calendar-event',
-              event.resource.priority > 0 && 'water-calendar-event-priority'
+              event.resource.type === 'fire'
+                ? 'fire-calendar-event'
+                : 'water-calendar-event',
+              event.resource.priority > 0 && event.resource.type === 'water' && 'water-calendar-event-priority',
+              event.resource.priority > 0 && event.resource.type === 'fire' && 'fire-calendar-event-priority'
             ),
           })}
           className="water-calendar"

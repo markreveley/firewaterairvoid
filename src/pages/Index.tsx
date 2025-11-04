@@ -27,6 +27,8 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const pageSize = viewMode === "overview" ? 200 : 10;
   const { items, isLoading, hasMore, addItem, deleteItem, updateItem, loadMore } = useItems(activeType, pageSize);
+  // Also fetch fire items for water calendar view to show todos
+  const { items: fireItems } = useItems(activeType === "water" && viewMode === "calendar" ? "fire" : undefined, 200);
   const [selectedProjectTag, setSelectedProjectTag] = useState<string>();
   const [selectedProjectChildTag, setSelectedProjectChildTag] = useState<string>();
   const [selectedCategoryTags, setSelectedCategoryTags] = useState<string[]>([]);
@@ -211,7 +213,7 @@ const Index = () => {
                   )}
                 </>
               ) : viewMode === "calendar" && activeType === "water" ? (
-                <WaterCalendar items={items} />
+                <WaterCalendar items={items} fireItems={fireItems} />
               ) : (
                 <>
                   <OverviewList items={items} searchQuery={searchQuery} />

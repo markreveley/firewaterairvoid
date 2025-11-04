@@ -63,7 +63,7 @@
   text-align: right;
 }
 
-/* Event styling */
+/* Water event styling */
 .water-calendar-event {
   background-color: hsl(var(--water-primary)) !important;
   color: white !important;
@@ -80,6 +80,27 @@
 
 .water-calendar-event-priority {
   background-color: hsl(var(--water-dark)) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 0 0 2px hsl(var(--yellow-500) / 0.3) !important;
+}
+
+/* Fire event styling */
+.fire-calendar-event {
+  background-color: hsl(var(--fire-primary)) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 0.25rem !important;
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.875rem !important;
+  cursor: pointer !important;
+}
+
+.fire-calendar-event:hover {
+  background-color: hsl(var(--fire-secondary)) !important;
+}
+
+.fire-calendar-event-priority {
+  background-color: hsl(var(--fire-dark)) !important;
   font-weight: 600 !important;
   box-shadow: 0 0 0 2px hsl(var(--yellow-500) / 0.3) !important;
 }
