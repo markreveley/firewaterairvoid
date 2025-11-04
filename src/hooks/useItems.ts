@@ -298,6 +298,56 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
     },
   });
 
+  // Bulk delete items mutation
+  const bulkDeleteItemsMutation = useMutation({
+    mutationFn: async (itemIds: string[]) => {
+      for (const itemId of itemIds) {
+        const { data: itemData, error: fetchError } = await supabase
+          .from("items")
+          .select("*")
+          .eq("id", itemId)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        // Insert into trashed_items
+        const { error: trashError } = await supabase
+          .from("trashed_items")
+          .insert({
+            original_id: itemData.id,
+            title: itemData.title,
+            type: itemData.type,
+            notes: itemData.notes,
+            status: itemData.status,
+            url: itemData.url,
+            deadline: itemData.deadline,
+            parent_id: itemData.parent_id,
+            created_at: itemData.created_at,
+          });
+
+        if (trashError) throw trashError;
+
+        // Delete the item
+        const { error: deleteError } = await supabase
+          .from("items")
+          .delete()
+          .eq("id", itemId);
+
+        if (deleteError) throw deleteError;
+      }
+    },
+    onSuccess: (_, itemIds) => {
+      queryClient.invalidateQueries({ queryKey: itemKeys.lists() });
+      toast.success(`${itemIds.length} ${itemIds.length === 1 ? 'item' : 'items'} moved to trash`);
+      setOffset(0);
+      setAllItems([]);
+    },
+    onError: (error) => {
+      console.error("Error deleting items:", error);
+      toast.error("Failed to delete items");
+    },
+  });
+
   // Update item mutation with optimistic updates
   const updateItemMutation = useMutation({
     mutationFn: async ({
@@ -461,6 +511,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
     items,
     isLoading,
     hasMore,
+    isBulkDeleting: bulkDeleteItemsMutation.isPending,
     addItem: (
       title: string,
       type: ItemType,
@@ -487,6 +538,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       recurrence_end_date,
     }),
     deleteItem: (itemId: string) => deleteItemMutation.mutateAsync(itemId),
+    bulkDeleteItems: (itemIds: string[]) => bulkDeleteItemsMutation.mutateAsync(itemIds),
     updateItem: (itemId: string, updates: any) => updateItemMutation.mutateAsync({ itemId, updates }),
     loadMore,
   };

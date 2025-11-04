@@ -8,7 +8,7 @@ import { StatusFilter } from "@/components/StatusFilter";
 import { useItems } from "@/hooks/useItems";
 import { useTags } from "@/hooks/useTags";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Plus, Search, User } from "lucide-react";
+import { Plus, Search, User, Loader2 } from "lucide-react";
 import fireWaterLogo from "@/assets/firewater_logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,7 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<"card" | "calendar" | "overview">(initialView);
   const [searchQuery, setSearchQuery] = useState("");
   const pageSize = viewMode === "overview" ? 200 : 50;
-  const { items, isLoading, hasMore, addItem, deleteItem, updateItem, loadMore } = useItems(activeType, pageSize);
+  const { items, isLoading, hasMore, isBulkDeleting, addItem, deleteItem, bulkDeleteItems, updateItem, loadMore } = useItems(activeType, pageSize);
   // Also fetch fire items for water calendar view to show todos
   const { items: fireItems } = useItems(activeType === "water" && viewMode === "calendar" ? "fire" : undefined, 200);
   const [selectedProjectTag, setSelectedProjectTag] = useState<string>();
@@ -208,6 +208,33 @@ const Index = () => {
                           {isLoading ? 'Loading...' : 'Load More'}
                         </Button>
                       )}
+
+                      {/* Clear Completed Button for Fire items */}
+                      {activeType === "fire" && selectedStatusFilter === "Completed" && (() => {
+                        const completedItems = items.filter(item => item.type === "fire" && item.status === "Completed");
+                        return completedItems.length > 0 && (
+                          <Button
+                            onClick={async () => {
+                              if (window.confirm(`Are you sure you want to delete ${completedItems.length} completed ${completedItems.length === 1 ? 'item' : 'items'}? This will move them to trash.`)) {
+                                const itemIds = completedItems.map(item => item.id);
+                                await bulkDeleteItems(itemIds);
+                              }
+                            }}
+                            disabled={isBulkDeleting}
+                            variant="destructive"
+                            className="min-w-[200px]"
+                          >
+                            {isBulkDeleting ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              `Clear Completed (${completedItems.length})`
+                            )}
+                          </Button>
+                        );
+                      })()}
                     </div>
                   )}
                 </>
