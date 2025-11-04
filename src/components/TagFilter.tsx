@@ -98,14 +98,14 @@ export function TagFilter({
                 ? "bg-earth-primary text-white shadow-md scale-105"
                 : "bg-white text-black shadow-md scale-105 border-2 border-black"
               : type === "fire"
-              ? "bg-fire-light text-fire-dark hover:bg-fire-secondary"
+              ? "bg-fire-light text-fire-dark dark:text-foreground hover:bg-fire-secondary"
               : type === "water"
-              ? "bg-water-light text-water-dark hover:bg-water-secondary"
+              ? "bg-water-light text-water-dark dark:text-foreground hover:bg-water-secondary"
               : type === "air"
-              ? "bg-air-light text-air-dark hover:bg-air-secondary"
+              ? "bg-air-light text-air-dark dark:text-foreground hover:bg-air-secondary"
               : type === "earth"
-              ? "bg-earth-light text-earth-dark hover:bg-earth-secondary"
-              : "bg-void-light text-void-dark hover:bg-white hover:text-black hover:border-black"
+              ? "bg-earth-light text-earth-dark dark:text-foreground hover:bg-earth-secondary"
+              : "bg-void-light text-void-dark dark:text-foreground hover:bg-white hover:text-black hover:border-black"
           )}
           onClick={() => {
             if (isGrandchildTag) {
@@ -176,14 +176,14 @@ export function TagFilter({
                 ? "bg-earth-primary text-white shadow-md scale-105"
                 : "bg-white text-black shadow-md scale-105 border-2 border-black"
               : type === "fire"
-              ? "bg-fire-light text-fire-dark hover:bg-fire-secondary"
+              ? "bg-fire-light text-fire-dark dark:text-foreground hover:bg-fire-secondary"
               : type === "water"
-              ? "bg-water-light text-water-dark hover:bg-water-secondary"
+              ? "bg-water-light text-water-dark dark:text-foreground hover:bg-water-secondary"
               : type === "air"
-              ? "bg-air-light text-air-dark hover:bg-air-secondary"
+              ? "bg-air-light text-air-dark dark:text-foreground hover:bg-air-secondary"
               : type === "earth"
-              ? "bg-earth-light text-earth-dark hover:bg-earth-secondary"
-              : "bg-void-light text-void-dark hover:bg-white hover:text-black hover:border-black"
+              ? "bg-earth-light text-earth-dark dark:text-foreground hover:bg-earth-secondary"
+              : "bg-void-light text-void-dark dark:text-foreground hover:bg-white hover:text-black hover:border-black"
           )}
           onClick={() => {
             if (isChildTag) {

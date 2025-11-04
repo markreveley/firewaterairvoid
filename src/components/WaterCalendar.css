@@ -50,6 +50,10 @@
   border-bottom: 1px solid hsl(var(--border));
 }
 
+.dark .water-calendar .rbc-header {
+  color: hsl(var(--foreground));
+}
+
 .water-calendar .rbc-today {
   background-color: hsl(var(--water-light) / 0.3);
 }
