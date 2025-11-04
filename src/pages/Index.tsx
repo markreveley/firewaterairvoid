@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ItemList } from "@/components/ItemList";
 import { OverviewList } from "@/components/OverviewList";
+import { WaterCalendar } from "@/components/WaterCalendar";
 import { FireWaterToggle } from "@/components/FireWaterToggle";
 import { TagFilter } from "@/components/TagFilter";
 import { StatusFilter } from "@/components/StatusFilter";
@@ -20,8 +21,9 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialType = (searchParams.get("type") as ItemType) || "fire";
+  const initialView = (searchParams.get("view") as "card" | "calendar" | "overview") || "card";
   const [activeType, setActiveType] = useState<ItemType>(initialType);
-  const [viewMode, setViewMode] = useState<"card" | "overview">("card");
+  const [viewMode, setViewMode] = useState<"card" | "calendar" | "overview">(initialView);
   const [searchQuery, setSearchQuery] = useState("");
   const pageSize = viewMode === "overview" ? 200 : 10;
   const { items, isLoading, hasMore, addItem, deleteItem, updateItem, loadMore } = useItems(activeType, pageSize);
@@ -46,6 +48,7 @@ const Index = () => {
     setSearchParams((prev) => {
       const p = new URLSearchParams(prev);
       p.set("type", activeType);
+      p.set("view", viewMode);
       if (selectedProjectTag) p.set("projectTag", selectedProjectTag);
       else p.delete("projectTag");
       if (selectedProjectChildTag) p.set("projectChildTag", selectedProjectChildTag);
@@ -56,20 +59,27 @@ const Index = () => {
       else p.delete("categoryChildTags");
       return p;
     });
-  }, [activeType, selectedProjectTag, selectedProjectChildTag, selectedCategoryTags, selectedCategoryChildTags, setSearchParams]);
+  }, [activeType, viewMode, selectedProjectTag, selectedProjectChildTag, selectedCategoryTags, selectedCategoryChildTags, setSearchParams]);
+
+  // Reset calendar view when switching away from water
+  useEffect(() => {
+    if (viewMode === "calendar" && activeType !== "water") {
+      setViewMode("card");
+    }
+  }, [activeType, viewMode]);
 
   // Clear tag filters when switching types if selected tags don't exist in new type
   useEffect(() => {
     if (allTags.length > 0) {
       const { projectTags, categoryTags } = getTagsForItemType(allTags, activeType);
-      
+
       // Check project tag - validate against ALL project tags, not just root tags
       const allProjectTags = allTags.filter(t => t.type === 'project');
       if (selectedProjectTag && !allProjectTags.some(t => t.id === selectedProjectTag)) {
         setSelectedProjectTag(undefined);
         setSelectedProjectChildTag(undefined);
       }
-      
+
       // Check category tags
       const validCategoryTagIds = categoryTags.map(tag => tag.id);
       const validSelectedCategoryTags = selectedCategoryTags.filter(id => validCategoryTagIds.includes(id));
@@ -147,9 +157,12 @@ const Index = () => {
                 />
               )}
 
-              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "overview")}>
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "calendar" | "overview")}>
                 <TabsList>
                   <TabsTrigger value="card">Card</TabsTrigger>
+                  {activeType === "water" && (
+                    <TabsTrigger value="calendar">Calendar</TabsTrigger>
+                  )}
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -193,6 +206,8 @@ const Index = () => {
                     </div>
                   )}
                 </>
+              ) : viewMode === "calendar" && activeType === "water" ? (
+                <WaterCalendar items={items} />
               ) : (
                 <>
                   <OverviewList items={items} searchQuery={searchQuery} />

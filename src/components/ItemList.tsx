@@ -253,13 +253,17 @@ export function ItemList({
                 
                 {/* Footer: Children and Deadline (left) and Parent (right) */}
                 <div className="flex items-center justify-between pt-2">
-                  {/* Bottom left: Children and Deadline for fire items */}
+                  {/* Bottom left: Children and Deadline for fire/water items */}
                   <div className="flex flex-col items-start gap-1 ml-8">
-                    {/* Deadline for fire items */}
-                    {item.type === "fire" && item.deadline && (
-                      <div className={cn("text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap", isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark")}>
-                        <Flame className="w-3 h-3" />
-                        {item.deadline.getHours() === 0 && item.deadline.getMinutes() === 0 
+                    {/* Deadline for fire and water items */}
+                    {(item.type === "fire" || item.type === "water") && item.deadline && (
+                      <div className={cn(
+                        "text-xs px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap",
+                        item.type === "fire" && (isOverdue ? "bg-fire-dark text-white" : "bg-fire-light text-fire-dark"),
+                        item.type === "water" && "bg-water-light text-water-dark"
+                      )}>
+                        {item.type === "fire" ? <Flame className="w-3 h-3" /> : <Droplet className="w-3 h-3" />}
+                        {item.deadline.getHours() === 0 && item.deadline.getMinutes() === 0
                           ? format(item.deadline, "MMM d, yyyy")
                           : format(item.deadline, "MMM d, yyyy 'at' HH:mm")}
                       </div>

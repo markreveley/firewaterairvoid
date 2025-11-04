@@ -23,10 +23,17 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - deep tag hierarchy navigation complete ✅
+**Working on**: Nothing - water calendar view complete ✅
 **Next**: Waiting for next feature request or bug report
 
 ## Work Log
+--------------------------------------------------
+2025-11-03 – water calendar view
+- Goal: Add calendar display for water items with month/week/agenda views
+- Key files: src/components/WaterCalendar.tsx (new), src/components/WaterCalendar.css (new), src/pages/Index.tsx (calendar view mode), src/components/ItemList.tsx (water deadline display), src/utils/itemTypes.ts (enable deadline for water), src/pages/ItemDetail.tsx (comment update)
+- Decisions: Installed react-big-calendar for calendar UI; water items now support deadline field (same as fire); calendar view only appears for water type as third tab (Card | Calendar | Overview); view mode saved in URL params; unscheduled water items (no deadline) shown below calendar; water-blue theme styling applied to calendar events; priority items highlighted with yellow glow
+- Library choice: react-big-calendar chosen over custom solution for mature month/week/agenda view support
+- Next: (completed ✅)
 --------------------------------------------------
 2025-11-03 – deep tag hierarchy navigation
 - Goal: Support 3-level tag hierarchies (e.g., Dev/Rust/Built in Rust) with proper UI navigation and filtering

@@ -5,12 +5,46 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CalendarIcon, Flame, Droplet, Circle, Plus, X, Clock, ArrowLeft, Wind, Mountain, Edit2, Eye, FileText, ChevronRight, Trash2, Link as LinkIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  Flame,
+  Droplet,
+  Circle,
+  Plus,
+  X,
+  Clock,
+  ArrowLeft,
+  Wind,
+  Mountain,
+  Edit2,
+  Eye,
+  FileText,
+  ChevronRight,
+  Trash2,
+  Link as LinkIcon,
+} from "lucide-react";
 import { ParentItemSelector } from "@/components/ParentItemSelector";
 import ReactMarkdown from "react-markdown";
 import { format, set } from "date-fns";
@@ -18,8 +52,15 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tag, Item, ItemType } from "@/types";
-import { supportsUrl, supportsDeadline, supportsStatus } from "@/utils/itemTypes";
-import { filterTagsForItemType, getProjectAndCategoryTags } from "@/utils/tagFilters";
+import {
+  supportsUrl,
+  supportsDeadline,
+  supportsStatus,
+} from "@/utils/itemTypes";
+import {
+  filterTagsForItemType,
+  getProjectAndCategoryTags,
+} from "@/utils/tagFilters";
 import { generateTimeOptions } from "@/utils/time";
 import { FIRE_TAG_NAMES } from "@/constants/tags";
 
@@ -33,7 +74,7 @@ interface ItemDetailProps {
     status?: string,
     url?: string,
     parent_id?: string,
-    is_subitem?: boolean
+    is_subitem?: boolean,
   ) => Promise<void>;
   existingTags: Tag[];
   existingItem?: Item | null;
@@ -52,11 +93,18 @@ interface ItemDetailProps {
       parent_id?: string | null;
       priority?: number;
       completed?: boolean;
-    }
+    },
   ) => Promise<void>;
 }
 
-export default function ItemDetail({ onAddItem, existingTags, existingItem, allItems, onDeleteItem, onUpdateItem }: ItemDetailProps) {
+export default function ItemDetail({
+  onAddItem,
+  existingTags,
+  existingItem,
+  allItems,
+  onDeleteItem,
+  onUpdateItem,
+}: ItemDetailProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
@@ -66,25 +114,40 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const [notes, setNotes] = useState(existingItem?.notes || "");
   const [status, setStatus] = useState(existingItem?.status || "");
   const [url, setUrl] = useState(existingItem?.url || "");
-  const [itemType, setItemType] = useState<ItemType>(existingItem?.type || typeParam || "fire");
-  const [selectedTags, setSelectedTags] = useState<Tag[]>(existingItem?.tags || []);
-  const [deadline, setDeadline] = useState<Date | undefined>(existingItem?.deadline);
+  const [itemType, setItemType] = useState<ItemType>(
+    existingItem?.type || typeParam || "fire",
+  );
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(
+    existingItem?.tags || [],
+  );
+  const [deadline, setDeadline] = useState<Date | undefined>(
+    existingItem?.deadline,
+  );
   const [selectedTime, setSelectedTime] = useState<string>(
-    existingItem?.deadline ? format(existingItem.deadline, "HH:mm") : "00:00"
+    existingItem?.deadline ? format(existingItem.deadline, "HH:mm") : "00:00",
   );
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [isEditingTag, setIsEditingTag] = useState(false);
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [editTagName, setEditTagName] = useState("");
-  const [selectedParent, setSelectedParent] = useState<{ id: string; title: string } | null>(null);
+  const [selectedParent, setSelectedParent] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [notesItemsTab, setNotesItemsTab] = useState<"notes" | "items">("notes");
+  const [notesItemsTab, setNotesItemsTab] = useState<"notes" | "items">(
+    "notes",
+  );
   const [newSubItemTitle, setNewSubItemTitle] = useState("");
   const [newSubItemUrl, setNewSubItemUrl] = useState("");
-  const [newSubItemType, setNewSubItemType] = useState<"task" | "url" | "note">("task");
-  const [subItems, setSubItems] = useState<Array<{ id: string; title: string; type: string; completed?: boolean }>>([]);
+  const [newSubItemType, setNewSubItemType] = useState<"task" | "url" | "note">(
+    "task",
+  );
+  const [subItems, setSubItems] = useState<
+    Array<{ id: string; title: string; type: string; completed?: boolean }>
+  >([]);
 
   // Track initial values for change detection
   const initialValues = {
@@ -96,31 +159,46 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     selectedTags: existingItem?.tags || [],
     deadline: existingItem?.deadline,
     parentId: existingItem?.parent_id,
-    selectedTime: existingItem?.deadline ? format(existingItem.deadline, "HH:mm") : "00:00",
+    selectedTime: existingItem?.deadline
+      ? format(existingItem.deadline, "HH:mm")
+      : "00:00",
   };
 
   // Check if form has changed
   useEffect(() => {
-    const hasChanged = 
+    const hasChanged =
       title !== initialValues.title ||
       notes !== initialValues.notes ||
       status !== initialValues.status ||
       url !== initialValues.url ||
       itemType !== initialValues.itemType ||
-      JSON.stringify(selectedTags.map(t => t.id).sort()) !== JSON.stringify(initialValues.selectedTags.map(t => t.id).sort()) ||
+      JSON.stringify(selectedTags.map((t) => t.id).sort()) !==
+        JSON.stringify(initialValues.selectedTags.map((t) => t.id).sort()) ||
       deadline?.getTime() !== initialValues.deadline?.getTime() ||
       selectedTime !== initialValues.selectedTime ||
       selectedParent?.id !== initialValues.parentId;
 
     setHasUnsavedChanges(hasChanged);
-  }, [title, notes, status, url, itemType, selectedTags, deadline, selectedTime, selectedParent]);
+  }, [
+    title,
+    notes,
+    status,
+    url,
+    itemType,
+    selectedTags,
+    deadline,
+    selectedTime,
+    selectedParent,
+  ]);
 
   const timeOptions = generateTimeOptions();
 
   // Initialize parent selection from existing item - FIX: Changed from useState to useEffect
   useEffect(() => {
     if (existingItem?.parent_id) {
-      const parent = allItems.find(item => item.id === existingItem.parent_id);
+      const parent = allItems.find(
+        (item) => item.id === existingItem.parent_id,
+      );
       if (parent) {
         setSelectedParent({ id: parent.id, title: parent.title });
       }
@@ -193,7 +271,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
         newSubItemType === "task" ? "To Do" : undefined, // status only for tasks
         subItemUrl,
         existingItem.id, // parent_id is the current item
-        true // is_subitem = true for items created via Items tab
+        true, // is_subitem = true for items created via Items tab
       );
 
       // Clear inputs
@@ -220,28 +298,36 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
     }
   };
 
-  const handleSubmit = async (e?: React.FormEvent, shouldNavigate: boolean = false) => {
+  const handleSubmit = async (
+    e?: React.FormEvent,
+    shouldNavigate: boolean = false,
+  ) => {
     if (e) e.preventDefault();
     if (title.trim()) {
       let finalDeadline = deadline;
       if (deadline && selectedTime) {
-        const [hours, minutes] = selectedTime.split(':').map(Number);
-        finalDeadline = set(deadline, { hours, minutes, seconds: 0, milliseconds: 0 });
+        const [hours, minutes] = selectedTime.split(":").map(Number);
+        finalDeadline = set(deadline, {
+          hours,
+          minutes,
+          seconds: 0,
+          milliseconds: 0,
+        });
       }
 
-    await onAddItem(
-      title,
-      itemType,
-      selectedTags,
-      supportsDeadline(itemType) ? finalDeadline : undefined,
-      notes.trim() || undefined,
-      supportsStatus(itemType) ? (status.trim() || "To Do") : undefined,
-      supportsUrl(itemType) ? (url.trim() || undefined) : undefined,
-      selectedParent?.id, // Pass parent_id for hierarchical linking
-      false // is_subitem = false for main items (parent-child relationships)
-    );
+      await onAddItem(
+        title,
+        itemType,
+        selectedTags,
+        supportsDeadline(itemType) ? finalDeadline : undefined,
+        notes.trim() || undefined,
+        supportsStatus(itemType) ? status.trim() || "To Do" : undefined,
+        supportsUrl(itemType) ? url.trim() || undefined : undefined,
+        selectedParent?.id, // Pass parent_id for hierarchical linking
+        false, // is_subitem = false for main items (parent-child relationships)
+      );
       setHasUnsavedChanges(false);
-      
+
       if (shouldNavigate) {
         navigate(`/?type=${itemType}`);
       }
@@ -268,7 +354,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
 
   const addProjectTag = (tag: Tag) => {
     // Remove all existing project tags and add the new one
-    const nonProjectTags = selectedTags.filter(t => !FIRE_TAG_NAMES.includes(t.name as any));
+    const nonProjectTags = selectedTags.filter(
+      (t) => !FIRE_TAG_NAMES.includes(t.name as any),
+    );
     setSelectedTags([...nonProjectTags, tag]);
   };
 
@@ -284,9 +372,11 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
 
   const saveEditedTag = () => {
     if (editTagName.trim() && editingTagId) {
-      setSelectedTags(selectedTags.map(t =>
-        t.id === editingTagId ? { ...t, name: editTagName.trim() } : t
-      ));
+      setSelectedTags(
+        selectedTags.map((t) =>
+          t.id === editingTagId ? { ...t, name: editTagName.trim() } : t,
+        ),
+      );
       setIsEditingTag(false);
       setEditingTagId(null);
       setEditTagName("");
@@ -297,27 +387,30 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
   const baseFilteredTags = filterTagsForItemType(existingTags, itemType);
 
   // For water items, get separate project and category tags
-  const { projectTags: waterProjectTags, categoryTags: waterCategoryTags } = getProjectAndCategoryTags(existingTags, itemType);
+  const { projectTags: waterProjectTags, categoryTags: waterCategoryTags } =
+    getProjectAndCategoryTags(existingTags, itemType);
 
   // Separate parent and child tags
-  const parentTags = baseFilteredTags.filter(tag => !tag.parent_id);
-  const childTags = baseFilteredTags.filter(tag => tag.parent_id);
+  const parentTags = baseFilteredTags.filter((tag) => !tag.parent_id);
+  const childTags = baseFilteredTags.filter((tag) => tag.parent_id);
 
   // Get IDs of selected tags
-  const selectedTagIds = selectedTags.map(t => t.id);
+  const selectedTagIds = selectedTags.map((t) => t.id);
 
   // Find which selected tags have children
-  const selectedTagsWithChildren = selectedTags.filter(tag => 
-    existingTags.some(t => t.parent_id === tag.id)
+  const selectedTagsWithChildren = selectedTags.filter((tag) =>
+    existingTags.some((t) => t.parent_id === tag.id),
   );
 
   // Get child tags for each selected parent
   const getChildTagsForParent = (parentId: string) => {
-    return existingTags.filter(tag => tag.parent_id === parentId);
+    return existingTags.filter((tag) => tag.parent_id === parentId);
   };
 
   // Check if a project tag is already selected
-  const hasProjectTag = selectedTags.some(tag => FIRE_TAG_NAMES.includes(tag.name as any));
+  const hasProjectTag = selectedTags.some((tag) =>
+    FIRE_TAG_NAMES.includes(tag.name as any),
+  );
 
   // Full-page markdown preview
   if (isMarkdownPreview) {
@@ -337,7 +430,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             {notes ? (
               <ReactMarkdown>{notes}</ReactMarkdown>
             ) : (
-              <p className="text-muted-foreground italic">No notes to preview</p>
+              <p className="text-muted-foreground italic">
+                No notes to preview
+              </p>
             )}
           </div>
         </div>
@@ -384,7 +479,11 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
           )}
         </div>
 
-        <form id="item-form" onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
+        <form
+          id="item-form"
+          onSubmit={handleSubmit}
+          className="space-y-6 max-w-4xl mx-auto"
+        >
           <div className="space-y-4">
             <Input
               value={title}
@@ -398,7 +497,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             <div className="flex gap-4 items-start">
               <div className="flex-1">
                 <label className="text-sm font-medium mb-2 block">Type</label>
-                <Select value={itemType} onValueChange={(value: ItemType) => setItemType(value)}>
+                <Select
+                  value={itemType}
+                  onValueChange={(value: ItemType) => setItemType(value)}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -412,25 +514,25 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                     <SelectItem value="water">
                       <div className="flex items-center gap-2">
                         <Droplet className="w-4 h-4 text-water-primary" />
-                        Water (Writing)
+                        Water (Calendar)
                       </div>
                     </SelectItem>
                     <SelectItem value="earth">
                       <div className="flex items-center gap-2">
                         <Mountain className="w-4 h-4 text-earth-primary" />
-                        Earth (How to)
+                        Earth (Companies)
                       </div>
                     </SelectItem>
                     <SelectItem value="air">
                       <div className="flex items-center gap-2">
                         <Wind className="w-4 h-4 text-air-primary" />
-                        Air (Analysis)
+                        Air (Knowledge)
                       </div>
                     </SelectItem>
                     <SelectItem value="void">
                       <div className="flex items-center gap-2">
                         <Circle className="w-4 h-4 text-black dark:text-white" />
-                        Void (Web URLs)
+                        Me (Stuff)
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -439,7 +541,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
 
               {supportsStatus(itemType) ? (
                 <div className="flex-1">
-                  <label className="text-sm font-medium mb-2 block">Status</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Status
+                  </label>
                   <Select value={status || "To Do"} onValueChange={setStatus}>
                     <SelectTrigger className="w-full h-[52px]">
                       <SelectValue />
@@ -461,7 +565,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               )}
             </div>
 
-            {/* Row 2: Parent Item | Deadline (for Fire) */}
+            {/* Row 2: Parent Item | Deadline (for Fire & Water) */}
             {supportsDeadline(itemType) && (
               <div className="flex gap-4 items-start">
                 <ParentItemSelector
@@ -473,7 +577,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                 />
 
                 <div className="flex-1">
-                  <label className="text-sm font-medium mb-2 block">Deadline</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Deadline
+                  </label>
                   <div className="flex gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -482,25 +588,31 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                           variant="outline"
                           className={cn(
                             "flex-1 justify-start h-[52px]",
-                            deadline && "bg-fire-light text-fire-dark border-fire-secondary"
+                            deadline &&
+                              "bg-fire-light text-fire-dark border-fire-secondary",
                           )}
                         >
                           <CalendarIcon className="w-4 h-4 mr-2" />
-                          {deadline ? format(deadline, "MMM d, yyyy") : "Set Deadline"}
+                          {deadline
+                            ? format(deadline, "MMM d, yyyy")
+                            : "Set Deadline"}
                         </Button>
                       </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={deadline}
-                        onSelect={setDeadline}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={deadline}
+                          onSelect={setDeadline}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
                     </Popover>
 
-                    <Select value={selectedTime} onValueChange={setSelectedTime}>
+                    <Select
+                      value={selectedTime}
+                      onValueChange={setSelectedTime}
+                    >
                       <SelectTrigger className="w-32 h-[52px]">
                         <Clock className="w-4 h-4 mr-2" />
                         <SelectValue />
@@ -536,7 +648,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                 <Input
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  placeholder={itemType === "void" ? "Add URL..." : "Add URL (optional)..."}
+                  placeholder={
+                    itemType === "void" ? "Add URL..." : "Add URL (optional)..."
+                  }
                   className="text-base py-4 px-6 rounded-xl"
                   type="url"
                 />
@@ -545,13 +659,15 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
 
             <div>
               <label className="text-sm font-medium mb-2 block">Tags</label>
-              
+
               {/* For water items, show separate project and category tag sections */}
               {itemType === "water" ? (
                 <div className="space-y-4">
                   {/* Project Tags Section */}
                   <div>
-                    <label className="text-xs font-medium mb-2 block text-muted-foreground">Project Tags</label>
+                    <label className="text-xs font-medium mb-2 block text-muted-foreground">
+                      Project Tags
+                    </label>
                     <div className="flex gap-2 items-center mb-2">
                       <Popover>
                         <PopoverTrigger asChild>
@@ -562,7 +678,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                             className="rounded-full border-dashed"
                           >
                             <Plus className="w-3 h-3 mr-1" />
-                            {hasProjectTag ? "Change Project Tag" : "Add Project Tag"}
+                            {hasProjectTag
+                              ? "Change Project Tag"
+                              : "Add Project Tag"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-80 p-0" align="start">
@@ -576,9 +694,12 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                                   <span>Edit tags</span>
                                 </CommandItem>
                               </CommandGroup>
-                               <CommandGroup heading="Project Tags">
+                              <CommandGroup heading="Project Tags">
                                 {waterProjectTags.map((tag) => (
-                                  <CommandItem key={tag.id} onSelect={() => addProjectTag(tag)}>
+                                  <CommandItem
+                                    key={tag.id}
+                                    onSelect={() => addProjectTag(tag)}
+                                  >
                                     <span>{tag.name}</span>
                                   </CommandItem>
                                 ))}
@@ -587,11 +708,15 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                           </Command>
                         </PopoverContent>
                       </Popover>
-                      
+
                       {/* Add Child Tag buttons for project tags with children */}
                       {selectedTags
-                        .filter(tag => FIRE_TAG_NAMES.includes(tag.name as any))
-                        .filter(tag => existingTags.some(t => t.parent_id === tag.id))
+                        .filter((tag) =>
+                          FIRE_TAG_NAMES.includes(tag.name as any),
+                        )
+                        .filter((tag) =>
+                          existingTags.some((t) => t.parent_id === tag.id),
+                        )
                         .map((tag) => (
                           <Popover key={tag.id}>
                             <PopoverTrigger asChild>
@@ -609,20 +734,33 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                               <Command>
                                 <CommandInput placeholder="Search child tags..." />
                                 <CommandList>
-                                  <CommandEmpty>No child tags found</CommandEmpty>
+                                  <CommandEmpty>
+                                    No child tags found
+                                  </CommandEmpty>
                                   <CommandGroup>
-                                    <CommandItem onSelect={() => navigate("/tags")}>
+                                    <CommandItem
+                                      onSelect={() => navigate("/tags")}
+                                    >
                                       <Edit2 className="w-4 h-4 mr-2" />
                                       <span>Edit tags</span>
                                     </CommandItem>
                                   </CommandGroup>
-                                  <CommandGroup heading={`${tag.name} Child Tags`}>
-                                    {getChildTagsForParent(tag.id).map((childTag) => (
-                                      <CommandItem key={childTag.id} onSelect={() => addExistingTag(childTag)}>
-                                        <ChevronRight className="w-4 h-4 mr-2" />
-                                        <span>{childTag.name}</span>
-                                      </CommandItem>
-                                    ))}
+                                  <CommandGroup
+                                    heading={`${tag.name} Child Tags`}
+                                  >
+                                    {getChildTagsForParent(tag.id).map(
+                                      (childTag) => (
+                                        <CommandItem
+                                          key={childTag.id}
+                                          onSelect={() =>
+                                            addExistingTag(childTag)
+                                          }
+                                        >
+                                          <ChevronRight className="w-4 h-4 mr-2" />
+                                          <span>{childTag.name}</span>
+                                        </CommandItem>
+                                      ),
+                                    )}
                                   </CommandGroup>
                                 </CommandList>
                               </Command>
@@ -632,14 +770,21 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                     </div>
                     <div className="flex flex-wrap gap-2 items-center">
                       {selectedTags
-                        .filter(tag => FIRE_TAG_NAMES.includes(tag.name as any))
+                        .filter((tag) =>
+                          FIRE_TAG_NAMES.includes(tag.name as any),
+                        )
                         .map((tag) => {
                           return (
-                            <div key={tag.id} className="flex items-center gap-2">
-                              <Badge className={cn(
-                                "px-3 py-1 rounded-full flex items-center gap-1",
-                                "bg-fire-light text-fire-dark border-fire-secondary"
-                              )}>
+                            <div
+                              key={tag.id}
+                              className="flex items-center gap-2"
+                            >
+                              <Badge
+                                className={cn(
+                                  "px-3 py-1 rounded-full flex items-center gap-1",
+                                  "bg-fire-light text-fire-dark border-fire-secondary",
+                                )}
+                              >
                                 <span>{tag.name}</span>
                                 <button
                                   type="button"
@@ -657,7 +802,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
 
                   {/* Category Tags Section */}
                   <div>
-                    <label className="text-xs font-medium mb-2 block text-muted-foreground">Category Tags</label>
+                    <label className="text-xs font-medium mb-2 block text-muted-foreground">
+                      Category Tags
+                    </label>
                     <div className="flex gap-2 items-center mb-2">
                       <Popover>
                         <PopoverTrigger asChild>
@@ -675,7 +822,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                           <Command>
                             <CommandInput placeholder="Search category tags..." />
                             <CommandList>
-                              <CommandEmpty>No category tags found</CommandEmpty>
+                              <CommandEmpty>
+                                No category tags found
+                              </CommandEmpty>
                               <CommandGroup>
                                 <CommandItem onSelect={() => navigate("/tags")}>
                                   <Edit2 className="w-4 h-4 mr-2" />
@@ -684,7 +833,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                               </CommandGroup>
                               <CommandGroup heading="Category Tags">
                                 {waterCategoryTags.map((tag) => (
-                                  <CommandItem key={tag.id} onSelect={() => addExistingTag(tag)}>
+                                  <CommandItem
+                                    key={tag.id}
+                                    onSelect={() => addExistingTag(tag)}
+                                  >
                                     <span>{tag.name}</span>
                                   </CommandItem>
                                 ))}
@@ -693,11 +845,15 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                           </Command>
                         </PopoverContent>
                       </Popover>
-                      
+
                       {/* Add Child Tag buttons for category tags with children */}
                       {selectedTags
-                        .filter(tag => !FIRE_TAG_NAMES.includes(tag.name as any))
-                        .filter(tag => existingTags.some(t => t.parent_id === tag.id))
+                        .filter(
+                          (tag) => !FIRE_TAG_NAMES.includes(tag.name as any),
+                        )
+                        .filter((tag) =>
+                          existingTags.some((t) => t.parent_id === tag.id),
+                        )
                         .map((tag) => (
                           <Popover key={tag.id}>
                             <PopoverTrigger asChild>
@@ -715,20 +871,33 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                               <Command>
                                 <CommandInput placeholder="Search child tags..." />
                                 <CommandList>
-                                  <CommandEmpty>No child tags found</CommandEmpty>
+                                  <CommandEmpty>
+                                    No child tags found
+                                  </CommandEmpty>
                                   <CommandGroup>
-                                    <CommandItem onSelect={() => navigate("/tags")}>
+                                    <CommandItem
+                                      onSelect={() => navigate("/tags")}
+                                    >
                                       <Edit2 className="w-4 h-4 mr-2" />
                                       <span>Edit tags</span>
                                     </CommandItem>
                                   </CommandGroup>
-                                  <CommandGroup heading={`${tag.name} Child Tags`}>
-                                    {getChildTagsForParent(tag.id).map((childTag) => (
-                                      <CommandItem key={childTag.id} onSelect={() => addExistingTag(childTag)}>
-                                        <ChevronRight className="w-4 h-4 mr-2" />
-                                        <span>{childTag.name}</span>
-                                      </CommandItem>
-                                    ))}
+                                  <CommandGroup
+                                    heading={`${tag.name} Child Tags`}
+                                  >
+                                    {getChildTagsForParent(tag.id).map(
+                                      (childTag) => (
+                                        <CommandItem
+                                          key={childTag.id}
+                                          onSelect={() =>
+                                            addExistingTag(childTag)
+                                          }
+                                        >
+                                          <ChevronRight className="w-4 h-4 mr-2" />
+                                          <span>{childTag.name}</span>
+                                        </CommandItem>
+                                      ),
+                                    )}
                                   </CommandGroup>
                                 </CommandList>
                               </Command>
@@ -737,28 +906,36 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         ))}
                     </div>
                     <div className="flex flex-wrap gap-2 items-center">
-                      {selectedTags.filter(tag => !FIRE_TAG_NAMES.includes(tag.name as any)).map((tag) => {
-                        return (
-                          <div key={tag.id} className="flex items-center gap-2">
-                            <Badge className={cn(
-                              "px-3 py-1 rounded-full flex items-center gap-1",
-                              "bg-water-light text-water-dark border-water-secondary"
-                            )}>
-                              <span>{tag.name}</span>
-                              <button
-                                type="button"
-                                onClick={() => removeTag(tag.id)}
-                                className="ml-1 hover:opacity-70"
+                      {selectedTags
+                        .filter(
+                          (tag) => !FIRE_TAG_NAMES.includes(tag.name as any),
+                        )
+                        .map((tag) => {
+                          return (
+                            <div
+                              key={tag.id}
+                              className="flex items-center gap-2"
+                            >
+                              <Badge
+                                className={cn(
+                                  "px-3 py-1 rounded-full flex items-center gap-1",
+                                  "bg-water-light text-water-dark border-water-secondary",
+                                )}
                               >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          </div>
-                        );
-                      })}
+                                <span>{tag.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeTag(tag.id)}
+                                  className="ml-1 hover:opacity-70"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
-
                 </div>
               ) : (
                 /* For non-water items, show single tag section */
@@ -773,7 +950,11 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                           className="rounded-full border-dashed"
                         >
                           <Plus className="w-3 h-3 mr-1" />
-                          {itemType === "fire" && hasProjectTag ? "Change Project Tag" : itemType === "fire" ? "Add Project Tag" : "Add Category Tag"}
+                          {itemType === "fire" && hasProjectTag
+                            ? "Change Project Tag"
+                            : itemType === "fire"
+                              ? "Add Project Tag"
+                              : "Add Category Tag"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 p-0" align="start">
@@ -787,9 +968,20 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                                 <span>Edit tags</span>
                               </CommandItem>
                             </CommandGroup>
-                            <CommandGroup heading={itemType === "fire" ? "Fire Tags" : "Tags"}>
+                            <CommandGroup
+                              heading={
+                                itemType === "fire" ? "Fire Tags" : "Tags"
+                              }
+                            >
                               {parentTags.map((tag) => (
-                                <CommandItem key={tag.id} onSelect={() => (itemType === "fire" ? addProjectTag(tag) : addExistingTag(tag))}>
+                                <CommandItem
+                                  key={tag.id}
+                                  onSelect={() =>
+                                    itemType === "fire"
+                                      ? addProjectTag(tag)
+                                      : addExistingTag(tag)
+                                  }
+                                >
                                   <span>{tag.name}</span>
                                 </CommandItem>
                               ))}
@@ -798,10 +990,12 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         </Command>
                       </PopoverContent>
                     </Popover>
-                    
+
                     {/* Add Child Tag buttons for tags with children */}
                     {selectedTags
-                      .filter(tag => existingTags.some(t => t.parent_id === tag.id))
+                      .filter((tag) =>
+                        existingTags.some((t) => t.parent_id === tag.id),
+                      )
                       .map((tag) => (
                         <Popover key={tag.id}>
                           <PopoverTrigger asChild>
@@ -821,18 +1015,29 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                               <CommandList>
                                 <CommandEmpty>No child tags found</CommandEmpty>
                                 <CommandGroup>
-                                  <CommandItem onSelect={() => navigate("/tags")}>
+                                  <CommandItem
+                                    onSelect={() => navigate("/tags")}
+                                  >
                                     <Edit2 className="w-4 h-4 mr-2" />
                                     <span>Edit tags</span>
                                   </CommandItem>
                                 </CommandGroup>
-                                <CommandGroup heading={`${tag.name} Child Tags`}>
-                                  {getChildTagsForParent(tag.id).map((childTag) => (
-                                    <CommandItem key={childTag.id} onSelect={() => addExistingTag(childTag)}>
-                                      <ChevronRight className="w-4 h-4 mr-2" />
-                                      <span>{childTag.name}</span>
-                                    </CommandItem>
-                                  ))}
+                                <CommandGroup
+                                  heading={`${tag.name} Child Tags`}
+                                >
+                                  {getChildTagsForParent(tag.id).map(
+                                    (childTag) => (
+                                      <CommandItem
+                                        key={childTag.id}
+                                        onSelect={() =>
+                                          addExistingTag(childTag)
+                                        }
+                                      >
+                                        <ChevronRight className="w-4 h-4 mr-2" />
+                                        <span>{childTag.name}</span>
+                                      </CommandItem>
+                                    ),
+                                  )}
                                 </CommandGroup>
                               </CommandList>
                             </Command>
@@ -841,42 +1046,55 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                       ))}
                   </div>
                   <div className="flex flex-wrap gap-2 items-center">
-                      {selectedTags.map((tag) => {
-                        const isProjectTag = FIRE_TAG_NAMES.includes(tag.name as any);
-                        return (
-                          <div key={tag.id} className="flex items-center gap-2">
-                            <Badge className={cn(
+                    {selectedTags.map((tag) => {
+                      const isProjectTag = FIRE_TAG_NAMES.includes(
+                        tag.name as any,
+                      );
+                      return (
+                        <div key={tag.id} className="flex items-center gap-2">
+                          <Badge
+                            className={cn(
                               "px-3 py-1 rounded-full flex items-center gap-1",
-                              itemType === "fire" && "bg-fire-light text-fire-dark border-fire-secondary",
-                              itemType === "earth" && "bg-earth-light text-earth-dark border-earth-secondary",
-                              itemType === "air" && "bg-air-light text-air-dark border-air-secondary",
-                              itemType === "void" && "bg-muted text-foreground"
-                            )}>
-                              <span>{tag.name}</span>
-                              <button
-                                type="button"
-                                onClick={() => removeTag(tag.id)}
-                                className="ml-1 hover:opacity-70"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          </div>
-                        );
-                      })}
+                              itemType === "fire" &&
+                                "bg-fire-light text-fire-dark border-fire-secondary",
+                              itemType === "earth" &&
+                                "bg-earth-light text-earth-dark border-earth-secondary",
+                              itemType === "air" &&
+                                "bg-air-light text-air-dark border-air-secondary",
+                              itemType === "void" && "bg-muted text-foreground",
+                            )}
+                          >
+                            <span>{tag.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeTag(tag.id)}
+                              className="ml-1 hover:opacity-70"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </Badge>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
             </div>
 
-            <Tabs value={notesItemsTab} onValueChange={(v) => setNotesItemsTab(v as "notes" | "items")} className="w-full">
+            <Tabs
+              value={notesItemsTab}
+              onValueChange={(v) => setNotesItemsTab(v as "notes" | "items")}
+              className="w-full"
+            >
               <div className="flex items-center justify-between mb-2">
                 <TabsList>
                   <TabsTrigger value="notes">Notes</TabsTrigger>
                   <TabsTrigger value="items" disabled={!existingItem}>
                     Items
                     {!existingItem && (
-                      <span className="ml-1 text-xs text-muted-foreground">(Save first)</span>
+                      <span className="ml-1 text-xs text-muted-foreground">
+                        (Save first)
+                      </span>
                     )}
                   </TabsTrigger>
                 </TabsList>
@@ -908,7 +1126,12 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                   {/* Add new sub-item */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <Select value={newSubItemType} onValueChange={(v) => setNewSubItemType(v as "task" | "url" | "note")}>
+                      <Select
+                        value={newSubItemType}
+                        onValueChange={(v) =>
+                          setNewSubItemType(v as "task" | "url" | "note")
+                        }
+                      >
                         <SelectTrigger className="w-32">
                           <SelectValue />
                         </SelectTrigger>
@@ -977,7 +1200,10 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         type="button"
                         size="sm"
                         onClick={handleAddSubItem}
-                        disabled={!newSubItemTitle.trim() || (newSubItemType === "url" && !newSubItemUrl.trim())}
+                        disabled={
+                          !newSubItemTitle.trim() ||
+                          (newSubItemType === "url" && !newSubItemUrl.trim())
+                        }
                       >
                         <Plus className="w-4 h-4" />
                       </Button>
@@ -991,7 +1217,11 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                         <div
                           key={child.id}
                           className="flex items-center gap-2 p-2 hover:bg-accent rounded-md cursor-pointer"
-                          onClick={() => navigate(`/item/edit?id=${child.id}&type=${child.type}`)}
+                          onClick={() =>
+                            navigate(
+                              `/item/edit?id=${child.id}&type=${child.type}`,
+                            )
+                          }
                         >
                           {child.type === "fire" && onUpdateItem && (
                             <Checkbox
@@ -999,19 +1229,27 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onUpdateItem(child.id, {
-                                  completed: !child.completed
+                                  completed: !child.completed,
                                 });
                               }}
                             />
                           )}
-                          <span className={cn("flex-1", child.completed && "line-through text-muted-foreground")}>
+                          <span
+                            className={cn(
+                              "flex-1",
+                              child.completed &&
+                                "line-through text-muted-foreground",
+                            )}
+                          >
                             {child.title}
                           </span>
                           <ChevronRight className="w-4 h-4 text-muted-foreground" />
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-muted-foreground text-center py-8">No sub-items yet</p>
+                      <p className="text-sm text-muted-foreground text-center py-8">
+                        No sub-items yet
+                      </p>
                     )}
                   </div>
                 </div>
@@ -1019,7 +1257,7 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             </Tabs>
           </div>
         </form>
-        
+
         {/* Bottom action buttons */}
         <div className="max-w-4xl mx-auto mt-6 flex justify-between items-center">
           {existingItem && onDeleteItem ? (
@@ -1028,7 +1266,9 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
               variant="ghost"
               size="icon"
               onClick={async () => {
-                if (confirm("Are you sure you want to move this item to trash?")) {
+                if (
+                  confirm("Are you sure you want to move this item to trash?")
+                ) {
                   await onDeleteItem(existingItem.id);
                   navigate(-1);
                 }
@@ -1044,7 +1284,8 @@ export default function ItemDetail({ onAddItem, existingTags, existingItem, allI
             onClick={() => handleSubmit(undefined, false)}
             disabled={!hasUnsavedChanges}
             className={cn(
-              !hasUnsavedChanges && "bg-muted text-muted-foreground hover:bg-muted"
+              !hasUnsavedChanges &&
+                "bg-muted text-muted-foreground hover:bg-muted",
             )}
           >
             Save

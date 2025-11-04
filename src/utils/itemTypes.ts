@@ -18,5 +18,5 @@ export const supportsStatus = (type: ItemType): boolean => {
  * Check if an item type supports deadline field
  */
 export const supportsDeadline = (type: ItemType): boolean => {
-  return type === "fire";
+  return type === "fire" || type === "water";
 };

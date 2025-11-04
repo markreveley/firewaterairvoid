@@ -1,0 +1,158 @@
+/* Water Calendar Custom Styling */
+
+.water-calendar {
+  font-family: inherit;
+}
+
+/* Calendar toolbar styling */
+.water-calendar .rbc-toolbar {
+  padding: 1rem 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+.water-calendar .rbc-toolbar button {
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: hsl(var(--background));
+  transition: all 0.2s;
+}
+
+.water-calendar .rbc-toolbar button:hover {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--water-primary));
+}
+
+.water-calendar .rbc-toolbar button.rbc-active {
+  background: hsl(var(--water-primary));
+  color: white;
+  border-color: hsl(var(--water-primary));
+}
+
+.water-calendar .rbc-toolbar button.rbc-active:hover {
+  background: hsl(var(--water-secondary));
+}
+
+/* Month view styling */
+.water-calendar .rbc-month-view {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.water-calendar .rbc-header {
+  padding: 0.75rem;
+  background: hsl(var(--water-light));
+  color: hsl(var(--water-dark));
+  font-weight: 600;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.water-calendar .rbc-today {
+  background-color: hsl(var(--water-light) / 0.3);
+}
+
+.water-calendar .rbc-off-range-bg {
+  background: hsl(var(--muted));
+}
+
+.water-calendar .rbc-date-cell {
+  padding: 0.5rem;
+  text-align: right;
+}
+
+/* Event styling */
+.water-calendar-event {
+  background-color: hsl(var(--water-primary)) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 0.25rem !important;
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.875rem !important;
+  cursor: pointer !important;
+}
+
+.water-calendar-event:hover {
+  background-color: hsl(var(--water-secondary)) !important;
+}
+
+.water-calendar-event-priority {
+  background-color: hsl(var(--water-dark)) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 0 0 2px hsl(var(--yellow-500) / 0.3) !important;
+}
+
+/* Week view styling */
+.water-calendar .rbc-time-view {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.water-calendar .rbc-time-header {
+  background: hsl(var(--background));
+}
+
+.water-calendar .rbc-time-content {
+  border-top: 1px solid hsl(var(--border));
+}
+
+.water-calendar .rbc-time-slot {
+  border-top: 1px solid hsl(var(--border) / 0.5);
+}
+
+.water-calendar .rbc-current-time-indicator {
+  background-color: hsl(var(--water-primary));
+  height: 2px;
+}
+
+/* Agenda view styling */
+.water-calendar .rbc-agenda-view {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.water-calendar .rbc-agenda-table {
+  border: none;
+}
+
+.water-calendar .rbc-agenda-date-cell,
+.water-calendar .rbc-agenda-time-cell {
+  padding: 0.75rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.water-calendar .rbc-agenda-event-cell {
+  padding: 0.75rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.water-calendar .rbc-agenda-event-cell:hover {
+  background: hsl(var(--accent));
+  cursor: pointer;
+}
+
+/* Selected event styling */
+.water-calendar .rbc-selected {
+  background-color: hsl(var(--water-dark)) !important;
+}
+
+/* Override default colors */
+.water-calendar .rbc-event-label {
+  font-size: 0.75rem;
+}
+
+.water-calendar .rbc-show-more {
+  background-color: transparent;
+  color: hsl(var(--water-primary));
+  font-weight: 600;
+  padding: 0.25rem;
+}
+
+.water-calendar .rbc-show-more:hover {
+  color: hsl(var(--water-dark));
+  text-decoration: underline;
+}
