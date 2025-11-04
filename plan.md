@@ -23,10 +23,18 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - refactoring complete ✅
+**Working on**: Nothing - dark mode complete ✅
 **Next**: Ready for user testing
 
 ## Work Log
+--------------------------------------------------
+2025-11-04 – dark mode implementation
+- Goal: Add dark mode toggle and fix logo visibility in both themes
+- Key files: src/components/theme-provider.tsx (new), src/components/theme-toggle.tsx (new), src/App.tsx (ThemeProvider integration), src/pages/Index.tsx (toggle button and logo fix)
+- Changes: Created ThemeProvider wrapper using next-themes library (already installed); created ThemeToggle dropdown component with Light/Dark/System options; wrapped app in ThemeProvider with class attribute and system detection enabled; added toggle button to header next to User icon; applied dark:invert CSS filter to logo for visibility in dark mode
+- UX: Sun/Moon icon animates on theme change; dropdown menu for theme selection; respects system preference by default; logo automatically inverts colors in dark mode
+- Theme system: Uses existing CSS variables in index.css (.dark class already defined with full color palette); Tailwind configured for class-based dark mode
+- Next: (completed ✅)
 --------------------------------------------------
 2025-11-04 – bulk delete for completed fire items
 - Goal: Add ability to clear all completed fire items at once
