@@ -231,7 +231,8 @@ export function ItemList({
                           >
                             <Star className={cn("w-4 h-4", item.priority > 0 && "fill-current")} />
                           </button>
-                          {item.tags.length > 0 && (
+                          {/* Hide tags for water type */}
+                          {item.type !== "water" && item.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 justify-end">
                               {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
                                   {tag.name}

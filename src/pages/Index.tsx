@@ -114,22 +114,25 @@ const Index = () => {
       </header>
 
       <div className="container mx-auto px-8 md:px-12 lg:px-16 pt-4 pb-12 space-y-8">
-        <div className="py-2">
-          <TagFilter
-            projectTags={projectTags}
-            categoryTags={categoryTags}
-            allTags={allTags}
-            type={activeType}
-            selectedProjectTag={selectedProjectTag}
-            selectedProjectChildTag={selectedProjectChildTag}
-            selectedCategoryTags={selectedCategoryTags}
-            selectedCategoryChildTags={selectedCategoryChildTags}
-            onSelectProjectTag={setSelectedProjectTag}
-            onSelectProjectChildTag={setSelectedProjectChildTag}
-            onSelectCategoryTags={setSelectedCategoryTags}
-            onSelectCategoryChildTags={setSelectedCategoryChildTags}
-          />
-        </div>
+        {/* Hide tag filter for water type */}
+        {activeType !== "water" && (
+          <div className="py-2">
+            <TagFilter
+              projectTags={projectTags}
+              categoryTags={categoryTags}
+              allTags={allTags}
+              type={activeType}
+              selectedProjectTag={selectedProjectTag}
+              selectedProjectChildTag={selectedProjectChildTag}
+              selectedCategoryTags={selectedCategoryTags}
+              selectedCategoryChildTags={selectedCategoryChildTags}
+              onSelectProjectTag={setSelectedProjectTag}
+              onSelectProjectChildTag={setSelectedProjectChildTag}
+              onSelectCategoryTags={setSelectedCategoryTags}
+              onSelectCategoryChildTags={setSelectedCategoryChildTags}
+            />
+          </div>
+        )}
 
         <div className="max-w-4xl mx-auto space-y-6">
           {/* New Item Button and View Mode Toggle */}

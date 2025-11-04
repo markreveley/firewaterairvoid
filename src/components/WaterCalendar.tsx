@@ -5,7 +5,6 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Droplet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Item } from '@/types';
@@ -178,15 +177,6 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-medium flex-1">{item.title}</p>
-                  {item.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 justify-end">
-                      {item.tags.map(tag => (
-                        <Badge key={tag.id} variant="outline" className="text-xs">
-                          {tag.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
                 </div>
                 {item.notes && (
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
