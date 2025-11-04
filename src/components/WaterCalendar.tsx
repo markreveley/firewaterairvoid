@@ -78,6 +78,16 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
         const recurrenceType = item.recurrence_type || 'none';
         const recurrenceEndDate = item.recurrence_end_date;
 
+        // Debug logging
+        if (item.type === 'water') {
+          console.log('Water item:', {
+            title: item.title,
+            recurrence_type: item.recurrence_type,
+            recurrence_end_date: item.recurrence_end_date,
+            deadline: item.deadline,
+          });
+        }
+
         if (recurrenceType === 'none') {
           // Non-recurring event - add single instance
           calendarEvents.push({
