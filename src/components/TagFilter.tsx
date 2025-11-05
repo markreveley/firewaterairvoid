@@ -51,11 +51,11 @@ export function TagFilter({
   }
 
   // Get child tags for selected project tag (second row)
-  // If selectedProjectTag is not a root tag, show it and its siblings
+  // If selectedProjectTag is not a root tag, show all siblings
   const selectedParentTag = selectedProjectTag ? allTags.find(t => t.id === selectedProjectTag) : null;
   const projectChildTags = selectedProjectTag
     ? selectedParentTag?.parent_id
-      ? [selectedParentTag] // Show the selected non-root tag itself
+      ? allTags.filter(tag => tag.parent_id === selectedParentTag.parent_id) // Show all siblings (including selected)
       : allTags.filter(tag => tag.parent_id === selectedProjectTag) // Show children of root tag
     : [];
 
@@ -86,7 +86,7 @@ export function TagFilter({
   const selectedCategoryParentTag = selectedCategoryTag ? allTags.find(t => t.id === selectedCategoryTag) : null;
   const categoryChildTags = selectedCategoryTag
     ? selectedCategoryParentTag?.parent_id
-      ? [selectedCategoryParentTag] // Show the selected non-root tag itself
+      ? allTags.filter(tag => tag.parent_id === selectedCategoryParentTag.parent_id) // Show all siblings (including selected)
       : allTags.filter(tag => tag.parent_id === selectedCategoryTag) // Show children of root tag
     : [];
 
@@ -143,8 +143,14 @@ export function TagFilter({
                 onSelectProjectChildTag(tag.id);
               }
             } else if (isChildTag) {
-              // Select/deselect child tag (both leaf and branch tags)
-              onSelectProjectChildTag(isSelected ? undefined : tag.id);
+              // If this tag is the selectedProjectTag itself, go back to parent
+              if (tag.id === selectedProjectTag) {
+                onSelectProjectTag(tag.parent_id);
+                onSelectProjectChildTag(undefined);
+              } else {
+                // Otherwise just toggle child tag selection
+                onSelectProjectChildTag(isSelected ? undefined : tag.id);
+              }
             } else {
               // Parent tag clicked - toggle selection
               onSelectProjectTag(isSelected ? undefined : tag.id);
@@ -162,8 +168,14 @@ export function TagFilter({
                   // Clear grandchild selection, keep parent (go back to showing just Rust)
                   onSelectProjectChildTag(undefined);
                 } else if (isChildTag) {
-                  // Clear child selection, keep parent
-                  onSelectProjectChildTag(undefined);
+                  // If this tag is the selectedProjectTag itself, go back to its parent
+                  if (tag.id === selectedProjectTag) {
+                    onSelectProjectTag(tag.parent_id);
+                    onSelectProjectChildTag(undefined);
+                  } else {
+                    // Clear child selection, keep parent
+                    onSelectProjectChildTag(undefined);
+                  }
                 } else {
                   // Clear parent selection
                   onSelectProjectTag(undefined);
@@ -223,8 +235,14 @@ export function TagFilter({
                 onSelectCategoryChildTags([tag.id]);
               }
             } else if (isChildTag) {
-              // Select/deselect child tag (both leaf and branch tags) - exclusive
-              onSelectCategoryChildTags(isSelected ? [] : [tag.id]);
+              // If this tag is the selectedCategoryTag itself, go back to parent
+              if (tag.id === selectedCategoryTag) {
+                onSelectCategoryTags(tag.parent_id ? [tag.parent_id] : []);
+                onSelectCategoryChildTags([]);
+              } else {
+                // Otherwise just toggle child tag selection - exclusive
+                onSelectCategoryChildTags(isSelected ? [] : [tag.id]);
+              }
             } else {
               // Parent tag clicked - toggle selection (exclusive)
               onSelectCategoryTags(isSelected ? [] : [tag.id]);
@@ -242,8 +260,14 @@ export function TagFilter({
                   // Clear grandchild selection, keep parent
                   onSelectCategoryChildTags([]);
                 } else if (isChildTag) {
-                  // Clear child selection, keep parent
-                  onSelectCategoryChildTags([]);
+                  // If this tag is the selectedCategoryTag itself, go back to its parent
+                  if (tag.id === selectedCategoryTag) {
+                    onSelectCategoryTags(tag.parent_id ? [tag.parent_id] : []);
+                    onSelectCategoryChildTags([]);
+                  } else {
+                    // Clear child selection, keep parent
+                    onSelectCategoryChildTags([]);
+                  }
                 } else {
                   // Clear parent selection
                   onSelectCategoryTags([]);

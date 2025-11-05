@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ItemType, Tag } from "@/types";
-import { getTagsForItemType } from "@/utils/tagFilters";
+import { getTagsForItemType, getAllTagsForItemType } from "@/utils/tagFilters";
 import { FIRE_TAG_NAMES } from "@/constants/tags";
 
 const Index = () => {
@@ -76,10 +76,11 @@ const Index = () => {
   // Clear tag filters when switching types if selected tags don't exist in new type
   useEffect(() => {
     if (allTags.length > 0) {
-      const tagsForType = getTagsForItemType(allTags, activeType);
+      // Use getAllTagsForItemType to validate against the full tag hierarchy, not just root tags
+      const allTagsForType = getAllTagsForItemType(allTags, activeType);
 
       // Check if currently selected tags exist in the new type
-      const validTagIds = tagsForType.map(tag => tag.id);
+      const validTagIds = allTagsForType.map(tag => tag.id);
       if (selectedProjectTag && !validTagIds.includes(selectedProjectTag)) {
         setSelectedProjectTag(undefined);
         setSelectedProjectChildTag(undefined);
