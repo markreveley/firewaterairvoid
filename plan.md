@@ -28,6 +28,17 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – fix hierarchical tag selection and deselection bugs
+- Goal: Resolve issues with 3-level tag hierarchy selection being auto-cleared and improve deselection UX
+- Key files: src/components/TagFilter.tsx (click handlers, visibility logic), src/pages/Index.tsx (validation logic)
+- Issue 1: Selecting dirtwire→production→vieux would immediately deselect due to validation checking only root tags instead of full hierarchy
+- Issue 2: When drilling to 3rd level, all 2nd level siblings were hidden except selected tag
+- Issue 3: Clicking X or badge on middle-level tag (production) would clear everything instead of navigating back to parent (dirtwire)
+- Changes: Updated Index.tsx validation to use getAllTagsForItemType instead of getTagsForItemType; changed TagFilter to show all siblings at every level; implemented breadcrumb navigation pattern for deselection (steps back one level instead of clearing all)
+- UX improvements: Tags stay selected when drilling through hierarchy; all sibling tags remain visible for easy switching; deselecting middle-level tags navigates back to parent instead of clearing entire selection
+- Bug fix examples: dirtwire→production→vieux stays selected ✓; clicking X on production shows dirtwire ✓; all second-level tags visible when third-level selected ✓
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – restore centered alignment for tag filters
 - Goal: Fix tag filter alignment that was pinned to the left after recent changes
 - Key files: src/pages/Index.tsx (tag filter container styling)
