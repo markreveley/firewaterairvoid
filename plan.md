@@ -28,6 +28,14 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – priority colors and fire-only restriction
+- Goal: Improve visual clarity of priority system and restrict to fire items only
+- Key files: src/constants/priority.ts (color updates), src/components/ItemList.tsx (fire-only display), src/pages/ItemDetail.tsx (fire-only selector)
+- Changes: Updated priority colors to red/orange/yellow/grey gradient (levels 1-4) for clearer urgency visualization; wrapped priority icon button in ItemList with `item.type === "fire"` conditional; wrapped priority selector in ItemDetail with `itemType === "fire"` conditional
+- Color scheme: Level 1 (Immediate) = red, Level 2 (Pressing) = orange, Level 3 (To Do) = yellow, Level 4 (Paused) = grey, Level 5 (Done) = darker grey
+- UX improvements: Heat gradient (red→orange→yellow→grey) intuitively communicates urgency; priority UI only appears for fire (action/task) items, reinforcing elemental metaphor; air, void, and earth items no longer show priority
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – inline subitem display in cards
 - Goal: Show subitems within parent item cards in the main list view for better visibility
 - Key files: src/types/index.ts (subItems property), src/hooks/useItems.ts (fetch subitems), src/components/ItemList.tsx (display logic)
