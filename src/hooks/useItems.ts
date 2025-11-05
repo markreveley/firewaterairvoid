@@ -454,7 +454,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
         }
       }
 
-      return { itemId, updates };
+      // No return needed - mutation returns void
     },
     onMutate: async ({ itemId, updates }) => {
       // Cancel outgoing refetches

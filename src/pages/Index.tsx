@@ -172,9 +172,7 @@ const Index = () => {
                 <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "calendar" | "overview")}>
                   <TabsList>
                     <TabsTrigger value="card">Card</TabsTrigger>
-                    {activeType !== "water" && (
-                      <TabsTrigger value="overview">Overview</TabsTrigger>
-                    )}
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
