@@ -76,18 +76,17 @@ const Index = () => {
   // Clear tag filters when switching types if selected tags don't exist in new type
   useEffect(() => {
     if (allTags.length > 0) {
-      const { projectTags, categoryTags } = getTagsForItemType(allTags, activeType);
+      const tagsForType = getTagsForItemType(allTags, activeType);
 
-      // Check project tag - validate against ALL project tags, not just root tags
-      const allProjectTags = allTags.filter(t => t.type === 'project');
-      if (selectedProjectTag && !allProjectTags.some(t => t.id === selectedProjectTag)) {
+      // Check if currently selected tags exist in the new type
+      const validTagIds = tagsForType.map(tag => tag.id);
+      if (selectedProjectTag && !validTagIds.includes(selectedProjectTag)) {
         setSelectedProjectTag(undefined);
         setSelectedProjectChildTag(undefined);
       }
 
       // Check category tags
-      const validCategoryTagIds = categoryTags.map(tag => tag.id);
-      const validSelectedCategoryTags = selectedCategoryTags.filter(id => validCategoryTagIds.includes(id));
+      const validSelectedCategoryTags = selectedCategoryTags.filter(id => validTagIds.includes(id));
       if (validSelectedCategoryTags.length !== selectedCategoryTags.length) {
         setSelectedCategoryTags(validSelectedCategoryTags);
         setSelectedCategoryChildTags([]);
@@ -96,7 +95,11 @@ const Index = () => {
   }, [activeType, allTags, selectedProjectTag, selectedCategoryTags]);
 
   // Get filtered tags for current type
-  const { projectTags, categoryTags } = getTagsForItemType(allTags, activeType);
+  // Fire uses the "project tag" selection model (single selection)
+  // Earth/Air/Void use the "category tag" selection model (multiple selection)
+  const tagsForCurrentType = getTagsForItemType(allTags, activeType);
+  const projectTags = activeType === "fire" ? tagsForCurrentType : [];
+  const categoryTags = activeType !== "fire" && activeType !== "water" ? tagsForCurrentType : [];
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}

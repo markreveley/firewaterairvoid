@@ -5,7 +5,9 @@ export interface Tag {
   id: string;
   name: string;
   parent_id?: string | null;
-  type?: 'project' | 'category';
+  // Tag type must match ItemType: fire items use 'fire' tags, earth uses 'earth', etc.
+  // Water items have no tags.
+  type?: 'fire' | 'earth' | 'air' | 'void';
 }
 
 export interface Item {

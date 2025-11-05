@@ -57,12 +57,8 @@ import {
   supportsDeadline,
   supportsStatus,
 } from "@/utils/itemTypes";
-import {
-  filterTagsForItemType,
-  getProjectAndCategoryTags,
-} from "@/utils/tagFilters";
+import { getTagsForItemType, getAllTagsForItemType } from "@/utils/tagFilters";
 import { generateTimeOptions } from "@/utils/time";
-import { FIRE_TAG_NAMES } from "@/constants/tags";
 import { PRIORITY_LEVELS, PRIORITY_CONFIG, PriorityLevel } from "@/constants/priority";
 import { PriorityFireIcon } from "@/components/PriorityFireIcon";
 
@@ -460,11 +456,10 @@ export default function ItemDetail({
   };
 
   const addProjectTag = (tag: Tag) => {
-    // Remove all existing project tags and add the new one
-    const nonProjectTags = selectedTags.filter(
-      (t) => !FIRE_TAG_NAMES.includes(t.name as any),
-    );
-    setSelectedTags([...nonProjectTags, tag]);
+    // For fire items: Remove all existing fire tags and add the new one
+    // For other types: This shouldn't be called but handle it safely
+    const nonFireTags = selectedTags.filter((t) => t.type !== 'fire');
+    setSelectedTags([...nonFireTags, tag]);
     setIsMainTagPopoverOpen(false);
   };
 
@@ -491,12 +486,8 @@ export default function ItemDetail({
     }
   };
 
-  // Filter tags based on item type
-  const baseFilteredTags = filterTagsForItemType(existingTags, itemType);
-
-  // For water items, get separate project and category tags
-  const { projectTags: waterProjectTags, categoryTags: waterCategoryTags } =
-    getProjectAndCategoryTags(existingTags, itemType);
+  // Filter tags based on item type - water has no tags
+  const baseFilteredTags = itemType === "water" ? [] : getAllTagsForItemType(existingTags, itemType);
 
   // Separate parent and child tags
   const parentTags = baseFilteredTags.filter((tag) => !tag.parent_id);
@@ -515,10 +506,8 @@ export default function ItemDetail({
     return existingTags.filter((tag) => tag.parent_id === parentId);
   };
 
-  // Check if a project tag is already selected
-  const hasProjectTag = selectedTags.some((tag) =>
-    FIRE_TAG_NAMES.includes(tag.name as any),
-  );
+  // Check if a fire tag is already selected (only relevant for fire items)
+  const hasFireTag = selectedTags.some((tag) => tag.type === 'fire');
 
   // Full-page markdown preview
   if (isMarkdownPreview) {
@@ -883,11 +872,11 @@ export default function ItemDetail({
                           className="rounded-full border-dashed"
                         >
                           <Plus className="w-3 h-3 mr-1" />
-                          {itemType === "fire" && hasProjectTag
-                            ? "Change Project Tag"
+                          {itemType === "fire" && hasFireTag
+                            ? "Change Fire Tag"
                             : itemType === "fire"
-                              ? "Add Project Tag"
-                              : "Add Category Tag"}
+                              ? "Add Fire Tag"
+                              : "Add Tag"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 p-0" align="start">
@@ -984,9 +973,7 @@ export default function ItemDetail({
                   </div>
                   <div className="flex flex-wrap gap-2 items-center">
                     {selectedTags.map((tag) => {
-                      const isProjectTag = FIRE_TAG_NAMES.includes(
-                        tag.name as any,
-                      );
+                      const isFireTag = tag.type === 'fire';
                       return (
                         <div key={tag.id} className="flex items-center gap-2">
                           <Badge
