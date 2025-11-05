@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Edit2, Trash2, ChevronRight } from "lucide-react";
+import { ArrowLeft, Plus, Edit2, Trash2, ChevronRight, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client-safe";
 import { toast } from "sonner";
-import { FIRE_TAG_NAMES } from "@/constants/tags";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +22,7 @@ interface Tag {
   children?: Tag[];
 }
 
-export default function ProjectTagsManagement() {
+export default function FireTagsManagement() {
   const navigate = useNavigate();
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,26 +39,22 @@ export default function ProjectTagsManagement() {
       const { data, error } = await supabase
         .from("tags")
         .select("*")
-        .eq("type", "project")
+        .eq("type", "fire")
         .order("name", { ascending: true });
 
       if (error) throw error;
 
-      const projectTags = data || [];
-
-      // Store flat list for parent selection
-      setAllFlatTags(projectTags);
+      const fireTags = data || [];
+      setAllFlatTags(fireTags);
 
       // Organize tags into parent-child structure
       const tagMap = new Map<string, Tag>();
       const rootTags: Tag[] = [];
 
-      // First pass: create tag objects
-      projectTags.forEach((tag) => {
+      fireTags.forEach((tag) => {
         tagMap.set(tag.id, { ...tag, children: [] });
       });
 
-      // Second pass: organize into hierarchy
       tagMap.forEach((tag) => {
         if (tag.parent_id) {
           const parent = tagMap.get(tag.parent_id);
@@ -93,7 +88,7 @@ export default function ProjectTagsManagement() {
       const { error } = await supabase.from("tags").insert({
         name: newTagName.trim(),
         parent_id: parentTagForNew?.id || null,
-        type: "project",
+        type: "fire",
       });
 
       if (error) {
@@ -109,7 +104,7 @@ export default function ProjectTagsManagement() {
         return;
       }
 
-      toast.success(`Tag "${newTagName}" created`);
+      toast.success(`Fire tag "${newTagName}" created`);
       setNewTagName("");
       setParentTagForNew(null);
       loadTags();
@@ -167,12 +162,12 @@ export default function ProjectTagsManagement() {
   const renderTag = (tag: Tag, level: number = 0) => (
     <div key={tag.id} className="space-y-2">
       <div
-        className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent transition-colors"
+        className="flex items-center justify-between p-3 rounded-lg border border-fire-secondary/20 bg-card hover:bg-fire-primary/5 transition-colors"
         style={{ marginLeft: `${level * 24}px` }}
       >
         <div className="flex items-center gap-2">
-          {level > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
-          <Badge variant="outline">{tag.name}</Badge>
+          {level > 0 && <ChevronRight className="w-4 h-4 text-fire-secondary" />}
+          <Badge className="bg-fire-light text-white border-fire-secondary">{tag.name}</Badge>
           {tag.children && tag.children.length > 0 && (
             <span className="text-xs text-muted-foreground">
               ({tag.children.length} child tag{tag.children.length > 1 ? "s" : ""})
@@ -183,13 +178,14 @@ export default function ProjectTagsManagement() {
           <Button
             variant="ghost"
             size="sm"
+            className="hover:bg-fire-primary/10"
             onClick={() => {
               setParentTagForNew(tag);
               setNewTagName("");
             }}
           >
             <Plus className="w-4 h-4 mr-1" />
-            Add Child Tag
+            Add Child
           </Button>
           <Button
             variant="ghost"
@@ -220,26 +216,37 @@ export default function ProjectTagsManagement() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12">
         <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" onClick={() => navigate(-1)}>
+          <Button variant="ghost" onClick={() => navigate("/?type=fire")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-2xl font-bold">Manage Project Tags</h1>
-          <Button variant="outline" onClick={() => navigate("/tags/categories")}>
-            Category Tags
-          </Button>
+          <div className="flex items-center gap-2">
+            <Flame className="w-6 h-6 text-fire-primary" />
+            <h1 className="text-2xl font-bold">Manage Fire Tags</h1>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate("/tags/earth")}>
+              Earth
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/tags/air")}>
+              Air
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/tags/void")}>
+              Void
+            </Button>
+          </div>
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Create New Tag */}
-          <div className="p-6 rounded-lg border bg-card space-y-4">
+          <div className="p-6 rounded-lg border border-fire-secondary/20 bg-card space-y-4">
             <h2 className="text-lg font-semibold">
-              {parentTagForNew ? `Create Child Tag for "${parentTagForNew.name}"` : "Create New Project Tag"}
+              {parentTagForNew ? `Create Child Tag for "${parentTagForNew.name}"` : "Create New Fire Tag"}
             </h2>
             {parentTagForNew && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Parent:</span>
-                <Badge variant="outline">{parentTagForNew.name}</Badge>
+                <Badge className="bg-fire-light text-white border-fire-secondary">{parentTagForNew.name}</Badge>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -255,8 +262,13 @@ export default function ProjectTagsManagement() {
                 onChange={(e) => setNewTagName(e.target.value)}
                 placeholder="Tag name..."
                 onKeyDown={(e) => e.key === "Enter" && createTag()}
+                className="border-fire-secondary/20 focus:border-fire-primary"
               />
-              <Button onClick={createTag} disabled={!newTagName.trim()}>
+              <Button 
+                onClick={createTag} 
+                disabled={!newTagName.trim()}
+                className="bg-fire-primary hover:bg-fire-secondary text-white"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create
               </Button>
@@ -268,7 +280,7 @@ export default function ProjectTagsManagement() {
             {isLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading tags...</div>
             ) : tags.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">No project tags yet</div>
+              <div className="text-center py-12 text-muted-foreground">No fire tags yet</div>
             ) : (
               tags.map((tag) => renderTag(tag))
             )}
@@ -282,7 +294,7 @@ export default function ProjectTagsManagement() {
         }}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit Tag</DialogTitle>
+              <DialogTitle>Edit Fire Tag</DialogTitle>
               <DialogDescription>Change the name and parent of this tag</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">

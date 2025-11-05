@@ -9,7 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useItems } from "@/hooks/useItems";
 import { useTags } from "@/hooks/useTags";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Plus, Search, User, Loader2 } from "lucide-react";
+import { Plus, Search, User, Loader2, Edit2 } from "lucide-react";
 import fireWaterLogo from "@/assets/firewater_logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,7 +119,7 @@ const Index = () => {
       <div className={viewMode === "calendar" ? "" : "container mx-auto px-8 md:px-12 lg:px-16 pt-4 pb-12 space-y-8"}>
         {/* Hide tag filter for water type */}
         {activeType !== "water" && (
-          <div className="py-2">
+          <div className="py-2 flex items-center gap-4">
             <TagFilter
               projectTags={projectTags}
               categoryTags={categoryTags}
@@ -134,6 +134,17 @@ const Index = () => {
               onSelectCategoryTags={setSelectedCategoryTags}
               onSelectCategoryChildTags={setSelectedCategoryChildTags}
             />
+            
+            {/* Inline Tag Edit Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/tags/${activeType}`)}
+              className="flex-shrink-0"
+              title={`Edit ${activeType} tags`}
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
           </div>
         )}
 

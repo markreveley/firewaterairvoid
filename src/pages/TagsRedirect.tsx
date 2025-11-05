@@ -5,7 +5,8 @@ const TagsRedirect = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    navigate("/tags/projects", { replace: true });
+    // Default to fire tags management
+    navigate("/tags/fire", { replace: true });
   }, [navigate]);
 
   return null;
