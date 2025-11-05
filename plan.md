@@ -28,6 +28,16 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – tag auto-population and priority visual improvements
+- Goal: Auto-populate tags when creating items and improve priority visual hierarchy
+- Key files: src/pages/Index.tsx (tag passing), src/pages/ItemDetail.tsx (tag auto-population, X button fix), src/constants/priority.ts (Track rename), src/components/ItemList.tsx (dynamic border colors)
+- Tag auto-population: New item button now passes selected filter tags via URL params (tagIds); ItemDetail reads tagIds param and populates form with selected tags using useEffect; works for both fire (project tags) and earth/air/void (category tags); prevents "unsaved changes" warning on auto-populated tags
+- Priority rename: Changed level 5 from "Paused" to "Track" to better reflect tracking/monitoring use case
+- Card border colors: Fire item cards now display left border colors matching priority icon (Immediate=red, Pressing=orange, To Do=yellow, Eventually=gray, Track=darker gray); uses inline styles with PRIORITY_CONFIG colors for dynamic rendering
+- Tag removal fix: Added e.preventDefault() and e.stopPropagation() to tag X buttons to prevent form event bubbling
+- UX improvements: Creating new items with tags selected pre-fills the form, saving time; visual consistency between fire icon and card border reinforces priority at a glance; "Track" better describes low-priority items being monitored
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – priority level renaming and tag display order reversal
 - Goal: Improve priority level semantics and reverse tag display order for better visual hierarchy
 - Key files: src/constants/priority.ts (priority names), src/components/ItemList.tsx (tag order, comment update)
