@@ -24,9 +24,19 @@
 
 ## Current Status
 **Working on**: Nothing - all tasks complete ✅
-**Next**: Ready for user testing
+**Next**: Apply migration in Lovable, then ready for user testing
 
 ## Work Log
+--------------------------------------------------
+2025-11-04 – 5-state priority fire icon system
+- Goal: Replace binary star priority with intuitive 5-level fire icon with color-coded states
+- Key files: supabase/migrations/20251104120000_update_priority_to_five_levels.sql, src/constants/priority.ts, src/components/PriorityFireIcon.tsx, src/components/ItemList.tsx, src/pages/ItemDetail.tsx, src/pages/ItemDetailPage.tsx, src/hooks/useItems.ts
+- Priority levels: 1=immediate (dark red), 2=pressing (red), 3=todo (orange), 4=paused (gray), 5=done (dark gray)
+- Changes: Created PriorityFireIcon component with color-based states; replaced Star icon import with fire icon in ItemList; changed priority toggle to cycle through all 5 states (1→2→3→4→5→1); added priority dropdown in ItemDetail page showing colored fire icons for each state; updated data layer to support priority in add/update operations; migrated existing data (starred→immediate, normal→todo); set default priority to 3 (todo)
+- Migration required: User must apply SQL migration in Lovable (supabase/migrations/20251104120000_update_priority_to_five_levels.sql)
+- UX improvements: Visual fire metaphor matches urgency (burning red → cooling gray); single-click cycling on item cards; dropdown selector in detail view; color provides instant priority recognition
+- Next: (awaiting migration application in Lovable)
+--------------------------------------------------
 --------------------------------------------------
 2025-11-04 – water calendar full-height layout and recurring event fixes
 - Goal: Improve calendar UX with better layout and fix navigation bug for recurring events
