@@ -28,6 +28,15 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – hide completed fire items from calendar view
+- Goal: Remove completed fire tasks from water calendar to keep calendar focused on active items
+- Key files: src/components/WaterCalendar.tsx (calendar event filtering)
+- Changes: Added filter to exclude fire items where status === "Completed" from calendar events array; filter applied after deadline check but before event generation
+- Issue: Initially used completed boolean field, but fire items track completion via status field ("To Do" / "Completed") which is used throughout the UI
+- Solution: Changed filter from checking item.completed to item.status === 'Completed' to match ItemList checkbox logic
+- UX improvements: Calendar stays clean and focused on active tasks; completed fire items no longer clutter the view; water items always display regardless of completion since they're events/appointments not tasks
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – hierarchical tag filtering fix
 - Goal: Fix bug where selecting parent tag only showed exact-match items, not items with child tags
 - Key files: src/components/ItemList.tsx (getAllDescendantTagIds helper, filtering logic), src/pages/Index.tsx (allTags prop passing)
