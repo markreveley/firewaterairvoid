@@ -26,6 +26,7 @@ interface Item {
   parent_id?: string;
   parent?: { id: string; title: string; type: string };
   children?: Array<{ id: string; title: string; type: string; completed?: boolean }>;
+  subItems?: Array<{ id: string; title: string; type: string; completed?: boolean }>;
   priority: number;
   completed: boolean;
 }
@@ -249,10 +250,48 @@ export function ItemList({
                         {truncateNotes(item.notes)}
                       </p>
                     )}
+
+                    {/* Sub-items display */}
+                    {item.subItems && item.subItems.length > 0 && (
+                      <div className="mt-3 space-y-1 border-l-2 border-muted pl-3">
+                        {item.subItems.map((subItem) => (
+                          <div
+                            key={subItem.id}
+                            className="flex items-center gap-2 text-sm cursor-pointer hover:bg-accent/50 p-1 rounded transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/item/edit?id=${subItem.id}&type=${subItem.type}`);
+                            }}
+                          >
+                            {subItem.type === "fire" && (
+                              <div
+                                className={cn(
+                                  "w-4 h-4 rounded border flex items-center justify-center shrink-0",
+                                  subItem.completed
+                                    ? "bg-fire-primary border-fire-primary"
+                                    : "border-muted-foreground"
+                                )}
+                              >
+                                {subItem.completed && (
+                                  <Check className="w-3 h-3 text-white" />
+                                )}
+                              </div>
+                            )}
+                            {getTypeIcon(subItem.type)}
+                            <span className={cn(
+                              "flex-1 truncate",
+                              subItem.completed && "line-through text-muted-foreground"
+                            )}>
+                              {subItem.title}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Footer: Children and Deadline (left) and Parent (right) */}
                 <div className="flex items-center justify-between pt-2">
                   {/* Bottom left: Children and Deadline for fire/water items */}

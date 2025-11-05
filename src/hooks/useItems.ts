@@ -67,6 +67,20 @@ async function fetchItems(type?: ItemType, pageSize: number = 10, offset: number
     }
   }
 
+  // Fetch sub-items (is_subitem = true)
+  let subItemsData: any[] = [];
+  if (itemIds.length > 0) {
+    const { data: subData, error: subError } = await supabase
+      .from("items")
+      .select("id, title, type, parent_id, completed")
+      .in("parent_id", itemIds)
+      .eq("is_subitem", true);
+
+    if (!subError && subData) {
+      subItemsData = subData;
+    }
+  }
+
   // Transform to Item objects
   const itemsWithTags: Item[] = itemsData.map((item) => {
     const itemTags = itemTagsData
@@ -82,6 +96,15 @@ async function fetchItems(type?: ItemType, pageSize: number = 10, offset: number
       : null;
 
     const childrenItems = childItems
+      .filter((i: any) => i.parent_id === item.id)
+      .map((i: any) => ({
+        id: i.id,
+        title: i.title,
+        type: i.type,
+        completed: i.completed || false,
+      }));
+
+    const itemSubItems = subItemsData
       .filter((i: any) => i.parent_id === item.id)
       .map((i: any) => ({
         id: i.id,
@@ -107,6 +130,7 @@ async function fetchItems(type?: ItemType, pageSize: number = 10, offset: number
         type: parentItem.type,
       } : undefined,
       children: childrenItems.length > 0 ? childrenItems : undefined,
+      subItems: itemSubItems.length > 0 ? itemSubItems : undefined,
       priority: item.priority || 0,
       completed: item.completed || false,
       is_subitem: item.is_subitem || false,
