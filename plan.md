@@ -28,6 +28,15 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – restore centered alignment for tag filters
+- Goal: Fix tag filter alignment that was pinned to the left after recent changes
+- Key files: src/pages/Index.tsx (tag filter container styling)
+- Changes: Added justify-center class to tag filter container div at line 122
+- Issue: Recent refactoring added flex container with items-center and gap-4 but omitted justify-center, causing tags to align left instead of center
+- Solution: Added justify-center to restore original centered layout
+- UX improvements: Tags are now centered horizontally as originally designed, maintaining visual consistency
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – complete tag system refactoring with type independence
 - Goal: Restructure tag system so each type (Fire, Earth, Air, Void) has completely independent tags; water has no tags
 - Key files: Database (11 migration files), src/utils/tagFilters.ts (complete rewrite), src/pages/*TagsManagement.tsx (4 new themed pages), src/App.tsx (routing), src/pages/TagsRedirect.tsx, src/pages/Index.tsx (inline edit button), src/components/ItemList.tsx (tag filtering comments)
