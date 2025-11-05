@@ -117,6 +117,7 @@ export default function ItemDetail({
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
   const typeParam = searchParams.get("type") as ItemType | null;
   const deadlineParam = searchParams.get("deadline");
+  const tagIdsParam = searchParams.get("tagIds");
 
   // Parse deadline from URL param if present
   const initialDeadline = existingItem?.deadline ||
@@ -172,6 +173,35 @@ export default function ItemDetail({
     Array<{ id: string; title: string; type: string; completed?: boolean }>
   >([]);
 
+  // Auto-populate tags from URL params when creating a new item
+  useEffect(() => {
+    // Only run for new items (not editing existing ones)
+    if (!existingItem && tagIdsParam && existingTags.length > 0) {
+      const tagIds = tagIdsParam.split(',');
+      const tagsToSelect = tagIds
+        .map(id => existingTags.find(t => t.id === id))
+        .filter((t): t is Tag => t !== undefined);
+
+      if (tagsToSelect.length > 0) {
+        setSelectedTags(tagsToSelect);
+      }
+    }
+  }, [tagIdsParam, existingTags, existingItem]);
+
+  // Compute initial tags for change detection (includes URL params)
+  const getInitialTags = () => {
+    if (existingItem?.tags) {
+      return existingItem.tags;
+    }
+    if (tagIdsParam && existingTags.length > 0) {
+      const tagIds = tagIdsParam.split(',');
+      return tagIds
+        .map(id => existingTags.find(t => t.id === id))
+        .filter((t): t is Tag => t !== undefined);
+    }
+    return [];
+  };
+
   // Track initial values for change detection
   const initialValues = {
     title: initialTitle,
@@ -179,7 +209,7 @@ export default function ItemDetail({
     status: existingItem?.status || "",
     url: existingItem?.url || "",
     itemType: existingItem?.type || typeParam || "fire",
-    selectedTags: existingItem?.tags || [],
+    selectedTags: getInitialTags(),
     deadline: initialDeadline,
     parentId: existingItem?.parent_id,
     selectedTime: initialDeadline
@@ -974,7 +1004,11 @@ export default function ItemDetail({
                             <span>{tag.name}</span>
                             <button
                               type="button"
-                              onClick={() => removeTag(tag.id)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                removeTag(tag.id);
+                              }}
                               className="ml-1 hover:opacity-70"
                             >
                               <X className="w-3 h-3" />

@@ -7,7 +7,7 @@ import { Flame, Droplet, Circle, ExternalLink, Wind, Check, ArrowUp, ArrowDown, 
 import { format, isPast } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PriorityFireIcon } from "@/components/PriorityFireIcon";
-import { PRIORITY_LEVELS } from "@/constants/priority";
+import { PRIORITY_LEVELS, PRIORITY_CONFIG } from "@/constants/priority";
 interface Tag {
   id: string;
   name: string;
@@ -143,16 +143,16 @@ export function ItemList({
       const hasFireTag = item.type === "fire";
       
       return <Card
-        key={item.id} 
+        key={item.id}
         className={cn(
-          "p-4 transition-all duration-300 hover:shadow-lg cursor-pointer", 
-          type === "fire" && "border-l-4 border-l-fire-primary", 
-          type === "water" && "border-l-4 border-l-water-primary", 
-          type === "air" && "border-l-4 border-l-air-primary", 
-          type === "earth" && "border-l-4 border-l-earth-primary", 
-          type === "void" && "border-l-4 border-l-void-primary", 
+          "p-4 transition-all duration-300 hover:shadow-lg cursor-pointer border-l-4",
+          type === "water" && "border-l-water-primary",
+          type === "air" && "border-l-air-primary",
+          type === "earth" && "border-l-earth-primary",
+          type === "void" && "border-l-void-primary",
           isOverdue && "bg-fire-light/50"
         )}
+        style={type === "fire" ? { borderLeftColor: PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG]?.color || PRIORITY_CONFIG[PRIORITY_LEVELS.TODO].color } : undefined}
         onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`)}
       >
               <div className="space-y-3">
@@ -224,7 +224,7 @@ export function ItemList({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // Cycle through priority levels: 1 (Immediate) → 2 (Pressing) → 3 (To Do) → 4 (Eventually) → 5 (Paused) → 1
+                                // Cycle through priority levels: 1 (Immediate) → 2 (Pressing) → 3 (To Do) → 4 (Eventually) → 5 (Track) → 1
                                 const nextPriority = item.priority >= 5 ? 1 : item.priority + 1;
                                 onUpdateItem(item.id, {
                                   priority: nextPriority

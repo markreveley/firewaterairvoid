@@ -3,7 +3,7 @@ export const PRIORITY_LEVELS = {
   PRESSING: 2,
   TODO: 3,
   EVENTUALLY: 4,
-  PAUSED: 5,
+  TRACK: 5,
 } as const;
 
 export type PriorityLevel = typeof PRIORITY_LEVELS[keyof typeof PRIORITY_LEVELS];
@@ -29,9 +29,9 @@ export const PRIORITY_CONFIG = {
     color: '#9ca3af', // gray (gray-400)
     label: 'Eventually',
   },
-  [PRIORITY_LEVELS.PAUSED]: {
-    name: 'Paused',
+  [PRIORITY_LEVELS.TRACK]: {
+    name: 'Track',
     color: '#6b7280', // darker gray (gray-500)
-    label: 'Paused',
+    label: 'Track',
   },
 } as const;

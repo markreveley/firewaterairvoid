@@ -140,7 +140,24 @@ const Index = () => {
             <div className="flex items-center justify-between gap-4">
               {/* New Item Button - Left */}
               <Button
-                onClick={() => navigate(`/item/new?type=${activeType}`)}
+                onClick={() => {
+                  // Collect selected tag IDs to pass to new item form
+                  const tagIds: string[] = [];
+                  if (activeType === "fire") {
+                    // For fire items, pass project tags
+                    if (selectedProjectTag) tagIds.push(selectedProjectTag);
+                    if (selectedProjectChildTag) tagIds.push(selectedProjectChildTag);
+                  } else {
+                    // For earth/air/void items, pass category tags
+                    tagIds.push(...selectedCategoryTags, ...selectedCategoryChildTags);
+                  }
+
+                  // Build URL with tag IDs if any are selected
+                  const url = tagIds.length > 0
+                    ? `/item/new?type=${activeType}&tagIds=${tagIds.join(',')}`
+                    : `/item/new?type=${activeType}`;
+                  navigate(url);
+                }}
                 variant="white"
                 size="sm"
                 className="rounded-full w-9 h-9 p-0"
