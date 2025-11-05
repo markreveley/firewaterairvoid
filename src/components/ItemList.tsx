@@ -219,20 +219,23 @@ export function ItemList({
                         
                         {/* Fire icon and tags on the right of title */}
                         <div className="flex items-start gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Cycle through priority levels: 1 → 2 → 3 → 4 → 5 → 1
-                              const nextPriority = item.priority >= 5 ? 1 : item.priority + 1;
-                              onUpdateItem(item.id, {
-                                priority: nextPriority
-                              });
-                            }}
-                            className="p-1 rounded hover:bg-accent transition-colors shrink-0"
-                            title="Change priority"
-                          >
-                            <PriorityFireIcon priority={item.priority} />
-                          </button>
+                          {/* Priority icon - only for fire items */}
+                          {item.type === "fire" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Cycle through priority levels: 1 → 2 → 3 → 4 → 5 → 1
+                                const nextPriority = item.priority >= 5 ? 1 : item.priority + 1;
+                                onUpdateItem(item.id, {
+                                  priority: nextPriority
+                                });
+                              }}
+                              className="p-1 rounded hover:bg-accent transition-colors shrink-0"
+                              title="Change priority"
+                            >
+                              <PriorityFireIcon priority={item.priority} />
+                            </button>
+                          )}
                           {/* Hide tags for water type */}
                           {item.type !== "water" && item.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 justify-end">

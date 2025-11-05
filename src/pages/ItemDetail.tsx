@@ -526,7 +526,7 @@ export default function ItemDetail({
               autoFocus={!initialTitle}
             />
 
-            {/* Row 1: Type | Status (for Fire) OR Type | Parent Item (for non-Fire) | Priority */}
+            {/* Row 1: Type | Status & Priority (for Fire) OR Type | Parent Item (for non-Fire) */}
             <div className="flex gap-4 items-start">
               <div className="flex-1">
                 <label className="text-sm font-medium mb-2 block">Type</label>
@@ -597,30 +597,32 @@ export default function ItemDetail({
                 />
               )}
 
-              {/* Priority selector */}
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">
-                  Priority
-                </label>
-                <Select
-                  value={priority.toString()}
-                  onValueChange={(value) => setPriority(parseInt(value))}
-                >
-                  <SelectTrigger className="w-full h-[52px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(PRIORITY_CONFIG).map(([level, config]) => (
-                      <SelectItem key={level} value={level}>
-                        <div className="flex items-center gap-2">
-                          <PriorityFireIcon priority={parseInt(level)} />
-                          <span>{config.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Priority selector - only for fire items */}
+              {itemType === "fire" && (
+                <div className="flex-1">
+                  <label className="text-sm font-medium mb-2 block">
+                    Priority
+                  </label>
+                  <Select
+                    value={priority.toString()}
+                    onValueChange={(value) => setPriority(parseInt(value))}
+                  >
+                    <SelectTrigger className="w-full h-[52px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(PRIORITY_CONFIG).map(([level, config]) => (
+                        <SelectItem key={level} value={level}>
+                          <div className="flex items-center gap-2">
+                            <PriorityFireIcon priority={parseInt(level)} />
+                            <span>{config.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             {/* Row 2: Parent Item | Deadline (for Fire & Water) */}

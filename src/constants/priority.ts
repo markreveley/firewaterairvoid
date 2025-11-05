@@ -11,17 +11,17 @@ export type PriorityLevel = typeof PRIORITY_LEVELS[keyof typeof PRIORITY_LEVELS]
 export const PRIORITY_CONFIG = {
   [PRIORITY_LEVELS.IMMEDIATE]: {
     name: 'Immediate',
-    color: '#991b1b', // dark red (red-800)
+    color: '#dc2626', // red (red-600)
     label: 'Immediate',
   },
   [PRIORITY_LEVELS.PRESSING]: {
     name: 'Pressing',
-    color: '#dc2626', // red (red-600)
+    color: '#f97316', // orange (orange-500)
     label: 'Pressing',
   },
   [PRIORITY_LEVELS.TODO]: {
     name: 'To Do',
-    color: '#f97316', // orange (orange-500)
+    color: '#eab308', // yellow (yellow-500)
     label: 'To Do',
   },
   [PRIORITY_LEVELS.PAUSED]: {
