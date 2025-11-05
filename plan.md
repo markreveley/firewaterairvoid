@@ -28,6 +28,14 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – git workflow and testing protocol documentation
+- Goal: Document standard git workflow and testing protocol in claude.md for persistent context
+- Key files: claude.md (new Git Workflow section)
+- Changes: Added "Git Workflow (Standard Process)" section with two-commit pattern documentation; added "IMPORTANT - Testing Before Commits" section specifying DO NOT run npm run dev independently and DO NOT begin commits without user testing first; documented commit message templates with conventional commit types (feat, fix, refactor, docs, style, test); explained rationale for separating feature commits from documentation commits
+- Workflow enforcement: Agent must always ask user to test before committing; npm run dev assumed to be running in user environment; wait for user feedback before proceeding to git operations
+- Why this matters: claude.md is read at start of every session, so workflow rules are always loaded into context; prevents agent from automating testing or commits without user approval; ensures consistent commit patterns across all sessions
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – tag auto-population and priority visual improvements
 - Goal: Auto-populate tags when creating items and improve priority visual hierarchy
 - Key files: src/pages/Index.tsx (tag passing), src/pages/ItemDetail.tsx (tag auto-population, X button fix), src/constants/priority.ts (Track rename), src/components/ItemList.tsx (dynamic border colors)
