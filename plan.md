@@ -28,6 +28,15 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – ItemDetail tag selection improvements and bug fixes
+- Goal: Fix tag assignment UX issues and page loading problems in ItemDetail
+- Key files: src/pages/ItemDetail.tsx (tag selection logic, popover state, ID display), src/pages/ItemDetailPage.tsx (item loading logic)
+- Tag selection changes: Made dropdowns auto-close after selection using controlled Popover state; changed from cumulative to exclusive selection (one main tag, one child tag max); fixed child tag hierarchy preservation with isAncestor helper to keep parent chain intact when selecting deeper tags (e.g., 1181→me→health keeps all three)
+- Popover fixes: Changed from single boolean to per-tag ID tracking (openChildTagPopoverId) to fix flashing/disappearing child tag dropdowns
+- Page loading fixes: Added fallback to search all items if type-specific query fails; added "Item not found" error state for better UX
+- UI additions: Added item ID display at bottom of detail page (monospace, muted, centered)
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – exclusive tag selection for earth/air/void
 - Goal: Make earth, air, and void tag behavior match fire's exclusive selection model
 - Key files: src/components/TagFilter.tsx (category tag logic)
