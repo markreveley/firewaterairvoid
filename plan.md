@@ -28,6 +28,15 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – hierarchical tag filtering fix
+- Goal: Fix bug where selecting parent tag only showed exact-match items, not items with child tags
+- Key files: src/components/ItemList.tsx (getAllDescendantTagIds helper, filtering logic), src/pages/Index.tsx (allTags prop passing)
+- Changes: Added getAllDescendantTagIds() recursive helper function to find all descendant tags in hierarchy; updated tag filtering logic to check for parent tag OR any descendants; added parent_id to Tag interface in ItemList; passed allTags prop from Index to ItemList for hierarchy traversal
+- Bug example: Selecting "dirtwire → production" showed only 2 items tagged with "production", but should show all 3 items (including one tagged with child "dubby piano")
+- Solution: When a tag is selected, build allowedTagIds array containing the selected tag plus all its children/grandchildren/etc., then check if item has any tag in that array
+- UX improvements: Parent tag selection now shows complete view of all related items regardless of hierarchy depth; consistent behavior across project tags (fire) and category tags (earth/air/void); natural hierarchical filtering matches user expectations
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – git workflow and testing protocol documentation
 - Goal: Document standard git workflow and testing protocol in claude.md for persistent context
 - Key files: claude.md (new Git Workflow section)
