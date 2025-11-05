@@ -24,9 +24,17 @@
 
 ## Current Status
 **Working on**: Nothing - all tasks complete ✅
-**Next**: Apply migration in Lovable, then ready for user testing
+**Next**: Ready for user testing
 
 ## Work Log
+--------------------------------------------------
+2025-11-05 – inline subitem display in cards
+- Goal: Show subitems within parent item cards in the main list view for better visibility
+- Key files: src/types/index.ts (subItems property), src/hooks/useItems.ts (fetch subitems), src/components/ItemList.tsx (display logic)
+- Changes: Added subItems array property to Item type; modified useItems hook to fetch items where is_subitem=true in a single batch query; added inline display section in ItemList showing all subitems with type icons, checkboxes for fire tasks, and strikethrough for completed items; cards automatically expand height to accommodate all subitems
+- UX improvements: Users can now see all subitems at a glance without opening the item detail; clicking any subitem navigates to its detail page; visual hierarchy with left border accent distinguishes subitems from parent content
+- Performance: Batch query optimization fetches all subitems in O(1) database calls instead of O(n) per-item queries
+- Next: (completed ✅)
 --------------------------------------------------
 2025-11-05 – fix priority sort order for 5-state system
 - Goal: Correct fire item sorting so highest priority items appear first
