@@ -25,6 +25,59 @@ When starting a new conversation, you (Claude) should:
 - plan.md = lightweight index (~150 lines)
 - Detailed docs = DESIGN.md, USER_STORIES.md, STRATEGY.md
 
+## 📝 Git Workflow (Standard Process)
+
+**IMPORTANT - Testing Before Commits:**
+- **DO NOT** run `npm run dev` (it's always running in user's environment)
+- **DO NOT** begin the commit phase independently
+- **ALWAYS** tell the user to test the changes first
+- **WAIT** for user to relay test results
+- **THEN** proceed to git commit workflow
+
+**Two-Commit Pattern** - Use this workflow after making code changes:
+
+1. **Commit 1: Feature/Fix Commit**
+   ```bash
+   git add <changed files>
+   git commit -m "type: descriptive summary
+
+   - Bullet point of key change
+   - Another key change
+   - Brief explanation of why
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+   Co-Authored-By: Claude <noreply@anthropic.com>"
+   ```
+   **Commit types**: `feat:`, `fix:`, `refactor:`, `docs:`, `style:`, `test:`
+
+2. **Update plan.md**
+   - Add work log entry at the top of Work Log section
+   - Use template: date, goal, key files, changes, UX improvements, next steps
+   - Update "Current Status" if needed
+
+3. **Commit 2: Documentation Commit**
+   ```bash
+   git add plan.md
+   git commit -m "docs: update plan.md with [feature name]
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+   Co-Authored-By: Claude <noreply@anthropic.com>"
+   ```
+
+4. **Push both commits**
+   ```bash
+   git push
+   ```
+
+**Why Two Commits?**
+- Separates code changes from documentation for cleaner history
+- Makes code review easier (review feature, then review docs)
+- plan.md updates are self-contained and searchable
+
+**Important**: Always run `git status` and `git diff` before committing to verify changes.
+
 ## 📚 Documentation Structure
 
 - **plan.md** - Current status, work log, agent meta-instructions (READ THIS FIRST)
