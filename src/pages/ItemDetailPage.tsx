@@ -21,13 +21,33 @@ export default function ItemDetailPage() {
 
   const { allTags } = useTags();
 
-  const existingItem = itemId ? items.find(item => item.id === itemId) : null;
+  // Try to find the item in the type-specific items first, then fall back to all items
+  const existingItem = itemId
+    ? items.find(item => item.id === itemId) || allItemsRaw.find(item => item.id === itemId)
+    : null;
 
   // Wait for items to load if we're editing an existing item
   if (isLoading && itemId) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  // If we have an itemId but no existingItem after loading, the item might not exist or type is wrong
+  if (itemId && !existingItem && !isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground">Item not found</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="text-primary hover:underline"
+          >
+            Go back
+          </button>
+        </div>
       </div>
     );
   }

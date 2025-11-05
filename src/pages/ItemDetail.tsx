@@ -152,6 +152,8 @@ export default function ItemDetail({
   const [isEditingTag, setIsEditingTag] = useState(false);
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [editTagName, setEditTagName] = useState("");
+  const [isMainTagPopoverOpen, setIsMainTagPopoverOpen] = useState(false);
+  const [openChildTagPopoverId, setOpenChildTagPopoverId] = useState<string | null>(null);
   const [selectedParent, setSelectedParent] = useState<{
     id: string;
     title: string;
@@ -380,9 +382,51 @@ export default function ItemDetail({
   };
 
   const addExistingTag = (tag: Tag) => {
-    if (!selectedTags.find((t) => t.id === tag.id)) {
-      setSelectedTags([...selectedTags, tag]);
+    // For category tags (earth/air/void), use exclusive selection like fire
+    // When selecting a root tag, clear all tags and start fresh
+    // When selecting a child tag of an existing root, keep only that root and the new child
+    const existingTagData = existingTags.find(et => et.id === tag.id);
+
+    if (!existingTagData?.parent_id) {
+      // Adding a root tag - clear everything and just add this tag
+      setSelectedTags([tag]);
+    } else {
+      // Adding a child tag - keep only root tags and the new child
+      const rootTags = selectedTags.filter((t) => {
+        const tData = existingTags.find(et => et.id === t.id);
+        return !tData?.parent_id;
+      });
+      setSelectedTags([...rootTags, tag]);
     }
+    setIsMainTagPopoverOpen(false);
+  };
+
+  const addChildTag = (tag: Tag) => {
+    // Helper function to check if tagA is an ancestor of tagB
+    const isAncestor = (tagAId: string, tagBId: string): boolean => {
+      let currentId = tagBId;
+      while (currentId) {
+        const currentTag = existingTags.find(t => t.id === currentId);
+        if (!currentTag?.parent_id) break;
+        if (currentTag.parent_id === tagAId) return true;
+        currentId = currentTag.parent_id;
+      }
+      return false;
+    };
+
+    // Keep tags that are either:
+    // 1. Root tags (no parent_id)
+    // 2. Ancestor tags of the new tag (in the parent chain)
+    const tagsToKeep = selectedTags.filter((t) => {
+      const existingTagData = existingTags.find(et => et.id === t.id);
+      // Keep root tags
+      if (!existingTagData?.parent_id) return true;
+      // Keep if it's an ancestor of the new tag
+      return isAncestor(t.id, tag.id);
+    });
+
+    setSelectedTags([...tagsToKeep, tag]);
+    setOpenChildTagPopoverId(null);
   };
 
   const addProjectTag = (tag: Tag) => {
@@ -391,6 +435,7 @@ export default function ItemDetail({
       (t) => !FIRE_TAG_NAMES.includes(t.name as any),
     );
     setSelectedTags([...nonProjectTags, tag]);
+    setIsMainTagPopoverOpen(false);
   };
 
   const removeTag = (tagId: string) => {
@@ -799,7 +844,7 @@ export default function ItemDetail({
                 {/* For non-water items, show single tag section */}
                 <div className="space-y-2">
                   <div className="flex gap-2 items-center">
-                    <Popover>
+                    <Popover open={isMainTagPopoverOpen} onOpenChange={setIsMainTagPopoverOpen}>
                       <PopoverTrigger asChild>
                         <Button
                           type="button"
@@ -855,7 +900,11 @@ export default function ItemDetail({
                         existingTags.some((t) => t.parent_id === tag.id),
                       )
                       .map((tag) => (
-                        <Popover key={tag.id}>
+                        <Popover
+                          key={tag.id}
+                          open={openChildTagPopoverId === tag.id}
+                          onOpenChange={(open) => setOpenChildTagPopoverId(open ? tag.id : null)}
+                        >
                           <PopoverTrigger asChild>
                             <Button
                               type="button"
@@ -888,7 +937,7 @@ export default function ItemDetail({
                                       <CommandItem
                                         key={childTag.id}
                                         onSelect={() =>
-                                          addExistingTag(childTag)
+                                          addChildTag(childTag)
                                         }
                                       >
                                         <ChevronRight className="w-4 h-4 mr-2" />
@@ -1149,6 +1198,15 @@ export default function ItemDetail({
             Save
           </Button>
         </div>
+
+        {/* Item ID display */}
+        {existingItem && (
+          <div className="max-w-4xl mx-auto mt-4 text-center">
+            <p className="text-xs text-muted-foreground font-mono">
+              ID: {existingItem.id}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
