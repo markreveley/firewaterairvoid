@@ -53,6 +53,7 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
 
     allItems
       .filter(item => item.deadline)
+      .filter(item => !(item.type === 'fire' && item.status === 'Completed')) // Hide completed fire items from calendar
       .forEach(item => {
         const deadline = item.deadline!;
         const isAllDay = deadline.getHours() === 0 && deadline.getMinutes() === 0;
