@@ -119,7 +119,7 @@ const Index = () => {
       <div className={viewMode === "calendar" ? "" : "container mx-auto px-8 md:px-12 lg:px-16 pt-4 pb-12 space-y-8"}>
         {/* Hide tag filter for water type */}
         {activeType !== "water" && (
-          <div className="py-2 flex items-center gap-4">
+          <div className="py-2 flex items-center justify-center gap-4">
             <TagFilter
               projectTags={projectTags}
               categoryTags={categoryTags}
