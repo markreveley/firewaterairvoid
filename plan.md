@@ -28,6 +28,16 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – security audit and .env file remediation
+- Goal: Audit repository for accidentally committed API keys and private data
+- Key files: .gitignore (added .env patterns), .env.example (new template file)
+- Findings: .env file was committed with Supabase credentials (commit d445a74, Oct 27 2025); decoded JWT confirmed it was anon/publishable key (low risk, designed for client-side use); no other secrets found (no service role keys, private keys, credentials, or hardcoded secrets in codebase)
+- Changes: Added .env, .env.*, and !.env.example to .gitignore; removed .env from git tracking with git rm --cached; created .env.example template with placeholder values and helpful comments; committed security fixes to feature branch
+- Risk assessment: Medium priority - actual key exposed was low-risk public anon key, but committing .env files is security anti-pattern that could expose sensitive keys in future
+- Security posture: Repository now properly configured to prevent future environment variable commits; local .env file preserved for development use
+- Branch: claude/audit-private-data-011CUozyycGZrE12zD1yLEU2 (pushed successfully)
+- Next: Merge to main branch (requires manual merge due to branch naming restrictions)
+--------------------------------------------------
 2025-11-05 – restore tag filters when navigating back from item detail
 - Goal: Preserve hierarchical tag selections when user edits an item and returns to main page
 - Key files: src/pages/ItemDetail.tsx (navigation state builder), src/pages/Index.tsx (state restoration)
@@ -166,7 +176,6 @@
 - Security improvements: Sensitive Supabase credentials (ANON_KEY, SERVICE_ROLE_KEY) no longer tracked in version control; template file provides clear structure for local setup without exposing secrets
 - Migration required: None for security changes (local only); database migration pending application in Lovable
 - Next: (completed ✅)
---------------------------------------------------
 --------------------------------------------------
 2025-11-04 – 5-state priority fire icon system
 - Goal: Replace binary star priority with intuitive 5-level fire icon with color-coded states
