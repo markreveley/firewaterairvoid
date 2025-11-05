@@ -130,7 +130,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
   const { data, isLoading, refetch } = useQuery({
     queryKey: itemKeys.list(type, pageSize),
     queryFn: () => fetchItems(type, pageSize, offset),
-    enabled: type !== undefined, // Only run query if type is provided
+    // Query is always enabled - when type is undefined, fetches all items
   });
 
   // Track accumulated items for pagination
