@@ -66,3 +66,6 @@ Refactoring tag system so each type (Fire, Earth, Air, Void) has completely inde
 - Preserving hierarchical structure when duplicating tags
 - Using Option A for inline edit UI (navigate button)
 - Element-themed styling for each tag management page
+
+## Commits
+- **Phase 1 & 2 Complete** (2025-11-05): Database migration successful - tags now type-specific (fire: 25, earth/air/void: 11 each). Updated all utilities, types, and components. Water has no tags. No build errors.
