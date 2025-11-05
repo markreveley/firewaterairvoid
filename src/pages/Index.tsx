@@ -205,6 +205,7 @@ const Index = () => {
                   <ItemList
                     items={items}
                     type={activeType}
+                    allTags={allTags}
                     selectedProjectTag={selectedProjectTag}
                     selectedProjectChildTag={selectedProjectChildTag}
                     selectedCategoryTags={selectedCategoryTags}

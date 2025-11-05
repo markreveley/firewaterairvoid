@@ -11,6 +11,7 @@ import { PRIORITY_LEVELS, PRIORITY_CONFIG } from "@/constants/priority";
 interface Tag {
   id: string;
   name: string;
+  parent_id?: string | null;
 }
 
 interface Item {
@@ -34,6 +35,7 @@ interface Item {
 interface ItemListProps {
   items: Item[];
   type: "fire" | "water" | "air" | "void" | "earth";
+  allTags: Tag[];
   selectedProjectTag?: string;
   selectedProjectChildTag?: string;
   selectedCategoryTags?: string[];
@@ -53,9 +55,25 @@ const getTypeIcon = (type: string) => {
     default: return null;
   }
 };
+
+// Helper function to get all descendant tag IDs recursively
+function getAllDescendantTagIds(tagId: string, allTags: Tag[]): string[] {
+  const descendants: string[] = [];
+  const children = allTags.filter(tag => tag.parent_id === tagId);
+
+  for (const child of children) {
+    descendants.push(child.id);
+    // Recursively get grandchildren, great-grandchildren, etc.
+    descendants.push(...getAllDescendantTagIds(child.id, allTags));
+  }
+
+  return descendants;
+}
+
 export function ItemList({
   items,
   type,
+  allTags,
   selectedProjectTag,
   selectedProjectChildTag,
   selectedCategoryTags = [],
@@ -89,34 +107,40 @@ export function ItemList({
     if (type === "fire" && selectedStatusFilter) {
       if (item.status !== selectedStatusFilter) return false;
     }
-    
+
     // Filter by project tag (exclusive - only one parent, only one child)
+    // When a parent tag is selected, show items with that tag OR any of its descendants
     if (selectedProjectTag) {
-      const hasProjectTag = item.tags.some(tag => tag.id === selectedProjectTag);
+      const allowedTagIds = [selectedProjectTag, ...getAllDescendantTagIds(selectedProjectTag, allTags)];
+      const hasProjectTag = item.tags.some(tag => allowedTagIds.includes(tag.id));
       if (!hasProjectTag) return false;
     }
-    
+
+    // When a child tag is also selected, further filter to that child tag and its descendants
     if (selectedProjectChildTag) {
-      const hasProjectChildTag = item.tags.some(tag => tag.id === selectedProjectChildTag);
+      const allowedChildTagIds = [selectedProjectChildTag, ...getAllDescendantTagIds(selectedProjectChildTag, allTags)];
+      const hasProjectChildTag = item.tags.some(tag => allowedChildTagIds.includes(tag.id));
       if (!hasProjectChildTag) return false;
     }
-    
-    // Filter by category tags (cumulative - item must have ALL selected category tags)
+
+    // Filter by category tags (cumulative - item must have ALL selected category tags OR their descendants)
     if (selectedCategoryTags.length > 0) {
-      const hasAllCategoryTags = selectedCategoryTags.every(filterId => 
-        item.tags.some(tag => tag.id === filterId)
-      );
+      const hasAllCategoryTags = selectedCategoryTags.every(filterId => {
+        const allowedTagIds = [filterId, ...getAllDescendantTagIds(filterId, allTags)];
+        return item.tags.some(tag => allowedTagIds.includes(tag.id));
+      });
       if (!hasAllCategoryTags) return false;
     }
-    
-    // Filter by category child tags (cumulative - item must have ALL selected child tags)
+
+    // Filter by category child tags (cumulative - item must have ALL selected child tags OR their descendants)
     if (selectedCategoryChildTags.length > 0) {
-      const hasAllCategoryChildTags = selectedCategoryChildTags.every(filterId =>
-        item.tags.some(tag => tag.id === filterId)
-      );
+      const hasAllCategoryChildTags = selectedCategoryChildTags.every(filterId => {
+        const allowedChildTagIds = [filterId, ...getAllDescendantTagIds(filterId, allTags)];
+        return item.tags.some(tag => allowedChildTagIds.includes(tag.id));
+      });
       if (!hasAllCategoryChildTags) return false;
     }
-    
+
     return true;
   });
   const isUrl = (text: string) => {
