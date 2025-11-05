@@ -224,7 +224,7 @@ export function ItemList({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // Cycle through priority levels: 1 → 2 → 3 → 4 → 5 → 1
+                                // Cycle through priority levels: 1 (Immediate) → 2 (Pressing) → 3 (To Do) → 4 (Eventually) → 5 (Paused) → 1
                                 const nextPriority = item.priority >= 5 ? 1 : item.priority + 1;
                                 onUpdateItem(item.id, {
                                   priority: nextPriority
@@ -239,7 +239,7 @@ export function ItemList({
                           {/* Hide tags for water type */}
                           {item.type !== "water" && item.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 justify-end">
-                              {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
+                              {[...item.tags].reverse().map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
                                   {tag.name}
                                 </Badge>)}
                             </div>

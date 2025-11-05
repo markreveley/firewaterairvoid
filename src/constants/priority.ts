@@ -2,8 +2,8 @@ export const PRIORITY_LEVELS = {
   IMMEDIATE: 1,
   PRESSING: 2,
   TODO: 3,
-  PAUSED: 4,
-  DONE: 5,
+  EVENTUALLY: 4,
+  PAUSED: 5,
 } as const;
 
 export type PriorityLevel = typeof PRIORITY_LEVELS[keyof typeof PRIORITY_LEVELS];
@@ -24,14 +24,14 @@ export const PRIORITY_CONFIG = {
     color: '#eab308', // yellow (yellow-500)
     label: 'To Do',
   },
+  [PRIORITY_LEVELS.EVENTUALLY]: {
+    name: 'Eventually',
+    color: '#9ca3af', // gray (gray-400)
+    label: 'Eventually',
+  },
   [PRIORITY_LEVELS.PAUSED]: {
     name: 'Paused',
-    color: '#9ca3af', // gray (gray-400)
-    label: 'Paused',
-  },
-  [PRIORITY_LEVELS.DONE]: {
-    name: 'Done',
     color: '#6b7280', // darker gray (gray-500)
-    label: 'Done',
+    label: 'Paused',
   },
 } as const;
