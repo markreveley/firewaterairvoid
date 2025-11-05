@@ -63,6 +63,8 @@ import {
 } from "@/utils/tagFilters";
 import { generateTimeOptions } from "@/utils/time";
 import { FIRE_TAG_NAMES } from "@/constants/tags";
+import { PRIORITY_LEVELS, PRIORITY_CONFIG, PriorityLevel } from "@/constants/priority";
+import { PriorityFireIcon } from "@/components/PriorityFireIcon";
 
 interface ItemDetailProps {
   onAddItem: (
@@ -77,6 +79,7 @@ interface ItemDetailProps {
     is_subitem?: boolean,
     recurrence_type?: RecurrenceType,
     recurrence_end_date?: Date,
+    priority?: number,
   ) => Promise<void>;
   existingTags: Tag[];
   existingItem?: Item | null;
@@ -141,6 +144,9 @@ export default function ItemDetail({
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | undefined>(
     existingItem?.recurrence_end_date,
   );
+  const [priority, setPriority] = useState<number>(
+    existingItem?.priority || PRIORITY_LEVELS.TODO,
+  );
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [isEditingTag, setIsEditingTag] = useState(false);
@@ -179,6 +185,7 @@ export default function ItemDetail({
       : "00:00",
     recurrenceType: existingItem?.recurrence_type || "none",
     recurrenceEndDate: existingItem?.recurrence_end_date,
+    priority: existingItem?.priority || PRIORITY_LEVELS.TODO,
   };
 
   // Check if form has changed
@@ -195,7 +202,8 @@ export default function ItemDetail({
       selectedTime !== initialValues.selectedTime ||
       selectedParent?.id !== initialValues.parentId ||
       recurrenceType !== initialValues.recurrenceType ||
-      recurrenceEndDate?.getTime() !== initialValues.recurrenceEndDate?.getTime();
+      recurrenceEndDate?.getTime() !== initialValues.recurrenceEndDate?.getTime() ||
+      priority !== initialValues.priority;
 
     setHasUnsavedChanges(hasChanged);
   }, [
@@ -210,6 +218,7 @@ export default function ItemDetail({
     selectedParent,
     recurrenceType,
     recurrenceEndDate,
+    priority,
   ]);
 
   const timeOptions = generateTimeOptions();
@@ -348,6 +357,7 @@ export default function ItemDetail({
         false, // is_subitem = false for main items (parent-child relationships)
         recurrenceType,
         recurrenceEndDate,
+        priority,
       );
       setHasUnsavedChanges(false);
 
@@ -516,7 +526,7 @@ export default function ItemDetail({
               autoFocus={!initialTitle}
             />
 
-            {/* Row 1: Type | Status (for Fire) OR Type | Parent Item (for non-Fire) */}
+            {/* Row 1: Type | Status (for Fire) OR Type | Parent Item (for non-Fire) | Priority */}
             <div className="flex gap-4 items-start">
               <div className="flex-1">
                 <label className="text-sm font-medium mb-2 block">Type</label>
@@ -586,6 +596,31 @@ export default function ItemDetail({
                   className="flex-1"
                 />
               )}
+
+              {/* Priority selector */}
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">
+                  Priority
+                </label>
+                <Select
+                  value={priority.toString()}
+                  onValueChange={(value) => setPriority(parseInt(value))}
+                >
+                  <SelectTrigger className="w-full h-[52px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(PRIORITY_CONFIG).map(([level, config]) => (
+                      <SelectItem key={level} value={level}>
+                        <div className="flex items-center gap-2">
+                          <PriorityFireIcon priority={parseInt(level)} />
+                          <span>{config.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Row 2: Parent Item | Deadline (for Fire & Water) */}

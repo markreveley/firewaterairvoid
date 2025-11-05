@@ -168,6 +168,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       is_subitem,
       recurrence_type,
       recurrence_end_date,
+      priority,
     }: {
       title: string;
       type: ItemType;
@@ -180,6 +181,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       is_subitem?: boolean;
       recurrence_type?: RecurrenceType;
       recurrence_end_date?: Date;
+      priority?: number;
     }) => {
       const { data: newItem, error: itemError } = await supabase
         .from("items")
@@ -194,6 +196,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
           is_subitem: is_subitem || false,
           recurrence_type: recurrence_type || 'none',
           recurrence_end_date: recurrence_end_date?.toISOString() || null,
+          priority: priority || 3, // Default to TODO (3) if not specified
         })
         .select()
         .single();
@@ -523,7 +526,8 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       parent_id?: string,
       is_subitem?: boolean,
       recurrence_type?: RecurrenceType,
-      recurrence_end_date?: Date
+      recurrence_end_date?: Date,
+      priority?: number
     ) => addItemMutation.mutateAsync({
       title,
       type,
@@ -536,6 +540,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
       is_subitem,
       recurrence_type,
       recurrence_end_date,
+      priority,
     }),
     deleteItem: (itemId: string) => deleteItemMutation.mutateAsync(itemId),
     bulkDeleteItems: (itemIds: string[]) => bulkDeleteItemsMutation.mutateAsync(itemIds),

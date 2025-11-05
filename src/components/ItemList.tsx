@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, Droplet, Circle, ExternalLink, Wind, Check, ArrowUp, ArrowDown, Mountain, Star } from "lucide-react";
+import { Flame, Droplet, Circle, ExternalLink, Wind, Check, ArrowUp, ArrowDown, Mountain } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { cn } from "@/lib/utils";
+import { PriorityFireIcon } from "@/components/PriorityFireIcon";
+import { PRIORITY_LEVELS } from "@/constants/priority";
 interface Tag {
   id: string;
   name: string;
@@ -214,22 +216,21 @@ export function ItemList({
                           )}
                         </p>
                         
-                        {/* Star icon and tags on the right of title */}
+                        {/* Fire icon and tags on the right of title */}
                         <div className="flex items-start gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              // Cycle through priority levels: 1 → 2 → 3 → 4 → 5 → 1
+                              const nextPriority = item.priority >= 5 ? 1 : item.priority + 1;
                               onUpdateItem(item.id, {
-                                priority: item.priority > 0 ? 0 : 1
+                                priority: nextPriority
                               });
                             }}
-                            className={cn(
-                              "p-1 rounded hover:bg-accent transition-colors shrink-0",
-                              item.priority > 0 && "text-yellow-500"
-                            )}
-                            title={item.priority > 0 ? "Remove from priority" : "Mark as priority"}
+                            className="p-1 rounded hover:bg-accent transition-colors shrink-0"
+                            title="Change priority"
                           >
-                            <Star className={cn("w-4 h-4", item.priority > 0 && "fill-current")} />
+                            <PriorityFireIcon priority={item.priority} />
                           </button>
                           {/* Hide tags for water type */}
                           {item.type !== "water" && item.tags.length > 0 && (

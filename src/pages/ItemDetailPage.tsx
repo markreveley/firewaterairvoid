@@ -41,7 +41,10 @@ export default function ItemDetailPage() {
     status?: string,
     url?: string,
     parent_id?: string,
-    is_subitem?: boolean
+    is_subitem?: boolean,
+    recurrence_type?: any,
+    recurrence_end_date?: Date,
+    priority?: number
   ) => {
     // If parent_id is provided AND is_subitem is true, we're creating a sub-item via Items tab
     if (parent_id && is_subitem) {
@@ -61,10 +64,13 @@ export default function ItemDetailPage() {
         status,
         url,
         parent_id: parent_id || null, // Use parent_id for hierarchical linking
+        priority,
+        recurrence_type,
+        recurrence_end_date: recurrence_end_date || null,
       });
     } else {
       // Create mode - add new item (not a sub-item, even if it has a parent)
-      const newItem = await addItem(title, type, tags, deadline, notes, status, url, parent_id, false);
+      const newItem = await addItem(title, type, tags, deadline, notes, status, url, parent_id, false, recurrence_type, recurrence_end_date, priority);
 
       // Navigate to edit view of the newly created item so Items tab becomes enabled
       if (newItem) {
