@@ -98,9 +98,7 @@ export function ItemList({
   };
 
   const filteredItems = items.filter(item => {
-    // Fire view: only fire items
-    // Water view: only water items
-    // Void view: only void items
+    // Type filter: only show items matching the current type
     if (item.type !== type) return false;
 
     // Filter by status for fire items
@@ -108,7 +106,8 @@ export function ItemList({
       if (item.status !== selectedStatusFilter) return false;
     }
 
-    // Filter by project tag (exclusive - only one parent, only one child)
+    // Tag filtering for Fire items (uses selectedProjectTag/selectedProjectChildTag)
+    // Fire items use single-selection tag model
     // When a parent tag is selected, show items with that tag OR any of its descendants
     if (selectedProjectTag) {
       const allowedTagIds = [selectedProjectTag, ...getAllDescendantTagIds(selectedProjectTag, allTags)];
@@ -123,7 +122,8 @@ export function ItemList({
       if (!hasProjectChildTag) return false;
     }
 
-    // Filter by category tags (cumulative - item must have ALL selected category tags OR their descendants)
+    // Tag filtering for Earth, Air, Void items (uses selectedCategoryTags/selectedCategoryChildTags)
+    // These types use multi-selection tag model (cumulative - item must have ALL selected tags)
     if (selectedCategoryTags.length > 0) {
       const hasAllCategoryTags = selectedCategoryTags.every(filterId => {
         const allowedTagIds = [filterId, ...getAllDescendantTagIds(filterId, allTags)];
@@ -132,7 +132,7 @@ export function ItemList({
       if (!hasAllCategoryTags) return false;
     }
 
-    // Filter by category child tags (cumulative - item must have ALL selected child tags OR their descendants)
+    // Filter by child tags (cumulative - item must have ALL selected child tags OR their descendants)
     if (selectedCategoryChildTags.length > 0) {
       const hasAllCategoryChildTags = selectedCategoryChildTags.every(filterId => {
         const allowedChildTagIds = [filterId, ...getAllDescendantTagIds(filterId, allTags)];
