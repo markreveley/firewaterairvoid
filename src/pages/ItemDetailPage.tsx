@@ -12,6 +12,13 @@ export default function ItemDetailPage() {
 
   // Use typeParam to fetch items of that type so we can find the existing item
   const { addItem, updateItem, deleteItem, items, isLoading } = useItems(typeParam || undefined);
+
+  // Fetch all items for parent selection (fire items can have parents from earth, air, void, and fire)
+  const { items: allItemsRaw } = useItems(undefined);
+
+  // Filter out water items (calendar/event-based) from parent options
+  const allItemsForParents = allItemsRaw.filter(item => item.type !== 'water');
+
   const { allTags } = useTags();
 
   const existingItem = itemId ? items.find(item => item.id === itemId) : null;
@@ -66,5 +73,5 @@ export default function ItemDetailPage() {
     }
   };
 
-  return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={items} onDeleteItem={deleteItem} onUpdateItem={updateItem} />;
+  return <ItemDetail onAddItem={handleAddItem} existingTags={allTags} existingItem={existingItem} allItems={allItemsForParents} onDeleteItem={deleteItem} onUpdateItem={updateItem} />;
 }
