@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client-safe";
 import { toast } from "sonner";
 import type { Tag, Item, ItemType, RecurrenceType } from "@/types";
 import { supportsUrl, supportsStatus, supportsDeadline } from "@/utils/itemTypes";

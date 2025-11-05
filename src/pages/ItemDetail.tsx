@@ -50,7 +50,7 @@ import ReactMarkdown from "react-markdown";
 import { format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client-safe";
 import type { Tag, Item, ItemType, RecurrenceType } from "@/types";
 import {
   supportsUrl,
