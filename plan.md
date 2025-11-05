@@ -28,6 +28,15 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – priority level renaming and tag display order reversal
+- Goal: Improve priority level semantics and reverse tag display order for better visual hierarchy
+- Key files: src/constants/priority.ts (priority names), src/components/ItemList.tsx (tag order, comment update)
+- Priority changes: Renamed level 4 from "Paused" to "Eventually" (better fits lower priority work); renamed level 5 from "Done" to "Paused" (reflects inactive/on-hold status); updated cycling comment in ItemList
+- Tag display changes: Tags now render in reverse order using `[...item.tags].reverse()` so parent tags appear on right side; creates left-to-right specific→general breadcrumb-like flow
+- Priority levels now: 1=Immediate (red), 2=Pressing (orange), 3=To Do (yellow), 4=Eventually (gray), 5=Paused (darker gray)
+- UX improvements: "Eventually" better describes lower-priority tasks that will be done later; "Paused" as lowest level indicates work that's on hold; tag order provides natural visual hierarchy
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – ItemDetail tag selection improvements and bug fixes
 - Goal: Fix tag assignment UX issues and page loading problems in ItemDetail
 - Key files: src/pages/ItemDetail.tsx (tag selection logic, popover state, ID display), src/pages/ItemDetailPage.tsx (item loading logic)
