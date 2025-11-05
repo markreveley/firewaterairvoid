@@ -28,6 +28,14 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – exclusive tag selection for earth/air/void
+- Goal: Make earth, air, and void tag behavior match fire's exclusive selection model
+- Key files: src/components/TagFilter.tsx (category tag logic)
+- Changes: Added ancestor highlighting for category tags; implemented exclusive selection (only one top-level tag at a time); added 3-level hierarchy support for category tags; selecting a sub-tag now highlights both parent and child in the hierarchy
+- Behavior change: Previously earth/air/void allowed cumulative multi-tag selection; now works like fire with exclusive single-tag selection and ancestor highlighting
+- UX improvements: Consistent tag behavior across all item types reduces cognitive load; parent tags remain highlighted when child tags are selected, providing visual breadcrumbs for hierarchy navigation
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – priority colors and fire-only restriction
 - Goal: Improve visual clarity of priority system and restrict to fire items only
 - Key files: src/constants/priority.ts (color updates), src/components/ItemList.tsx (fire-only display), src/pages/ItemDetail.tsx (fire-only selector)
