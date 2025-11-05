@@ -18,7 +18,7 @@ async function fetchItems(type?: ItemType, pageSize: number = 10, offset: number
     .from("items")
     .select("*")
     .eq("is_subitem", false)
-    .order("priority", { ascending: false })
+    .order("priority", { ascending: true })
     .order("deadline", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
 
