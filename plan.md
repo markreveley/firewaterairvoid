@@ -28,6 +28,14 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-04 – water calendar full-height layout and recurring event fixes
+- Goal: Improve calendar UX with better layout and fix navigation bug for recurring events
+- Key files: src/components/WaterCalendar.tsx (layout, navigation fix, recurring event safety), src/pages/Index.tsx (conditional layout), src/pages/ItemDetail.tsx (tag contrast)
+- Changes: Changed default view from 'month' to 'agenda' for better task focus; fixed recurring event navigation to extract actual item ID instead of event instance ID (was using "abc123-1234567890", now uses "abc123"); added safety limit of 200 iterations for recurring event generation; implemented full-height responsive layout (calc(100vh-73px)) that adapts to viewport; removed container constraints when in calendar view for full-width display; improved unscheduled items section with compact styling and scrolling; enhanced tag badge dark mode contrast with white text
+- Bug fix: Recurring event instances now navigate to correct item edit page (previously navigated to non-existent instance IDs)
+- UX improvements: Agenda view provides better task-oriented display; calendar uses full available height; conditional container styling optimizes space usage
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-04 – remove tags from water section
 - Goal: Hide all tag UI elements from water type while preserving infrastructure
 - Key files: src/pages/Index.tsx (hide TagFilter), src/components/WaterCalendar.tsx (remove tag display), src/components/ItemList.tsx (conditional hide tags), src/pages/ItemDetail.tsx (hide tag editing section)
