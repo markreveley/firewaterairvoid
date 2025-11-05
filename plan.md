@@ -28,6 +28,15 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – security audit: remove sensitive data from repository
+- Goal: Remove .env file from git history and prevent future exposure of sensitive credentials
+- Key files: .env (deleted), .env.example (created), .gitignore (updated), supabase/migrations/20251105015207_d79dea5d-c956-435f-8081-5cd3296799fe.sql (new migration), src/hooks/useItems.ts, src/pages/Index.tsx
+- Changes: Removed .env from repository using git filter-branch; created .env.example template with placeholder values for Supabase credentials; added .env and .env.* patterns to .gitignore; added new migration file for database changes
+- Security improvements: Sensitive Supabase credentials (ANON_KEY, SERVICE_ROLE_KEY) no longer tracked in version control; template file provides clear structure for local setup without exposing secrets
+- Migration required: None for security changes (local only); database migration pending application in Lovable
+- Next: (completed ✅)
+--------------------------------------------------
+--------------------------------------------------
 2025-11-04 – 5-state priority fire icon system
 - Goal: Replace binary star priority with intuitive 5-level fire icon with color-coded states
 - Key files: supabase/migrations/20251104120000_update_priority_to_five_levels.sql, src/constants/priority.ts, src/components/PriorityFireIcon.tsx, src/components/ItemList.tsx, src/pages/ItemDetail.tsx, src/pages/ItemDetailPage.tsx, src/hooks/useItems.ts
