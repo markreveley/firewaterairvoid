@@ -113,7 +113,7 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-8 md:px-12 lg:px-16 pt-4 pb-12 space-y-8">
+      <div className={viewMode === "calendar" ? "" : "container mx-auto px-8 md:px-12 lg:px-16 pt-4 pb-12 space-y-8"}>
         {/* Hide tag filter for water type */}
         {activeType !== "water" && (
           <div className="py-2">
@@ -134,7 +134,7 @@ const Index = () => {
           </div>
         )}
 
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className={viewMode === "calendar" ? "" : "max-w-4xl mx-auto space-y-6"}>
           {/* New Item Button and View Mode Toggle */}
           {activeType !== "water" && (
             <div className="flex items-center justify-between gap-4">

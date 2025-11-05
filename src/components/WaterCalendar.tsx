@@ -1,5 +1,5 @@
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay, addWeeks, addYears, isBefore, isAfter } from 'date-fns';
+import { format, parse, startOfWeek, getDay, addWeeks, addYears } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -40,7 +40,7 @@ interface CalendarEvent {
 
 export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
   const navigate = useNavigate();
-  const [view, setView] = useState<View>('month');
+  const [view, setView] = useState<View>('agenda');
   const [date, setDate] = useState(new Date());
 
   // Transform water and fire items with deadlines into calendar events
@@ -73,19 +73,24 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
           });
         } else {
           // Recurring event - generate instances
-          let currentDate = deadline;
+          let currentDate = new Date(deadline);
           const endDate = recurrenceEndDate
-            ? (isBefore(recurrenceEndDate, maxDate) ? recurrenceEndDate : maxDate)
+            ? new Date(Math.min(recurrenceEndDate.getTime(), maxDate.getTime()))
             : maxDate;
 
-          while (isBefore(currentDate, endDate) || currentDate.getTime() === endDate.getTime()) {
+          let count = 0;
+          const maxIterations = 200; // Safety limit
+
+          while (currentDate <= endDate && count < maxIterations) {
             calendarEvents.push({
               id: `${item.id}-${currentDate.getTime()}`,
               title: item.title,
-              start: currentDate,
-              end: isAllDay ? currentDate : new Date(currentDate.getTime() + duration),
+              start: new Date(currentDate),
+              end: isAllDay ? new Date(currentDate) : new Date(currentDate.getTime() + duration),
               resource: item,
             });
+
+            count++;
 
             // Generate next occurrence
             if (recurrenceType === 'weekly') {
@@ -93,14 +98,12 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
             } else if (recurrenceType === 'yearly') {
               currentDate = addYears(currentDate, 1);
             } else {
-              break; // Safety break
-            }
-
-            // Stop if we've gone past the end date
-            if (isAfter(currentDate, endDate)) {
-              break;
+              break; // Safety break for unknown types
             }
           }
+
+          // Debug logging for recurring events
+          console.log(`Generated ${count} instances for recurring ${recurrenceType} event "${item.title}"`);
         }
       });
 
@@ -113,8 +116,10 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
   }, [items]);
 
   const handleSelectEvent = (event: CalendarEvent) => {
+    // Extract the actual item ID (recurring events have IDs like "abc123-1234567890")
+    const itemId = event.resource.id;
     // Navigate to the item's actual type (water or fire)
-    navigate(`/item/edit?id=${event.id}&type=${event.resource.type}`);
+    navigate(`/item/edit?id=${itemId}&type=${event.resource.type}`);
   };
 
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
@@ -132,14 +137,17 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-card rounded-lg border shadow-sm p-4">
+    <div className="flex flex-col h-[calc(100vh-73px)]">
+      <div className={cn(
+        "bg-card flex-1 flex flex-col",
+        view === 'agenda' && "container mx-auto max-w-4xl"
+      )}>
         <Calendar
           localizer={localizer}
           events={events}
           startAccessor="start"
           endAccessor="end"
-          style={{ height: 600 }}
+          style={{ height: '100%' }}
           view={view}
           date={date}
           onNavigate={handleNavigate}
@@ -163,16 +171,19 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
 
       {/* Unscheduled items section */}
       {unscheduledItems.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Droplet className="w-5 h-5 text-water-primary" />
+        <div className={cn(
+          "border-t bg-card p-4 max-h-48 overflow-y-auto",
+          view === 'agenda' && "container mx-auto max-w-4xl"
+        )}>
+          <h3 className="text-sm font-semibold flex items-center gap-2 mb-3 sticky top-0 bg-card z-10 pb-2">
+            <Droplet className="w-4 h-4 text-water-primary" />
             Unscheduled ({unscheduledItems.length})
           </h3>
           <div className="space-y-2">
             {unscheduledItems.map(item => (
               <Card
                 key={item.id}
-                className="p-3 border-l-4 border-l-water-primary hover:shadow-md cursor-pointer transition-all"
+                className="p-2 border-l-4 border-l-water-primary hover:shadow-md cursor-pointer transition-all"
                 onClick={() => navigate(`/item/edit?id=${item.id}&type=water`)}
               >
                 <div className="flex items-start justify-between gap-2">

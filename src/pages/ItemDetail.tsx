@@ -875,14 +875,14 @@ export default function ItemDetail({
                         <div key={tag.id} className="flex items-center gap-2">
                           <Badge
                             className={cn(
-                              "px-3 py-1 rounded-full flex items-center gap-1",
+                              "px-3 py-1 rounded-full flex items-center gap-1 text-white",
                               itemType === "fire" &&
-                                "bg-fire-light text-fire-dark border-fire-secondary",
+                                "bg-fire-light border-fire-secondary",
                               itemType === "earth" &&
-                                "bg-earth-light text-earth-dark border-earth-secondary",
+                                "bg-earth-light border-earth-secondary",
                               itemType === "air" &&
-                                "bg-air-light text-air-dark border-air-secondary",
-                              itemType === "void" && "bg-muted text-foreground",
+                                "bg-air-light border-air-secondary",
+                              itemType === "void" && "bg-muted",
                             )}
                           >
                             <span>{tag.name}</span>
