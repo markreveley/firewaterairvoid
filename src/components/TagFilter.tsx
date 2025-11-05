@@ -66,12 +66,35 @@ export function TagFilter({
     ? allTags.filter(tag => tag.parent_id === selectedProjectChildTag)
     : [];
 
-  // Get child tags for all selected category tags
-  // If child tags are selected, show their children; otherwise show children of selected parent tags
-  const categoryChildTags = selectedCategoryChildTags.length > 0
-    ? allTags.filter(tag => tag.parent_id && selectedCategoryChildTags.includes(tag.parent_id))
-    : selectedCategoryTags.length > 0
-    ? allTags.filter(tag => tag.parent_id && selectedCategoryTags.includes(tag.parent_id))
+  // Find the root ancestor of selectedCategoryTag for highlighting (exclusive mode like fire)
+  const selectedCategoryTag = selectedCategoryTags.length > 0 ? selectedCategoryTags[0] : undefined;
+  const selectedCategoryChildTag = selectedCategoryChildTags.length > 0 ? selectedCategoryChildTags[0] : undefined;
+
+  const selectedCategoryParent = selectedCategoryTag ? allTags.find(t => t.id === selectedCategoryTag) : null;
+  let categoryRootAncestorId = selectedCategoryTag;
+  if (selectedCategoryParent) {
+    let current = selectedCategoryParent;
+    while (current.parent_id) {
+      const parent = allTags.find(t => t.id === current.parent_id);
+      if (!parent) break;
+      categoryRootAncestorId = parent.id;
+      current = parent;
+    }
+  }
+
+  // Get child tags for selected category tag (second row) - same logic as project tags
+  const selectedCategoryParentTag = selectedCategoryTag ? allTags.find(t => t.id === selectedCategoryTag) : null;
+  const categoryChildTags = selectedCategoryTag
+    ? selectedCategoryParentTag?.parent_id
+      ? [selectedCategoryParentTag] // Show the selected non-root tag itself
+      : allTags.filter(tag => tag.parent_id === selectedCategoryTag) // Show children of root tag
+    : [];
+
+  // Get grandchild tags (third row) - children of selected parent tag if it's not a root
+  const categoryGrandchildTags = selectedCategoryTag && selectedCategoryParentTag?.parent_id
+    ? allTags.filter(tag => tag.parent_id === selectedCategoryTag)
+    : selectedCategoryChildTag
+    ? allTags.filter(tag => tag.parent_id === selectedCategoryChildTag)
     : [];
 
   const renderProjectTagBadges = (tags: Tag[], isChildTag = false, isGrandchildTag = false) => {
@@ -154,11 +177,13 @@ export function TagFilter({
     });
   };
 
-  const renderCategoryTagBadges = (tags: Tag[], isChildTag = false) => {
+  const renderCategoryTagBadges = (tags: Tag[], isChildTag = false, isGrandchildTag = false) => {
     return tags.map((tag) => {
-      const isSelected = isChildTag 
-        ? selectedCategoryChildTags.includes(tag.id)
-        : selectedCategoryTags.includes(tag.id);
+      const isSelected = isGrandchildTag
+        ? selectedCategoryChildTag === tag.id
+        : isChildTag
+        ? (selectedCategoryChildTag === tag.id || selectedCategoryTag === tag.id) // Highlight if selected as parent or child
+        : (selectedCategoryTag === tag.id || categoryRootAncestorId === tag.id); // Highlight if selected or is ancestor
 
       return (
         <Badge
@@ -186,34 +211,24 @@ export function TagFilter({
               : "bg-void-light text-void-dark dark:text-foreground hover:bg-white hover:text-black hover:border-black"
           )}
           onClick={() => {
-            if (isChildTag) {
-              // Check if this child tag has its own children
-              const hasChildren = allTags.some(t => t.parent_id === tag.id);
-              if (hasChildren) {
-                // Promote to parent level for deeper navigation
-                // Clear current selections and select this as parent
-                onSelectCategoryTags([tag.id]);
+            if (isGrandchildTag) {
+              // Grandchild tag clicked - promote parent to selectedCategoryTag
+              // and this tag to selectedCategoryChildTag
+              if (isSelected) {
+                // Deselect: go back to just having the parent selected
                 onSelectCategoryChildTags([]);
               } else {
-                // Leaf tag: cumulative toggle
-                if (isSelected) {
-                  onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
-                } else {
-                  onSelectCategoryChildTags([...selectedCategoryChildTags, tag.id]);
-                }
+                // Select: set parent as selectedCategoryTag and this as selectedCategoryChildTag
+                onSelectCategoryTags(tag.parent_id ? [tag.parent_id] : selectedCategoryTags);
+                onSelectCategoryChildTags([tag.id]);
               }
+            } else if (isChildTag) {
+              // Select/deselect child tag (both leaf and branch tags) - exclusive
+              onSelectCategoryChildTags(isSelected ? [] : [tag.id]);
             } else {
-              // Cumulative: toggle parent tag
-              if (isSelected) {
-                onSelectCategoryTags(selectedCategoryTags.filter(id => id !== tag.id));
-                // Clear child tags belonging to this parent
-                const childTagIds = allTags
-                  .filter(t => t.parent_id === tag.id)
-                  .map(t => t.id);
-                onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => !childTagIds.includes(id)));
-              } else {
-                onSelectCategoryTags([...selectedCategoryTags, tag.id]);
-              }
+              // Parent tag clicked - toggle selection (exclusive)
+              onSelectCategoryTags(isSelected ? [] : [tag.id]);
+              onSelectCategoryChildTags([]);
             }
           }}
         >
@@ -223,15 +238,16 @@ export function TagFilter({
               className="w-3 h-3 ml-1"
               onClick={(e) => {
                 e.stopPropagation();
-                if (isChildTag) {
-                  onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
+                if (isGrandchildTag) {
+                  // Clear grandchild selection, keep parent
+                  onSelectCategoryChildTags([]);
+                } else if (isChildTag) {
+                  // Clear child selection, keep parent
+                  onSelectCategoryChildTags([]);
                 } else {
-                  onSelectCategoryTags(selectedCategoryTags.filter(id => id !== tag.id));
-                  // Clear child tags belonging to this parent
-                  const childTagIds = allTags
-                    .filter(t => t.parent_id === tag.id)
-                    .map(t => t.id);
-                  onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => !childTagIds.includes(id)));
+                  // Clear parent selection
+                  onSelectCategoryTags([]);
+                  onSelectCategoryChildTags([]);
                 }
               }}
             />
@@ -268,6 +284,11 @@ export function TagFilter({
           {categoryChildTags.length > 0 && (
             <div className="flex flex-wrap gap-2 items-center justify-center">
               {renderCategoryTagBadges(categoryChildTags, true)}
+            </div>
+          )}
+          {categoryGrandchildTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center justify-center">
+              {renderCategoryTagBadges(categoryGrandchildTags, false, true)}
             </div>
           )}
         </>
