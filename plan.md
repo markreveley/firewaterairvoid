@@ -28,6 +28,14 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – fix priority sort order for 5-state system
+- Goal: Correct fire item sorting so highest priority items appear first
+- Key files: src/hooks/useItems.ts (priority sort order)
+- Issue: Database query was sorting priority descending (5→1), but new 5-state system uses lower numbers for higher priority (1=Immediate, 5=Done); this caused Done items to appear before Immediate items
+- Solution: Changed `.order("priority", { ascending: false })` to `.order("priority", { ascending: true })` on line 21
+- Result: Fire items now display in correct priority order: Immediate (1) → Pressing (2) → To Do (3) → Paused (4) → Done (5), then by deadline, then by creation date
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – security audit: remove sensitive data from repository
 - Goal: Remove .env file from git history and prevent future exposure of sensitive credentials
 - Key files: .env (deleted), .env.example (created), .gitignore (updated), supabase/migrations/20251105015207_d79dea5d-c956-435f-8081-5cd3296799fe.sql (new migration), src/hooks/useItems.ts, src/pages/Index.tsx
