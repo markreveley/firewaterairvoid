@@ -358,7 +358,13 @@ Fire Water is a task/project management application that organizes items into fi
 - Core types: src/types/index.ts
 
 ## Known Issues / Blockers
-None currently.
+
+### Hardcoded Supabase Credentials
+**Files:** `src/integrations/supabase/client.ts`, `src/integrations/supabase/client-safe.ts`
+**Issue:** Both files contain hardcoded fallback Supabase URL and publishable key to prevent build failures when .env is missing
+**Risk:** Medium - credentials are public anon keys (safe for client-side), but violates environment variable best practices
+**Action Required:** Address with Lovable to ensure proper environment variable handling in deployments
+**Status:** Needs resolution
 
 ## Development Context (Quick Reference)
 
