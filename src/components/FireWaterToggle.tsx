@@ -90,7 +90,7 @@ export function FireWaterToggle({
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Companies - Income</p>
+            <p>Knowledge Base - Links - Analysis</p>
           </TooltipContent>
         </Tooltip>
 
@@ -115,7 +115,7 @@ export function FireWaterToggle({
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Knowledge Base - Links</p>
+            <p>Sources</p>
           </TooltipContent>
         </Tooltip>
 
@@ -140,7 +140,7 @@ export function FireWaterToggle({
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Me</p>
+            <p>Me - Output</p>
           </TooltipContent>
         </Tooltip>
       </div>
