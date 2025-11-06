@@ -8,7 +8,7 @@ import { StatusFilter } from "@/components/StatusFilter";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useItems } from "@/hooks/useItems";
 import { useTags } from "@/hooks/useTags";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Plus, Search, User, Loader2, Edit2 } from "lucide-react";
 import fireWaterLogo from "@/assets/firewater_logo.png";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import { FIRE_TAG_NAMES } from "@/constants/tags";
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const initialType = (searchParams.get("type") as ItemType) || "fire";
   const initialView = (searchParams.get("view") as "card" | "calendar" | "overview") || (initialType === "water" ? "calendar" : "card");
   const [activeType, setActiveType] = useState<ItemType>(initialType);
@@ -36,6 +37,21 @@ const Index = () => {
   const [selectedCategoryChildTags, setSelectedCategoryChildTags] = useState<string[]>([]);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
   const { allTags } = useTags();
+
+  // Initialize tag selections from navigation state when coming back from ItemDetail
+  useEffect(() => {
+    const navState = location.state as any;
+
+    if (navState?.fromItemDetail) {
+      if (navState.projectTag !== undefined) setSelectedProjectTag(navState.projectTag);
+      if (navState.projectChildTag !== undefined) setSelectedProjectChildTag(navState.projectChildTag);
+      if (navState.categoryTags !== undefined) setSelectedCategoryTags(navState.categoryTags);
+      if (navState.categoryChildTags !== undefined) setSelectedCategoryChildTags(navState.categoryChildTags);
+
+      // Clear the state so it doesn't apply again
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleAddItem = async (title: string, type: ItemType, tags: Tag[], deadline?: Date, notes?: string, status?: string, url?: string) => {
     // Default status to "To Do" for fire items if not provided

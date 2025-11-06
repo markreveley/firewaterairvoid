@@ -60,6 +60,7 @@ import {
 import { getTagsForItemType, getAllTagsForItemType } from "@/utils/tagFilters";
 import { generateTimeOptions } from "@/utils/time";
 import { PRIORITY_LEVELS, PRIORITY_CONFIG, PriorityLevel } from "@/constants/priority";
+import { useTags } from "@/hooks/useTags";
 import { PriorityFireIcon } from "@/components/PriorityFireIcon";
 
 interface ItemDetailProps {
@@ -110,6 +111,7 @@ export default function ItemDetail({
 }: ItemDetailProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { allTags } = useTags();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
   const typeParam = searchParams.get("type") as ItemType | null;
   const deadlineParam = searchParams.get("deadline");
@@ -356,6 +358,62 @@ export default function ItemDetail({
     }
   };
 
+  // Helper function to navigate back with tag state
+  const navigateBackWithTags = () => {
+    const navState: any = {
+      fromItemDetail: true,
+    };
+
+    if (selectedTags.length > 0 && allTags.length > 0) {
+      if (itemType === "fire") {
+        // First, look up all selected tags in allTags to get full tag objects with parent_id
+        const selectedTagIds = selectedTags.map(t => t.id);
+        const fullSelectedTags = selectedTagIds
+          .map(id => allTags.find(t => t.id === id))
+          .filter((t): t is Tag => t !== undefined);
+
+        // Find the deepest tag (one that has no children in the selected set)
+        const deepestTag = fullSelectedTags.find(tag =>
+          !fullSelectedTags.some(t => t.parent_id === tag.id)
+        );
+
+        if (deepestTag) {
+          if (deepestTag.parent_id) {
+            // Set projectTag to the parent and projectChildTag to the deepest tag
+            navState.projectTag = deepestTag.parent_id;
+            navState.projectChildTag = deepestTag.id;
+          } else {
+            // Deepest tag is a root tag
+            navState.projectTag = deepestTag.id;
+            navState.projectChildTag = undefined;
+          }
+        }
+      } else if (itemType !== "water") {
+        // For earth/air/void items, use category tags (same logic as fire)
+        const selectedTagIds = selectedTags.map(t => t.id);
+        const fullSelectedTags = selectedTagIds
+          .map(id => allTags.find(t => t.id === id))
+          .filter((t): t is Tag => t !== undefined);
+
+        const deepestTag = fullSelectedTags.find(tag =>
+          !fullSelectedTags.some(t => t.parent_id === tag.id)
+        );
+
+        if (deepestTag) {
+          if (deepestTag.parent_id) {
+            navState.categoryTags = [deepestTag.parent_id];
+            navState.categoryChildTags = [deepestTag.id];
+          } else {
+            navState.categoryTags = [deepestTag.id];
+            navState.categoryChildTags = [];
+          }
+        }
+      }
+    }
+
+    navigate(`/?type=${itemType}`, { state: navState });
+  };
+
   const handleSubmit = async (
     e?: React.FormEvent,
     shouldNavigate: boolean = false,
@@ -390,7 +448,7 @@ export default function ItemDetail({
       setHasUnsavedChanges(false);
 
       if (shouldNavigate) {
-        navigate(`/?type=${itemType}`);
+        navigateBackWithTags();
       }
     }
   };
@@ -550,7 +608,7 @@ export default function ItemDetail({
                 if (hasUnsavedChanges) {
                   await handleSubmit(undefined, true);
                 } else {
-                  navigate(`/?type=${itemType}`);
+                  navigateBackWithTags();
                 }
               }}
             >
@@ -562,7 +620,7 @@ export default function ItemDetail({
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => navigate(`/?type=${itemType}`)}
+                onClick={() => navigateBackWithTags()}
               >
                 Cancel
               </Button>
