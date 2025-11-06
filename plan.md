@@ -28,6 +28,17 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-06 – restore multi-select tag behavior for Earth/Air/Void items
+- Goal: Enable non-exclusive (multi-select) tag selection for Earth, Air, and Void types while maintaining exclusive selection for Fire
+- Key files: src/pages/ItemDetail.tsx (tag assignment logic), src/components/TagFilter.tsx (selection logic)
+- Issue: Previous exclusive selection for Earth/Air/Void (implemented 2025-11-05) was overwriting existing tags when adding new tags in ItemDetail
+- Root cause: Tag assignment logic treated Earth/Air/Void like Fire (exclusive), replacing all tags instead of adding to existing list
+- Changes: Updated addExistingTag() to implement toggle behavior for Earth/Air/Void (add/remove tags); updated addChildTag() to add child tags without clearing siblings; Fire type maintains exclusive selection (clear on new tag)
+- Behavior: Fire = exclusive (one tag at a time), Earth/Air/Void = multi-select (toggle tags on/off)
+- UX improvements: Users can now assign multiple tags to Earth/Air/Void items; clicking same tag toggles it off; Fire items maintain single-tag clarity
+- Commits: a28d3f2 (Update tag selection logic), cd0180e (Fix tag selection logic), 40fef12 (Fix tag assignment overwriting issue)
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-06 – enable link clickability for Earth items and update tooltips
 - Goal: Restore URL link functionality for Earth items that was missing from ItemList rendering
 - Key files: src/components/ItemList.tsx (link condition), src/components/FireWaterToggle.tsx (tooltip labels)
