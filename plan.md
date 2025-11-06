@@ -28,6 +28,16 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-06 – enable link clickability for Earth items and update tooltips
+- Goal: Restore URL link functionality for Earth items that was missing from ItemList rendering
+- Key files: src/components/ItemList.tsx (link condition), src/components/FireWaterToggle.tsx (tooltip labels)
+- Issue: Earth items with URLs weren't displaying as clickable blue links in main list view, only Air and Void were working
+- Root cause: ItemList.tsx line 214 only checked for void OR air types, missing earth type from the condition
+- Changes: Added earth type to URL link condition; updated FireWaterToggle tooltips for better clarity (Earth: "Knowledge Base - Links", Air: "Analysis - AI", Void: "Me - Output")
+- Backend verification: supportsUrl() utility already correctly included earth, air, and void - issue was only in UI rendering layer
+- UX improvements: Earth items with URLs now display blue, clickable titles matching Air and Void behavior; clicking opens URL in new tab via redirect endpoint
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-06 – technical debt cleanup and tag management consolidation
 - Goal: Comprehensive technical debt audit and major code consolidation refactoring
 - Phase 1 (Quick Wins): Fixed outdated test for water deadline support; removed debug console.log from WaterCalendar; all 29→35 tests passing
