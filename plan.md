@@ -28,6 +28,16 @@
 
 ## Work Log
 --------------------------------------------------
+2025-11-05 – restore tag filters when navigating back from item detail
+- Goal: Preserve hierarchical tag selections when user edits an item and returns to main page
+- Key files: src/pages/ItemDetail.tsx (navigation state builder), src/pages/Index.tsx (state restoration)
+- Issue: Clicking an item with tags (e.g., dirtwire→production→vieux), editing it, then clicking Back/Save would return to main page with no tags selected or only root tag selected
+- Root cause: selectedTags array from item didn't include parent_id field; needed to cross-reference with allTags to get full hierarchy information
+- Changes: Added useTags hook to ItemDetail; created navigateBackWithTags() helper that looks up full tag objects from allTags, finds deepest tag in hierarchy, and passes tag state via React Router navigate() state parameter; added useLocation hook to Index to read navigation state and restore tag selections
+- Implementation: Uses React Router state mechanism instead of URL params to avoid infinite loop between URL read/write effects; looks up selectedTags in allTags to get parent_id fields; finds deepest tag (one with no children in selected set); passes parent+child tag IDs via navigation state
+- UX improvements: Tag filters are automatically restored when returning from item detail; works for any hierarchy depth (1, 2, or 3+ levels); applies to Save, Back, and Cancel actions; user can continue working with same filtered view
+- Next: (completed ✅)
+--------------------------------------------------
 2025-11-05 – fix hierarchical tag selection and deselection bugs
 - Goal: Resolve issues with 3-level tag hierarchy selection being auto-cleared and improve deselection UX
 - Key files: src/components/TagFilter.tsx (click handlers, visibility logic), src/pages/Index.tsx (validation logic)
