@@ -67,14 +67,14 @@ export function TagFilter({
     : [];
 
   // Get child tags for selected category tags (second row) - multi-select mode
-  // Show children of all selected parent tags
+  // Show children of all selected parent tags combined
   const categoryChildTags = selectedCategoryTags.length > 0
     ? allTags.filter(tag => 
         selectedCategoryTags.some(parentId => tag.parent_id === parentId)
       )
     : [];
 
-  // Get grandchild tags (third row) - children of selected child tags
+  // Get grandchild tags (third row) - children of all selected child tags combined
   const categoryGrandchildTags = selectedCategoryChildTags.length > 0
     ? allTags.filter(tag => 
         selectedCategoryChildTags.some(childId => tag.parent_id === childId)
@@ -215,27 +215,26 @@ export function TagFilter({
                 onSelectCategoryChildTags([...selectedCategoryChildTags, tag.id]);
               }
             } else if (isChildTag) {
-              // If this tag is in selectedCategoryTags, it's a parent being shown in child row
-              if (selectedCategoryTags.includes(tag.id)) {
-                // Go back by removing from parent tags
-                onSelectCategoryTags(selectedCategoryTags.filter(id => id !== tag.id));
-                onSelectCategoryChildTags([]);
+              // Child tag clicked - toggle in array (multi-select)
+              if (isSelected) {
+                onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
               } else {
-                // Otherwise toggle child tag selection (multi-select)
-                if (isSelected) {
-                  onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
-                } else {
-                  onSelectCategoryChildTags([...selectedCategoryChildTags, tag.id]);
-                }
+                onSelectCategoryChildTags([...selectedCategoryChildTags, tag.id]);
               }
             } else {
               // Parent tag clicked - toggle selection (multi-select)
               if (isSelected) {
                 onSelectCategoryTags(selectedCategoryTags.filter(id => id !== tag.id));
+                // Also clear any child tags that belonged to this parent
+                const childTagsOfThisParent = allTags
+                  .filter(t => t.parent_id === tag.id)
+                  .map(t => t.id);
+                onSelectCategoryChildTags(
+                  selectedCategoryChildTags.filter(id => !childTagsOfThisParent.includes(id))
+                );
               } else {
                 onSelectCategoryTags([...selectedCategoryTags, tag.id]);
               }
-              onSelectCategoryChildTags([]);
             }
           }}
         >
@@ -249,18 +248,17 @@ export function TagFilter({
                   // Remove this specific grandchild tag
                   onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
                 } else if (isChildTag) {
-                  // If this tag is in selectedCategoryTags, remove from parent array
-                  if (selectedCategoryTags.includes(tag.id)) {
-                    onSelectCategoryTags(selectedCategoryTags.filter(id => id !== tag.id));
-                    onSelectCategoryChildTags([]);
-                  } else {
-                    // Remove this specific child tag
-                    onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
-                  }
+                  // Remove this specific child tag
+                  onSelectCategoryChildTags(selectedCategoryChildTags.filter(id => id !== tag.id));
                 } else {
-                  // Remove this specific parent tag
+                  // Remove this specific parent tag and its children
                   onSelectCategoryTags(selectedCategoryTags.filter(id => id !== tag.id));
-                  onSelectCategoryChildTags([]);
+                  const childTagsOfThisParent = allTags
+                    .filter(t => t.parent_id === tag.id)
+                    .map(t => t.id);
+                  onSelectCategoryChildTags(
+                    selectedCategoryChildTags.filter(id => !childTagsOfThisParent.includes(id))
+                  );
                 }
               }}
             />
