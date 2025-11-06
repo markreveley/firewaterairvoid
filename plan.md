@@ -23,10 +23,24 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Nothing - all tasks complete ✅
-**Next**: Ready for user testing
+**Working on**: Technical debt refactoring ✅
+**Next**: Test Phase 3+4 refactoring in Lovable, then consider Phase 5 (ItemDetail component splitting)
 
 ## Work Log
+--------------------------------------------------
+2025-11-06 – technical debt cleanup and tag management consolidation
+- Goal: Comprehensive technical debt audit and major code consolidation refactoring
+- Phase 1 (Quick Wins): Fixed outdated test for water deadline support; removed debug console.log from WaterCalendar; all 29→35 tests passing
+- Phase 3 (Test Coverage): Added comprehensive tests for useTags hook (6 new tests); test coverage increased 21%; tests for tag loading, error handling, empty data, null handling, mount behavior
+- Phase 4 (Tag Consolidation): **MAJOR REFACTORING** - Created generic TagsManagementPage component; consolidated Fire/Earth/Air/Void tag management pages from 4 duplicate files into 1 reusable component
+- Key files: src/components/TagsManagementPage.tsx (new generic component), src/pages/FireTagsManagement.tsx, src/pages/EarthTagsManagement.tsx, src/pages/AirTagsManagement.tsx, src/pages/VoidTagsManagement.tsx (all reduced to 20-line wrappers), src/hooks/useTags.test.ts (new test file)
+- Code reduction: 1,510 lines → 480 lines (68% reduction); eliminated 1,030 lines of duplicated code
+- Impact: Each tag page now just passes props (itemType, icon, displayName, colors) to generic component; all CRUD functionality preserved (create/edit/delete tags, hierarchical relationships, parent selection)
+- Testing: All 35 tests passing; build successful; bundle size reduced from 1,016KB to 997KB (19KB smaller); no TypeScript errors; no functionality lost
+- Technical debt identified: Hardcoded Supabase credentials in client files (documented in Known Issues); console.log statements (removed); outdated tests (fixed); code duplication (eliminated)
+- Phase 5 deferred: ItemDetail.tsx refactoring (1,292 lines) identified as next opportunity but deferred for thorough user testing due to complexity and MEDIUM-HIGH risk
+- Branch: claude/phase3-test-coverage-expansion-011CUozyycGZrE12zD1yLEU2
+- Next: User should test tag management pages in Lovable deployment before proceeding to Phase 5
 --------------------------------------------------
 2025-11-05 – security audit and .env file remediation
 - Goal: Audit repository for accidentally committed API keys and private data
