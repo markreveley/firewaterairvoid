@@ -30,12 +30,12 @@ describe('itemTypes utilities', () => {
   });
 
   describe('supportsDeadline', () => {
-    it('should return true only for fire type', () => {
+    it('should return true for fire and water types', () => {
       expect(supportsDeadline('fire')).toBe(true);
+      expect(supportsDeadline('water')).toBe(true);
     });
 
-    it('should return false for all other types', () => {
-      expect(supportsDeadline('water')).toBe(false);
+    it('should return false for air, earth, and void types', () => {
       expect(supportsDeadline('air')).toBe(false);
       expect(supportsDeadline('earth')).toBe(false);
       expect(supportsDeadline('void')).toBe(false);

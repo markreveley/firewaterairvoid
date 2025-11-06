@@ -102,9 +102,6 @@ export function WaterCalendar({ items, fireItems = [] }: WaterCalendarProps) {
               break; // Safety break for unknown types
             }
           }
-
-          // Debug logging for recurring events
-          console.log(`Generated ${count} instances for recurring ${recurrenceType} event "${item.title}"`);
         }
       });
 
