@@ -466,50 +466,75 @@ export default function ItemDetail({
   };
 
   const addExistingTag = (tag: Tag) => {
-    // For category tags (earth/air/void), use exclusive selection like fire
-    // When selecting a root tag, clear all tags and start fresh
-    // When selecting a child tag of an existing root, keep only that root and the new child
+    // Fire uses exclusive selection (single tag at a time)
+    // Earth/Air/Void use multi-select (can have multiple tags)
     const existingTagData = existingTags.find(et => et.id === tag.id);
 
-    if (!existingTagData?.parent_id) {
-      // Adding a root tag - clear everything and just add this tag
-      setSelectedTags([tag]);
+    if (itemType === 'fire') {
+      // Fire: exclusive selection
+      if (!existingTagData?.parent_id) {
+        // Adding a root tag - clear everything and just add this tag
+        setSelectedTags([tag]);
+      } else {
+        // Adding a child tag - keep only root tags and the new child
+        const rootTags = selectedTags.filter((t) => {
+          const tData = existingTags.find(et => et.id === t.id);
+          return !tData?.parent_id;
+        });
+        setSelectedTags([...rootTags, tag]);
+      }
     } else {
-      // Adding a child tag - keep only root tags and the new child
-      const rootTags = selectedTags.filter((t) => {
-        const tData = existingTags.find(et => et.id === t.id);
-        return !tData?.parent_id;
-      });
-      setSelectedTags([...rootTags, tag]);
+      // Earth/Air/Void: multi-select (toggle behavior)
+      const isAlreadySelected = selectedTags.some(t => t.id === tag.id);
+      if (isAlreadySelected) {
+        // Deselect the tag
+        setSelectedTags(selectedTags.filter(t => t.id !== tag.id));
+      } else {
+        // Add the tag
+        setSelectedTags([...selectedTags, tag]);
+      }
     }
     setIsMainTagPopoverOpen(false);
   };
 
   const addChildTag = (tag: Tag) => {
-    // Helper function to check if tagA is an ancestor of tagB
-    const isAncestor = (tagAId: string, tagBId: string): boolean => {
-      let currentId = tagBId;
-      while (currentId) {
-        const currentTag = existingTags.find(t => t.id === currentId);
-        if (!currentTag?.parent_id) break;
-        if (currentTag.parent_id === tagAId) return true;
-        currentId = currentTag.parent_id;
+    // Fire uses exclusive selection, Earth/Air/Void use multi-select
+    if (itemType === 'fire') {
+      // Helper function to check if tagA is an ancestor of tagB
+      const isAncestor = (tagAId: string, tagBId: string): boolean => {
+        let currentId = tagBId;
+        while (currentId) {
+          const currentTag = existingTags.find(et => et.id === currentId);
+          if (!currentTag?.parent_id) break;
+          if (currentTag.parent_id === tagAId) return true;
+          currentId = currentTag.parent_id;
+        }
+        return false;
+      };
+
+      // Fire: Keep only:
+      // 1. Root tags (no parent)
+      // 2. Ancestor tags of the new tag (in the parent chain)
+      const tagsToKeep = selectedTags.filter((t) => {
+        const existingTagData = existingTags.find(et => et.id === t.id);
+        // Keep root tags
+        if (!existingTagData?.parent_id) return true;
+        // Keep if it's an ancestor of the new tag
+        return isAncestor(t.id, tag.id);
+      });
+
+      setSelectedTags([...tagsToKeep, tag]);
+    } else {
+      // Earth/Air/Void: multi-select (toggle behavior)
+      const isAlreadySelected = selectedTags.some(t => t.id === tag.id);
+      if (isAlreadySelected) {
+        // Deselect the tag
+        setSelectedTags(selectedTags.filter(t => t.id !== tag.id));
+      } else {
+        // Add the tag
+        setSelectedTags([...selectedTags, tag]);
       }
-      return false;
-    };
-
-    // Keep tags that are either:
-    // 1. Root tags (no parent_id)
-    // 2. Ancestor tags of the new tag (in the parent chain)
-    const tagsToKeep = selectedTags.filter((t) => {
-      const existingTagData = existingTags.find(et => et.id === t.id);
-      // Keep root tags
-      if (!existingTagData?.parent_id) return true;
-      // Keep if it's an ancestor of the new tag
-      return isAncestor(t.id, tag.id);
-    });
-
-    setSelectedTags([...tagsToKeep, tag]);
+    }
     setOpenChildTagPopoverId(null);
   };
 
