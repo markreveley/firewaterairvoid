@@ -27,16 +27,23 @@ const Index = () => {
   const [activeType, setActiveType] = useState<ItemType>(initialType);
   const [viewMode, setViewMode] = useState<"card" | "calendar" | "overview">(initialView);
   const [searchQuery, setSearchQuery] = useState("");
-  const pageSize = viewMode === "overview" ? 200 : 50;
-  const { items, isLoading, hasMore, isBulkDeleting, addItem, deleteItem, bulkDeleteItems, updateItem, loadMore } = useItems(activeType, pageSize);
-  // Also fetch fire items for water calendar view to show todos
-  const { items: fireItems } = useItems(activeType === "water" && viewMode === "calendar" ? "fire" : undefined, 200);
   const [selectedProjectTag, setSelectedProjectTag] = useState<string>();
   const [selectedProjectChildTag, setSelectedProjectChildTag] = useState<string>();
   const [selectedCategoryTags, setSelectedCategoryTags] = useState<string[]>([]);
   const [selectedCategoryChildTags, setSelectedCategoryChildTags] = useState<string[]>([]);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<"To Do" | "Completed">("To Do");
   const { allTags } = useTags();
+
+  // Increase page size when tag filters are active to avoid paginating away matching items
+  const hasTagFilters =
+    (activeType === "fire" && (!!selectedProjectTag || !!selectedProjectChildTag)) ||
+    (activeType !== "fire" && activeType !== "water" && (selectedCategoryTags.length > 0 || selectedCategoryChildTags.length > 0));
+
+  const pageSize = viewMode === "overview" ? 200 : hasTagFilters ? 500 : 50;
+
+  const { items, isLoading, hasMore, isBulkDeleting, addItem, deleteItem, bulkDeleteItems, updateItem, loadMore } = useItems(activeType, pageSize);
+  // Also fetch fire items for water calendar view to show todos
+  const { items: fireItems } = useItems(activeType === "water" && viewMode === "calendar" ? "fire" : undefined, 200);
 
   // Initialize tag selections from navigation state when coming back from ItemDetail
   useEffect(() => {
