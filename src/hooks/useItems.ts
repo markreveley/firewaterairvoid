@@ -227,7 +227,8 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
 
       if (itemError) throw itemError;
 
-      // Add tags
+      // Add tags and track the IDs
+      const insertedTags: Tag[] = [];
       for (const tag of tags) {
         let tagId = tag.id;
 
@@ -236,7 +237,7 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
             .from("tags")
             .select("*")
             .eq("name", tag.name)
-            .single();
+            .maybeSingle();
 
           if (existingTag) {
             tagId = existingTag.id;
@@ -260,13 +261,20 @@ export function useItems(type?: ItemType, pageSize: number = 10) {
           });
 
         if (linkError) throw linkError;
+        
+        // Track the inserted tag with its actual ID
+        insertedTags.push({ id: tagId, name: tag.name });
       }
 
-      return newItem;
+      // Return the item with its tags attached for immediate use
+      return {
+        ...newItem,
+        tags: insertedTags
+      };
     },
-    onSuccess: () => {
-      // Invalidate all item queries to refetch
-      queryClient.invalidateQueries({ queryKey: itemKeys.lists() });
+    onSuccess: async () => {
+      // Invalidate and wait for refetch to complete
+      await queryClient.invalidateQueries({ queryKey: itemKeys.lists() });
       toast.success("Item added");
       setOffset(0);
       setAllItems([]);
