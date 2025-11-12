@@ -70,6 +70,25 @@ function getAllDescendantTagIds(tagId: string, allTags: Tag[]): string[] {
   return descendants;
 }
 
+// Helper function to build the full hierarchical path for a tag
+function getTagPath(tag: Tag, allTags: Tag[]): string {
+  const path: string[] = [tag.name];
+  let currentTag = tag;
+
+  // Traverse up the parent hierarchy
+  while (currentTag.parent_id) {
+    const parent = allTags.find(t => t.id === currentTag.parent_id);
+    if (parent) {
+      path.unshift(parent.name);
+      currentTag = parent;
+    } else {
+      break;
+    }
+  }
+
+  return path.join(' → ');
+}
+
 export function ItemList({
   items,
   type,
@@ -264,7 +283,7 @@ export function ItemList({
                           {item.type !== "water" && item.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 justify-end">
                               {[...item.tags].reverse().map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
-                                  {tag.name}
+                                  {item.type === "fire" ? getTagPath(tag, allTags) : tag.name}
                                 </Badge>)}
                             </div>
                           )}
