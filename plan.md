@@ -23,10 +23,87 @@
 - **plan.md** (this file) - Lightweight index, current status, work log
 
 ## Current Status
-**Working on**: Technical debt refactoring ✅
-**Next**: Test Phase 3+4 refactoring in Lovable, then consider Phase 5 (ItemDetail component splitting)
+**Working on**: Tag hierarchy display order and auto-population ⚠️ **FAILING**
+**Branch**: fix/tag-hierarchy-display-order
+**Next**: Debug why tags are still displaying in wrong order despite passing tests
 
 ## Work Log
+--------------------------------------------------
+2025-11-12 – **INCOMPLETE**: Fix tag hierarchy display order (auto-populate all parents, correct display order)
+- **Status**: ⚠️ FAILING - Tests pass but UI still broken
+- Goal: Ensure all hierarchical tags display in correct order (child→parent→root) both in card view and item details
+- **User-Reported Issues**:
+  1. Not all parent tags showing (e.g., Dirtwire missing from some items)
+  2. Tags display in wrong order: shows (Production) (Dirtwire) (Library) instead of (Library) (Production) (Dirtwire)
+  3. Item details also shows wrong order
+  4. When selecting tags in UI (Dirtwire→Production→Library), only Production and Library auto-populate
+
+- **TDD Workflow Implemented**:
+  - Updated CLAUDE.md with comprehensive TDD section (RED-GREEN-REFACTOR cycle)
+  - Created failing tests first (RED phase) ✅
+  - Fixed code to make tests pass (GREEN phase) ✅
+  - All 28 tests passing ✅ BUT UI still broken ❌
+
+- **Key Changes Made**:
+  - Created `src/utils/tagHierarchy.ts`: `getAllParentTags()`, `getTagsWithParents()` with depth-based sorting
+  - Created `src/utils/tagHierarchy.test.ts`: 14 comprehensive tests verifying tag order and hierarchy
+  - Updated `src/hooks/useItems.ts:91`: Added `parent_id` field to tag mapping
+  - Updated `src/pages/ItemDetail.tsx`: Uses `getTagsWithParents(selectedTags, allTags)` when saving
+  - Updated `src/pages/ItemDetailPage.tsx:71,85`: Both create and update use `getTagsWithParents()`
+  - Updated `src/components/ItemList.tsx:295`: Removed `.reverse()` - tags display in saved order
+  - Updated `src/components/ItemList.test.tsx`: Added test for correct display order
+  - Updated `CLAUDE.md`: Added TDD workflow guidelines for all future development
+
+- **Test Coverage**:
+  - `src/utils/tagHierarchy.test.ts`: 14 tests (ALL PASSING ✅)
+  - `src/components/ItemList.test.tsx`: 10 tests (ALL PASSING ✅)
+  - `src/hooks/useItems.test.tsx`: 4 tests (ALL PASSING ✅)
+  - **Total**: 28 tests covering tag hierarchy behavior
+
+- **What Should Work** (according to tests):
+  - `getTagsWithParents([libraryTag], allTags)` returns `[Library, Production, Dirtwire]` ✅
+  - Tags sorted by depth (deepest/most specific first) ✅
+  - Works regardless of input tag order ✅
+  - Display order: child (left) → parent → root (right) ✅
+
+- **What's Still Broken** (user testing):
+  - Creating new item with Dirtwire→Production→Library selected
+  - Only Production and Library auto-populate (Dirtwire missing)
+  - After save, displays: (Production) (Dirtwire) (Library) instead of (Library) (Production) (Dirtwire)
+  - Item details also shows wrong order
+
+- **Possible Root Causes to Investigate**:
+  1. Tag selection in UI not passing all selected tags to save function?
+  2. `selectedTags` state missing Dirtwire when only child tags are clicked?
+  3. Auto-population logic not including root tag?
+  4. Display component getting tags in different order than saved?
+  5. Test mocks not matching real data structure?
+
+- **Files Modified**:
+  - CLAUDE.md (TDD guidelines added)
+  - src/utils/tagHierarchy.ts (NEW - sorting logic)
+  - src/utils/tagHierarchy.test.ts (NEW - 14 tests)
+  - src/hooks/useItems.ts (added parent_id to tags)
+  - src/hooks/useItems.test.tsx (NEW - 4 tests)
+  - src/pages/ItemDetail.tsx (uses getTagsWithParents)
+  - src/pages/ItemDetailPage.tsx (uses getTagsWithParents)
+  - src/components/ItemList.tsx (removed .reverse(), simplified display)
+  - src/components/ItemList.test.tsx (added order test)
+
+- **Commits on Branch** `fix/tag-hierarchy-display-order`:
+  - 4b0e17a: fix: display only tag names in item cards, not full hierarchy paths
+  - 1836f95: WIP: Fix tag hierarchy display order and include parent_id
+  - (CLAUDE.md changes not yet committed)
+
+- **Next Steps for Next Session**:
+  1. **Debug tag selection state**: Log `selectedTags` in ItemDetail.tsx before calling `getTagsWithParents()` - is Dirtwire included?
+  2. **Debug save operation**: Log the result of `getTagsWithParents()` - does it return correct order?
+  3. **Debug display**: Log `item.tags` in ItemList.tsx - what order are they in database?
+  4. **Check ItemDetail UI**: When user clicks Dirtwire→Production→Library, what goes into `selectedTags` state?
+  5. **Possible fix**: May need to track tag selection differently in UI (store full hierarchy path, not just clicked tag)
+  6. **Consider E2E test**: May need Playwright to test actual UI interaction vs unit tests
+
+- **Important**: All unit tests pass but UI fails = integration/state management issue, not logic issue
 --------------------------------------------------
 2025-11-06 – restore multi-select tag behavior for Earth/Air/Void items
 - Goal: Enable non-exclusive (multi-select) tag selection for Earth, Air, and Void types while maintaining exclusive selection for Fire
