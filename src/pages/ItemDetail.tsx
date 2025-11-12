@@ -59,6 +59,7 @@ import {
 } from "@/utils/itemTypes";
 import { getTagsForItemType, getAllTagsForItemType } from "@/utils/tagFilters";
 import { generateTimeOptions } from "@/utils/time";
+import { getTagsWithParents } from "@/utils/tagHierarchy";
 import { PRIORITY_LEVELS, PRIORITY_CONFIG, PriorityLevel } from "@/constants/priority";
 import { useTags } from "@/hooks/useTags";
 import { PriorityFireIcon } from "@/components/PriorityFireIcon";
@@ -434,7 +435,7 @@ export default function ItemDetail({
       await onAddItem(
         title,
         itemType,
-        selectedTags,
+        getTagsWithParents(selectedTags, allTags), // Include all parent tags in hierarchy
         supportsDeadline(itemType) ? finalDeadline : undefined,
         notes.trim() || undefined,
         supportsStatus(itemType) ? status.trim() || "To Do" : undefined,

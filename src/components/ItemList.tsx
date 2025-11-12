@@ -292,7 +292,7 @@ export function ItemList({
                           {/* Hide tags for water type */}
                           {item.type !== "water" && item.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 justify-end">
-                              {[...item.tags].reverse().map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
+                              {item.tags.map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
                                   {tag.name}
                                 </Badge>)}
                             </div>

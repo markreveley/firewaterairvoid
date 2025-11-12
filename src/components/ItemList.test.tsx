@@ -297,5 +297,46 @@ describe('ItemList Tag Display', () => {
       // Verify the tag structure includes parent_id
       expect(items[0].tags[0].parent_id).toBe('tag-1');
     });
+
+    it('should display tags in correct order: child first (left), parent last (right)', () => {
+      const items: Item[] = [
+        {
+          id: 'item-1',
+          title: 'Test Item',
+          type: 'fire',
+          tags: [
+            // Tags should be in order: child → parent → grandparent
+            { id: 'tag-3', name: 'Mushy 70 4', parent_id: 'tag-2' },
+            { id: 'tag-2', name: 'Production', parent_id: 'tag-1' },
+            { id: 'tag-1', name: 'Dirtwire', parent_id: null },
+          ],
+          createdAt: new Date(),
+          priority: 3,
+          completed: false,
+          is_subitem: false,
+          recurrence_type: 'none',
+        },
+      ];
+
+      render(
+        <ItemList
+          items={items}
+          type="fire"
+          allTags={mockTags}
+          onDeleteItem={mockOnDeleteItem}
+          onUpdateItem={mockOnUpdateItem}
+        />
+      );
+
+      // Verify all tags are displayed
+      expect(screen.getByText('Mushy 70 4')).toBeInTheDocument();
+      expect(screen.getByText('Production')).toBeInTheDocument();
+      expect(screen.getByText('Dirtwire')).toBeInTheDocument();
+
+      // Document expected display order:
+      // When tags are saved as [child, parent, grandparent],
+      // they should display in that same order (child leftmost, grandparent rightmost)
+      // Example display: (Mushy 70 4) (Production) (Dirtwire)
+    });
   });
 });

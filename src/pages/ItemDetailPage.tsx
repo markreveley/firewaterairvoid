@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import ItemDetail from "./ItemDetail";
 import { useItems } from "@/hooks/useItems";
 import { useTags } from "@/hooks/useTags";
+import { getTagsWithParents } from "@/utils/tagHierarchy";
 import type { ItemType, Tag } from "@/types";
 
 export default function ItemDetailPage() {
@@ -66,9 +67,12 @@ export default function ItemDetailPage() {
     recurrence_end_date?: Date,
     priority?: number
   ) => {
+    // Expand tags to include all parent tags in hierarchy
+    const tagsWithParents = getTagsWithParents(tags, allTags);
+
     // If parent_id is provided AND is_subitem is true, we're creating a sub-item via Items tab
     if (parent_id && is_subitem) {
-      await addItem(title, type, tags, deadline, notes, status, url, parent_id, true);
+      await addItem(title, type, tagsWithParents, deadline, notes, status, url, parent_id, true);
       return;
     }
 
@@ -78,7 +82,7 @@ export default function ItemDetailPage() {
       await updateItem(existingItem.id, {
         title,
         type,
-        tags,
+        tags: tagsWithParents, // Include all parent tags
         deadline: deadline || null,
         notes,
         status,
@@ -90,7 +94,7 @@ export default function ItemDetailPage() {
       });
     } else {
       // Create mode - add new item (not a sub-item, even if it has a parent)
-      const newItem = await addItem(title, type, tags, deadline, notes, status, url, parent_id, false, recurrence_type, recurrence_end_date, priority);
+      const newItem = await addItem(title, type, tagsWithParents, deadline, notes, status, url, parent_id, false, recurrence_type, recurrence_end_date, priority);
 
       // Navigate to edit view of the newly created item so Items tab becomes enabled
       if (newItem) {
