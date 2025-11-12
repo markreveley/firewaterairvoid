@@ -78,6 +78,88 @@ When starting a new conversation, you (Claude) should:
 
 **Important**: Always run `git status` and `git diff` before committing to verify changes.
 
+## 🧪 Test-Driven Development (TDD) Workflow
+
+**CRITICAL: Always follow TDD for features and bug fixes**
+
+### When to Use TDD
+
+- **All new features**: Write failing tests first
+- **Bug fixes**: Create failing test that reproduces the bug
+- **Refactoring**: Ensure tests exist before refactoring
+
+### TDD Cycle (Red-Green-Refactor)
+
+1. **RED: Write Failing Tests**
+   ```bash
+   # Create test file if it doesn't exist
+   # Write tests that describe expected behavior
+   # Run tests - they MUST fail
+   npm test -- path/to/test.test.ts
+   ```
+
+2. **GREEN: Make Tests Pass**
+   ```bash
+   # Write minimal code to pass tests
+   # Run tests - they MUST pass
+   npm test -- path/to/test.test.ts
+   ```
+
+3. **REFACTOR: Improve Code**
+   ```bash
+   # Clean up code while keeping tests green
+   # Run tests - they MUST stay passing
+   npm test -- path/to/test.test.ts
+   ```
+
+### Test Requirements
+
+**Before implementing any feature or bug fix:**
+1. Create test file: `[filename].test.ts` or `[filename].test.tsx`
+2. Write tests describing expected behavior
+3. **Verify tests fail** (proves they're testing the right thing)
+4. Implement solution
+5. **Verify tests pass** (proves solution works)
+
+**Example: Bug Fix Workflow**
+```bash
+# User reports: "Tags display in wrong order"
+# 1. Write failing test
+it('should display tags in order: child, parent, grandparent', () => {
+  const result = getTagsWithParents([childTag], allTags);
+  expect(result[0].name).toBe('Child');
+  expect(result[1].name).toBe('Parent');
+  expect(result[2].name).toBe('Grandparent');
+});
+
+# 2. Run test - should FAIL
+npm test
+
+# 3. Fix the code
+# 4. Run test - should PASS
+npm test
+
+# 5. Commit with test
+git add src/utils/tagHierarchy.ts src/utils/tagHierarchy.test.ts
+git commit -m "fix: correct tag display order from child to parent"
+```
+
+### Test Coverage Guidelines
+
+- **Utilities**: 100% coverage for pure functions
+- **Components**: Test behavior, not implementation
+- **Integration**: Test user workflows end-to-end
+- **Edge cases**: Always test null, empty, and error states
+
+### Testing Tools
+
+- **Unit tests**: Vitest + React Testing Library
+- **E2E tests**: Playwright (via MCP when needed)
+- **Run tests**: `npm test -- path/to/test.test.ts`
+- **Watch mode**: `npm test -- --watch`
+
+**Remember**: If tests don't exist for a feature or bug, CREATE THEM FIRST before writing code!
+
 ## 📚 Documentation Structure
 
 - **plan.md** - Current status, work log, agent meta-instructions (READ THIS FIRST)
