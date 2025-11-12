@@ -71,6 +71,7 @@ function getAllDescendantTagIds(tagId: string, allTags: Tag[]): string[] {
 }
 
 // Helper function to build the full hierarchical path for a tag
+// Displays tags in order of specificity: most specific (child) first, least specific (parent) last
 function getTagPath(tag: Tag, allTags: Tag[]): string {
   const path: string[] = [tag.name];
   let currentTag = tag;
@@ -79,14 +80,14 @@ function getTagPath(tag: Tag, allTags: Tag[]): string {
   while (currentTag.parent_id) {
     const parent = allTags.find(t => t.id === currentTag.parent_id);
     if (parent) {
-      path.unshift(parent.name);
+      path.push(parent.name);  // Add parent at the END (child first, parent last)
       currentTag = parent;
     } else {
       break;
     }
   }
 
-  return path.join(' → ');
+  return path.join(' ');  // Use space separator for clean display
 }
 
 export function ItemList({

@@ -88,6 +88,7 @@ async function fetchItems(type?: ItemType, pageSize: number = 10, offset: number
       .map((it: any) => ({
         id: it.tags.id,
         name: it.tags.name,
+        parent_id: it.tags.parent_id,
       }));
 
     const parentItem = item.parent_id
