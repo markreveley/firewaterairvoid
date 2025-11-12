@@ -90,6 +90,15 @@ function getTagPath(tag: Tag, allTags: Tag[]): string {
   return path.join(' ');  // Use space separator for clean display
 }
 
+// Helper function to filter tags to only show the most specific (leaf) tags
+// If an item has both a parent and child tag, only show the child
+function getLeafTags(tags: Tag[]): Tag[] {
+  return tags.filter(tag => {
+    // Keep this tag only if none of the other tags are its children
+    return !tags.some(otherTag => otherTag.parent_id === tag.id);
+  });
+}
+
 export function ItemList({
   items,
   type,
@@ -284,7 +293,7 @@ export function ItemList({
                           {item.type !== "water" && item.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 justify-end">
                               {[...item.tags].reverse().map(tag => <Badge key={tag.id} variant="outline" className="text-xs">
-                                  {item.type === "fire" ? getTagPath(tag, allTags) : tag.name}
+                                  {tag.name}
                                 </Badge>)}
                             </div>
                           )}
