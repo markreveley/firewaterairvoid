@@ -41,6 +41,7 @@ interface ItemListProps {
   selectedCategoryTags?: string[];
   selectedCategoryChildTags?: string[];
   selectedStatusFilter?: "To Do" | "Completed";
+  searchQuery?: string;
   onDeleteItem: (itemId: string) => void;
   onUpdateItem: (itemId: string, updates: { deadline?: Date | null; tags?: Tag[]; notes?: string; status?: string; url?: string; type?: "fire" | "water" | "air" | "void" | "earth"; parent_id?: string | null; priority?: number; completed?: boolean }) => void;
 }
@@ -98,6 +99,7 @@ export function ItemList({
   selectedCategoryTags = [],
   selectedCategoryChildTags = [],
   selectedStatusFilter,
+  searchQuery,
   onDeleteItem,
   onUpdateItem
 }: ItemListProps) {
@@ -158,6 +160,22 @@ export function ItemList({
         return item.tags.some(tag => allowedChildTagIds.includes(tag.id));
       });
       if (!hasAllCategoryChildTags) return false;
+    }
+
+    // Search filter - search across title, notes, and tags
+    if (searchQuery && searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      const matchesTitle = item.title.toLowerCase().includes(query);
+      const matchesNotes = item.notes?.toLowerCase().includes(query);
+      const matchesTags = item.tags.some(tag =>
+        tag.name.toLowerCase().includes(query) ||
+        getTagPath(tag, allTags).toLowerCase().includes(query)
+      );
+      const matchesUrl = item.url?.toLowerCase().includes(query);
+
+      if (!matchesTitle && !matchesNotes && !matchesTags && !matchesUrl) {
+        return false;
+      }
     }
 
     return true;

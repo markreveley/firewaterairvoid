@@ -26,7 +26,7 @@ const Index = () => {
   const initialView = (searchParams.get("view") as "card" | "calendar" | "overview") || (initialType === "water" ? "calendar" : "card");
   const [activeType, setActiveType] = useState<ItemType>(initialType);
   const [viewMode, setViewMode] = useState<"card" | "calendar" | "overview">(initialView);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedProjectTag, setSelectedProjectTag] = useState<string>();
   const [selectedProjectChildTag, setSelectedProjectChildTag] = useState<string>();
   const [selectedCategoryTags, setSelectedCategoryTags] = useState<string[]>([]);
@@ -75,6 +75,8 @@ const Index = () => {
       const p = new URLSearchParams(prev);
       p.set("type", activeType);
       p.set("view", viewMode);
+      if (searchQuery) p.set("search", searchQuery);
+      else p.delete("search");
       if (selectedProjectTag) p.set("projectTag", selectedProjectTag);
       else p.delete("projectTag");
       if (selectedProjectChildTag) p.set("projectChildTag", selectedProjectChildTag);
@@ -85,7 +87,7 @@ const Index = () => {
       else p.delete("categoryChildTags");
       return p;
     });
-  }, [activeType, viewMode, selectedProjectTag, selectedProjectChildTag, selectedCategoryTags, selectedCategoryChildTags, setSearchParams]);
+  }, [activeType, viewMode, searchQuery, selectedProjectTag, selectedProjectChildTag, selectedCategoryTags, selectedCategoryChildTags, setSearchParams]);
 
   // Water always shows calendar view; other types show card/overview
   useEffect(() => {
@@ -204,18 +206,16 @@ const Index = () => {
               </Button>
 
               <div className="flex items-center gap-4">
-                {viewMode === "overview" && (
-                  <div className="relative w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      type="text"
-                      placeholder="Search items..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                )}
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search items..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
 
                 {activeType === "fire" && (
                   <StatusFilter
@@ -249,6 +249,7 @@ const Index = () => {
                     selectedCategoryTags={selectedCategoryTags}
                     selectedCategoryChildTags={selectedCategoryChildTags}
                     selectedStatusFilter={activeType === "fire" ? selectedStatusFilter : undefined}
+                    searchQuery={searchQuery}
                     onDeleteItem={deleteItem}
                     onUpdateItem={updateItem}
                   />
