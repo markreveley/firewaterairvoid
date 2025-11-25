@@ -196,7 +196,14 @@ export function ItemList({
           isOverdue && "bg-fire-light/50"
         )}
         style={type === "fire" ? { borderLeftColor: PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG]?.color || PRIORITY_CONFIG[PRIORITY_LEVELS.TODO].color } : undefined}
-        onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`)}
+        onClick={() => navigate(`/item/edit?id=${item.id}&type=${type}`, {
+          state: {
+            projectTag: selectedProjectTag,
+            projectChildTag: selectedProjectChildTag,
+            categoryTags: selectedCategoryTags,
+            categoryChildTags: selectedCategoryChildTags,
+          }
+        })}
       >
               <div className="space-y-3">
                 {/* Title row with tags on the right */}

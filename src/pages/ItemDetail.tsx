@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -110,6 +110,7 @@ export default function ItemDetail({
   onUpdateItem,
 }: ItemDetailProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { allTags } = useTags();
   const initialTitle = existingItem?.title || searchParams.get("title") || "";
@@ -364,7 +365,28 @@ export default function ItemDetail({
       fromItemDetail: true,
     };
 
-    if (selectedTags.length > 0 && allTags.length > 0) {
+    // Use original navigation state if available (preserves multi-select filters)
+    const locationState = location.state as any;
+    if (locationState?.projectTag !== undefined) {
+      navState.projectTag = locationState.projectTag;
+    }
+    if (locationState?.projectChildTag !== undefined) {
+      navState.projectChildTag = locationState.projectChildTag;
+    }
+    if (locationState?.categoryTags !== undefined) {
+      navState.categoryTags = locationState.categoryTags;
+    }
+    if (locationState?.categoryChildTags !== undefined) {
+      navState.categoryChildTags = locationState.categoryChildTags;
+    }
+
+    // Only reconstruct tag state if no original state was provided
+    if (
+      locationState?.projectTag === undefined &&
+      locationState?.categoryTags === undefined &&
+      selectedTags.length > 0 && 
+      allTags.length > 0
+    ) {
       if (itemType === "fire") {
         // First, look up all selected tags in allTags to get full tag objects with parent_id
         const selectedTagIds = selectedTags.map(t => t.id);
@@ -1231,6 +1253,14 @@ export default function ItemDetail({
                           onClick={() =>
                             navigate(
                               `/item/edit?id=${child.id}&type=${child.type}`,
+                              {
+                                state: {
+                                  projectTag: (location.state as any)?.projectTag,
+                                  projectChildTag: (location.state as any)?.projectChildTag,
+                                  categoryTags: (location.state as any)?.categoryTags,
+                                  categoryChildTags: (location.state as any)?.categoryChildTags,
+                                }
+                              }
                             )
                           }
                         >
